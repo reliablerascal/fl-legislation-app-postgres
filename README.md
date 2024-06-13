@@ -13,3 +13,9 @@ The repo pipeline consists of the following R applications:
 
 ## Data
 Bulk downloaded data from [LegiScan's 2023 and 2024 legislative session data](https://legiscan.com/FL/datasets) is initially saved in json_files (hidden), and transformed into the Postgres database.
+
+## Setup
+'''
+install.packages("DBI")
+install.packages("RPostgres")
+'''
