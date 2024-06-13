@@ -1,9 +1,9 @@
 {
     "id": "59207873",
-    "path": "C:/Users/relia/jour/my_github_portfolio/legislator_dashboard/app.R",
+    "path": "C:/Users/relia/jour/my_github_portfolio/fl-leg-postgres-app/app.R",
     "project_path": "app.R",
     "type": "r_source",
-    "hash": "798126141",
+    "hash": "0",
     "contents": "",
     "dirty": false,
     "created": 1718135563982.0,
@@ -11,14 +11,16 @@
     "relative_order": 1,
     "properties": {
         "source_window_id": "",
-        "Source": "Source"
+        "Source": "Source",
+        "cursorPosition": "0,0",
+        "scrollLine": "0"
     },
     "folds": "",
-    "lastKnownWriteTime": 1717700270,
+    "lastKnownWriteTime": 1718233235,
     "encoding": "UTF-8",
     "collab_server": "",
     "source_window": "",
-    "last_content_update": 1717700270,
+    "last_content_update": 1718233235,
     "read_only": false,
     "read_only_alternatives": []
 }
