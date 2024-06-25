@@ -14,5 +14,6 @@ load("data.RData")
 # Source the UI and server components
 source("ui.R")
 source("server_postgres.R")
+# source("temp1004 server_postgres.R")
 
 shinyApp(ui, server)

@@ -96,10 +96,10 @@ server <- function(input, output, session) {
   # })
   
   # pull in Postgres data
-  heatmap_data <- dbGetQuery(con, "SELECT * FROM app_shiny.heatmap_data")
+  #heatmap_data <- dbGetQuery(con, "SELECT * FROM app_shiny.heatmap_data")
   r_votes <- dbGetQuery(con, "SELECT * FROM app_shiny.r_votes")
   d_votes <- dbGetQuery(con, "SELECT * FROM app_shiny.d_votes")
-  y_labels <- dbGetQuery(con, "SELECT value FROM app_shiny.config WHERE key = 'y_labels'")$value
+  #y_labels <- dbGetQuery(con, "SELECT value FROM app_shiny.config WHERE key = 'y_labels'")$value
 
   # disconnect the database because the data has already been loaded into memory
   # dbDisconnect(con)
@@ -154,15 +154,19 @@ server <- function(input, output, session) {
     })
     output$heatmapPlot <- renderPlotly({
       data <- filteredData()
-      # Determine colors based on party
       
+      # Ensure correct column names
+      if (!all(c("roll_call_id", "name", "partisan_metric2", "hover_text") %in% colnames(data))) {
+        stop("Data does not have the required columns.")
+      }
+      
+      # Determine colors based on party
       numBills <- n_distinct(data$roll_call_id) # Adjust with your actual identifier
       
       # Dynamic height calculation
       baseHeight <- 500 # Minimum height
       perBillHeight <- 10 # Height per bill
       totalHeight <- baseHeight + (numBills * perBillHeight) # Total dynamic height
-      
       
       low_color <- if(input$party == "D") "#4575b4" else if(input$party == "R") "#d73027" else "#4575b4"
       mid_color <- "#6DA832"
@@ -171,10 +175,8 @@ server <- function(input, output, session) {
       # Generate the plot
       p <- ggplot(data, aes(x = name, y = as.factor(roll_call_id), fill = partisan_metric2, text = hover_text)) +
         geom_tile(color = "white", linewidth = 0.1) +
-        scale_fill_gradient2(low = low_color, high = high_color, mid = "#6DA832", midpoint = 1,
-        ) +
+        scale_fill_gradient2(low = low_color, high = high_color, mid = mid_color, midpoint = 1) +
         theme_minimal() +
-        #scale_fill_manual(values = color_mapping) + # Apply the dynamic color mapping
         scale_y_discrete(labels = y_labels) +
         scale_x_discrete(position = "top") +
         theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1, size = 10),
@@ -186,26 +188,36 @@ server <- function(input, output, session) {
               plot.title = element_blank(),
               plot.subtitle = element_blank())
       
-      ggplotly(p, tooltip = "text") %>%
-        layout(autosize=TRUE,xaxis=list(side="top"),
+      p_plotly <- ggplotly(p, tooltip = "text") %>%
+        layout(autosize = TRUE, xaxis = list(side = "top"),
                font = list(family = "Archivo"),
-               margin = list(t=85), #list(l = 0, r = 0, t = 60, b = 10),  # Adjust margins to ensure the full title and subtitle are visible,
-               # annotations = list(
-               #   x = 0.95, 
-               #   y = 1.1,  # Position the annotation at the top center
-               #   xref = 'paper', 
-               #   yref = 'paper',
-               #   text = 'Source: Florida Legislature Voting Records via LegiScan. Analysis by Andrew Pantazi',
-               #   showarrow = FALSE,
-               #   xanchor = 'right',
-               #   yanchor = 'bottom',
-               #   font = list(size = 11,family="Archivo")  # Adjust font size as needed
-               # ) ,
-               plot_bgcolor = "rgba(255,255,255,0.85)",  # Transparent plot background
+               margin = list(t = 85),
+               plot_bgcolor = "rgba(255,255,255,0.85)",
                paper_bgcolor = "rgba(255,255,255,0.85)",
-               height = totalHeight
-        ) %>% 
+               height = totalHeight) %>%
         config(displayModeBar = FALSE)
+      
+      # Ensure y_labels is correctly fetched and contains roll_call_id as names
+      if (length(y_labels) == 0) {
+        stop("y_labels is empty or not correctly loaded.")
+      }
+      
+      # Generate hyperlinks for y-axis labels
+      y_labels_with_links <- sapply(names(y_labels), function(id) {
+        bill <- y_labels[id]
+        paste0('<a href="https://legiscan.com/FL/bill/', sub(" - 2024", "", bill), '/2024" target="_blank">', bill, '</a>')
+      })
+      
+      # Update y-axis labels in the plotly layout
+      p_plotly <- p_plotly %>%
+        layout(yaxis = list(
+          tickmode = "array",
+          tickvals = names(y_labels),
+          ticktext = y_labels_with_links,
+          automargin = TRUE
+        ))
+      
+      p_plotly
     })
   })
   

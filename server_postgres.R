@@ -27,11 +27,14 @@ library(RPostgres) # added 6/13/24 for Postgres connectivity
 
 ########################################
 #                                      #  
-# Debug Notes                          #
+# Debug                                #
 #                                      #
 ########################################
 # 6/13/24
 # current work is refactoring heatmap_data so it works initially, and then so it's efficient
+
+# RR preliminary filter
+df_vote_patterns <- heatmap_data[,c("roll_call_id","partisan_metric2","hover_text","true_pct","year","role","final","party","name")]
 
 ########################################
 #                                      #  
@@ -96,10 +99,10 @@ server <- function(input, output, session) {
   # })
   
   # pull in Postgres data
-  heatmap_data <- dbGetQuery(con, "SELECT * FROM app_shiny.heatmap_data")
+  #heatmap_data <- dbGetQuery(con, "SELECT * FROM app_shiny.heatmap_data")
   r_votes <- dbGetQuery(con, "SELECT * FROM app_shiny.r_votes")
   d_votes <- dbGetQuery(con, "SELECT * FROM app_shiny.d_votes")
-  y_labels <- dbGetQuery(con, "SELECT value FROM app_shiny.config WHERE key = 'y_labels'")$value
+  #y_labels <- dbGetQuery(con, "SELECT value FROM app_shiny.config WHERE key = 'y_labels'")$value
 
   # disconnect the database because the data has already been loaded into memory
   # dbDisconnect(con)
@@ -129,8 +132,8 @@ server <- function(input, output, session) {
                 <span style='font-size: 14px;line-height:0.5;'>\n<b style ='font-size:1.75rem;color: ",color1hex,";'>",color1," votes</b>: Legislator aligned <i>against</i> most ",partytext," and <i>with</i> most ",partytext2,".</span>
                 <span style='font-size: 14px;line-height:0.5;'>\n<b style='font-size:1.75rem;color:",color2hex,";'>",color2," votes</b>: Legislator aligned <i>with</i> most ",partytext, ".</span>","<span style='font-size: 14px;line-height:0.5;'>\n<b style='color: #6DA832;font-size:1.75rem;'>Green votes</b>: Legislator aligned <i>against</i> both parties in bipartisan decisions.<br/><br/>\nBlank spaces indicate the legislators did not vote, either because they weren't assigned to those committees or they missed those votes.\n</span><span style='font-size: 14px;'>Displayed votes exclude ones where all members of a party voted unanimously. The table includes both amendment and bill votes. Data comes from the Florida Legislature's voting records via the Legiscan API.</span>"))
     })
-    filteredData <- reactive({
-      data <- heatmap_data %>% filter(true_pct!= 1 & true_pct != 0)
+    df_vote_patterns_filtered <- reactive({
+      data <- df_vote_patterns %>% filter(true_pct!= 1 & true_pct != 0)
       # Apply filters based on input
       if (input$year != "All") {data <- data %>% filter(year == input$year)}
       
@@ -153,7 +156,7 @@ server <- function(input, output, session) {
       return(data)
     })
     output$heatmapPlot <- renderPlotly({
-      data <- filteredData()
+      data <- df_vote_patterns_filtered()
       # Determine colors based on party
       
       numBills <- n_distinct(data$roll_call_id) # Adjust with your actual identifier
@@ -162,7 +165,6 @@ server <- function(input, output, session) {
       baseHeight <- 500 # Minimum height
       perBillHeight <- 10 # Height per bill
       totalHeight <- baseHeight + (numBills * perBillHeight) # Total dynamic height
-      
       
       low_color <- if(input$party == "D") "#4575b4" else if(input$party == "R") "#d73027" else "#4575b4"
       mid_color <- "#6DA832"
