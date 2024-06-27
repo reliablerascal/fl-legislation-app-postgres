@@ -1,6 +1,6 @@
 # Legislator Dashboard
 
-This work-in-progress repo adapts the Jacksonville Tributary's [interactive web application for displaying legislative votes](https://shiny.jaxtrib.org/), connecting to Postgres rather than CSV data. Data is sourced from [LegiScan's 2023 and 2024 legislative session data](https://legiscan.com/FL/datasets). The app consists of two visualizations:
+This work-in-progress repo adapts the Jacksonville Tributary's [interactive Shiny web application](https://github.com/apantazi/legislator_dashboard/blob/main/app.R) (see [original demo app](https://shiny.jaxtrib.org/)), connecting to Postgres rather than CSV data. Data is sourced from [LegiScan's 2023 and 2024 legislative session data](https://legiscan.com/FL/datasets). The app consists of two visualizations:
 * **Voting Patterns Analysis**- a heatmap of voting patterns on contested bills by party, chamber, and session year
 * **Legislator Activity Overview**- an interface for reviewing legislative activity by legislator, as well as searching bills
 

@@ -27,6 +27,14 @@ library(RPostgres) # added 6/13/24 for Postgres connectivity
 
 ########################################
 #                                      #  
+# Debug Notes                          #
+#                                      #
+########################################
+# 6/13/24
+# current work is refactoring heatmap_data so it works initially, and then so it's efficient
+
+########################################
+#                                      #  
 # define Postgres connection function  #
 #                                      #
 ########################################
@@ -55,11 +63,17 @@ attempt_connection <- function() {
 
 ########################################
 #                                      #  
-# Read data from Postgres database     #
+# define Server function               #
 #                                      #
 ########################################
 
 server <- function(input, output, session) {
+
+  #####################################################
+  #                                                   #  
+  # Establish Postgres connection and connect to data #
+  #                                                   #
+  #####################################################
   
     # Loop until successful connection
   repeat {
@@ -83,23 +97,21 @@ server <- function(input, output, session) {
   
   # pull in Postgres data
   #heatmap_data <- dbGetQuery(con, "SELECT * FROM app_shiny.heatmap_data")
-  r_votes <- dbGetQuery(con, "SELECT * FROM app_shiny.app_r_votes")
-  d_votes <- dbGetQuery(con, "SELECT * FROM app_shiny.app_d_votes")
-  app_vote_patterns <- dbGetQuery(con, "SELECT * FROM app_shiny.app_vote_patterns")
+  r_votes <- dbGetQuery(con, "SELECT * FROM app_shiny.r_votes")
+  d_votes <- dbGetQuery(con, "SELECT * FROM app_shiny.d_votes")
   #y_labels <- dbGetQuery(con, "SELECT value FROM app_shiny.config WHERE key = 'y_labels'")$value
 
   # disconnect the database because the data has already been loaded into memory
   # dbDisconnect(con)
-  #print("Disconnected from the database.")
+  print("Disconnected from the database.")
   
-########################################
-#                                      #  
-# app 1: voting patterns analysis      #
-#                                      #
-########################################
+  ########################################
+  #                                      #  
+  # server app logic (Andrew's code)     #
+  #                                      #
+  ########################################
   
-  #data <- heatmap_data
-  data <- app_vote_patterns
+  data <- heatmap_data 
   
   # App-specific logic
   observeEvent(input$navbarPage == "app1", {
@@ -117,11 +129,10 @@ server <- function(input, output, session) {
                 <span style='font-size: 14px;line-height:0.5;'>\n<b style ='font-size:1.75rem;color: ",color1hex,";'>",color1," votes</b>: Legislator aligned <i>against</i> most ",partytext," and <i>with</i> most ",partytext2,".</span>
                 <span style='font-size: 14px;line-height:0.5;'>\n<b style='font-size:1.75rem;color:",color2hex,";'>",color2," votes</b>: Legislator aligned <i>with</i> most ",partytext, ".</span>","<span style='font-size: 14px;line-height:0.5;'>\n<b style='color: #6DA832;font-size:1.75rem;'>Green votes</b>: Legislator aligned <i>against</i> both parties in bipartisan decisions.<br/><br/>\nBlank spaces indicate the legislators did not vote, either because they weren't assigned to those committees or they missed those votes.\n</span><span style='font-size: 14px;'>Displayed votes exclude ones where all members of a party voted unanimously. The table includes both amendment and bill votes. Data comes from the Florida Legislature's voting records via the Legiscan API.</span>"))
     })
-    app_vote_patterns_filtered <- reactive({
-      #data <- app_vote_patterns %>% filter(true_pct!= 1 & true_pct != 0)
-      data <- app_vote_patterns
+    filteredData <- reactive({
+      data <- heatmap_data %>% filter(true_pct!= 1 & true_pct != 0)
       # Apply filters based on input
-      if (input$year != "All") {data <- data %>% filter(session_year == input$year)}
+      if (input$year != "All") {data <- data %>% filter(year == input$year)}
       
       if (input$final != "All") {
         data <- data %>% filter(final == input$final)
@@ -142,9 +153,14 @@ server <- function(input, output, session) {
       return(data)
     })
     output$heatmapPlot <- renderPlotly({
-      data <- app_vote_patterns_filtered()
-      # Determine colors based on party
+      data <- filteredData()
       
+      # Ensure correct column names
+      if (!all(c("roll_call_id", "name", "partisan_metric2", "hover_text") %in% colnames(data))) {
+        stop("Data does not have the required columns.")
+      }
+      
+      # Determine colors based on party
       numBills <- n_distinct(data$roll_call_id) # Adjust with your actual identifier
       
       # Dynamic height calculation
@@ -157,12 +173,10 @@ server <- function(input, output, session) {
       high_color <- if(input$party == "D") "#d73027" else if(input$party == "R") "#4575b4" else "#d73027"
       
       # Generate the plot
-      p <- ggplot(data, aes(x = name, y = as.factor(roll_call_id), fill = partisan_metric, text = hover_text)) +
+      p <- ggplot(data, aes(x = name, y = as.factor(roll_call_id), fill = partisan_metric2, text = hover_text)) +
         geom_tile(color = "white", linewidth = 0.1) +
-        scale_fill_gradient2(low = low_color, high = high_color, mid = "#6DA832", midpoint = 1,
-        ) +
+        scale_fill_gradient2(low = low_color, high = high_color, mid = mid_color, midpoint = 1) +
         theme_minimal() +
-        #scale_fill_manual(values = color_mapping) + # Apply the dynamic color mapping
         scale_y_discrete(labels = y_labels) +
         scale_x_discrete(position = "top") +
         theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1, size = 10),
@@ -174,38 +188,38 @@ server <- function(input, output, session) {
               plot.title = element_blank(),
               plot.subtitle = element_blank())
       
-      ggplotly(p, tooltip = "text") %>%
-        layout(autosize=TRUE,xaxis=list(side="top"),
+      p_plotly <- ggplotly(p, tooltip = "text") %>%
+        layout(autosize = TRUE, xaxis = list(side = "top"),
                font = list(family = "Archivo"),
-               margin = list(t=85), #list(l = 0, r = 0, t = 60, b = 10),  # Adjust margins to ensure the full title and subtitle are visible,
-               # annotations = list(
-               #   x = 0.95, 
-               #   y = 1.1,  # Position the annotation at the top center
-               #   xref = 'paper', 
-               #   yref = 'paper',
-               #   text = 'Source: Florida Legislature Voting Records via LegiScan. Analysis by Andrew Pantazi',
-               #   showarrow = FALSE,
-               #   xanchor = 'right',
-               #   yanchor = 'bottom',
-               #   font = list(size = 11,family="Archivo")  # Adjust font size as needed
-               # ) ,
-               plot_bgcolor = "rgba(255,255,255,0.85)",  # Transparent plot background
+               margin = list(t = 85),
+               plot_bgcolor = "rgba(255,255,255,0.85)",
                paper_bgcolor = "rgba(255,255,255,0.85)",
-               height = totalHeight
-        ) %>% 
+               height = totalHeight) %>%
         config(displayModeBar = FALSE)
+      
+      # Ensure y_labels is correctly fetched and contains roll_call_id as names
+      if (length(y_labels) == 0) {
+        stop("y_labels is empty or not correctly loaded.")
+      }
+      
+      # Generate hyperlinks for y-axis labels
+      y_labels_with_links <- sapply(names(y_labels), function(id) {
+        bill <- y_labels[id]
+        paste0('<a href="https://legiscan.com/FL/bill/', sub(" - 2024", "", bill), '/2024" target="_blank">', bill, '</a>')
+      })
+      
+      # Update y-axis labels in the plotly layout
+      p_plotly <- p_plotly %>%
+        layout(yaxis = list(
+          tickmode = "array",
+          tickvals = names(y_labels),
+          ticktext = y_labels_with_links,
+          automargin = TRUE
+        ))
+      
+      p_plotly
     })
   })
-  
-  
-  ########################################
-  #                                      #  
-  # app 2: legislator activity overview  #
-  #                                      #
-  ########################################  
-  
-  
-  
   
   observeEvent(input$navbarPage == "app2",{
     values <- reactiveValues(party = character(0), role = character(0), final = character(0),selectedYears = list(),  year2023Active = FALSE,
