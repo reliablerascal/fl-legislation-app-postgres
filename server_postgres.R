@@ -98,8 +98,26 @@ server <- function(input, output, session) {
 #                                      #
 ########################################
   
-  #data <- heatmap_data
-  data <- app_vote_patterns
+#set output and formatting for text pop-up when user hovers over a heatmap square
+  # createHoverText <- function(numbers, descriptions, urls, pcts, vote_texts, descs, title, date, names, width = 100) {
+  #   wrapped_descriptions <- sapply(descriptions, function(desc) paste(strwrap(desc, width = width), collapse = "<br>"))
+  #   paste0(
+  #     "<b>", names, "</b> voted <i>", vote_texts, "</i> on <b>", descs, "</b> for bill <b>", numbers, "</b> - <b>", title, "</b> on <b>", date, "</b><br>",
+  #     "<b>Description:</b> ", wrapped_descriptions, "<br>",
+  #     "<b>URL:</b> <a href='", urls, "'>", urls, "</a><br>",
+  #     "<b>", pcts, "</b> voted for this bill"
+  #   )
+  # }
+  
+  createHoverText <- function(numbers, descriptions, urls, pcts, vote_texts, descs, title, date, names, width = 100) {
+    wrapped_descriptions <- sapply(descriptions, function(desc) paste(strwrap(desc, width = width), collapse = "<br>"))
+    paste0(
+      "<b>", names, "</b> voted <i>", vote_texts, "</i> on <b>", descs, "</b> on <b>", date, "</b><br>",
+      "for bill <a href='", urls, "'> <b>", numbers, "</b> - <b>", title, "</b></a><br>",
+      "<b>", pcts, "</b> voted for this bill<br><br>",
+      "<b>Bill Description:</b> ", wrapped_descriptions, "<br>"
+    )
+  }
   
   # App-specific logic
   observeEvent(input$navbarPage == "app1", {
@@ -124,7 +142,7 @@ server <- function(input, output, session) {
       if (input$year != "All") {data <- data %>% filter(session_year == input$year)}
       
       if (input$final != "All") {
-        data <- data %>% filter(final == input$final)
+        data <- data %>% filter(final_vote == input$final)
       }
       
       if (input$party != "All") {
@@ -145,6 +163,24 @@ server <- function(input, output, session) {
       data <- app_vote_patterns_filtered()
       # Determine colors based on party
       
+      #create hover text
+      data$hover_text <- mapply(
+        createHoverText,
+        numbers = data$bill_number,
+        descs = data$roll_call_desc,
+        title = data$bill_title,
+        date = data$roll_call_date,
+        descriptions = data$bill_desc,
+        urls = data$bill_url,
+        pcts = data$pct_voted_for,
+        vote_texts = data$vote_text,
+        names = data$legislator_name,
+        SIMPLIFY = FALSE  # Keep it as a list
+      )
+      data$hover_text <- sapply(data$hover_text, paste, collapse = " ") # Collapse the list into a single string
+      # data$hover_text = "DEBUG"
+      
+      
       numBills <- n_distinct(data$roll_call_id) # Adjust with your actual identifier
       
       # Dynamic height calculation
@@ -157,7 +193,7 @@ server <- function(input, output, session) {
       high_color <- if(input$party == "D") "#d73027" else if(input$party == "R") "#4575b4" else "#d73027"
       
       # Generate the plot
-      p <- ggplot(data, aes(x = name, y = as.factor(roll_call_id), fill = partisan_metric, text = hover_text)) +
+      p <- ggplot(data, aes(x = legislator_name, y = as.factor(roll_call_id), fill = partisan_metric, text = hover_text)) +
         geom_tile(color = "white", linewidth = 0.1) +
         scale_fill_gradient2(low = low_color, high = high_color, mid = "#6DA832", midpoint = 1,
         ) +

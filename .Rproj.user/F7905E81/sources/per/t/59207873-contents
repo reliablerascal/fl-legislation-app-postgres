@@ -5,6 +5,7 @@
 # changes to the original code:
 # modularized app to separate ui.R and server.R
 # updated connectivity to Postgres rather than data.RData
+# moved hover_text creation to this front-end app
 # see related scripts for more detail about updates
 
 print("look for password prompt, which is currently needed to start the app")

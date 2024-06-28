@@ -27,12 +27,6 @@ library(RPostgres) # added 6/13/24 for Postgres connectivity
 
 ########################################
 #                                      #  
-# Debug Notes                          #
-#                                      #
-########################################
-
-########################################
-#                                      #  
 # define Postgres connection function  #
 #                                      #
 ########################################
@@ -61,17 +55,11 @@ attempt_connection <- function() {
 
 ########################################
 #                                      #  
-# define Server function               #
+# Read data from Postgres database     #
 #                                      #
 ########################################
 
 server <- function(input, output, session) {
-
-  #####################################################
-  #                                                   #  
-  # Establish Postgres connection and connect to data #
-  #                                                   #
-  #####################################################
   
     # Loop until successful connection
   repeat {
@@ -94,22 +82,42 @@ server <- function(input, output, session) {
   # })
   
   # pull in Postgres data
-  # heatmap_data <- dbGetQuery(con, "SELECT * FROM app_shiny.heatmap_data")
-  r_votes <- dbGetQuery(con, "SELECT * FROM app_shiny.r_votes")
-  d_votes <- dbGetQuery(con, "SELECT * FROM app_shiny.d_votes")
-  y_labels <- dbGetQuery(con, "SELECT value FROM app_shiny.config WHERE key = 'y_labels'")$value
+  #heatmap_data <- dbGetQuery(con, "SELECT * FROM app_shiny.heatmap_data")
+  r_votes <- dbGetQuery(con, "SELECT * FROM app_shiny.app_r_votes")
+  d_votes <- dbGetQuery(con, "SELECT * FROM app_shiny.app_d_votes")
+  app_vote_patterns <- dbGetQuery(con, "SELECT * FROM app_shiny.app_vote_patterns")
+  #y_labels <- dbGetQuery(con, "SELECT value FROM app_shiny.config WHERE key = 'y_labels'")$value
 
   # disconnect the database because the data has already been loaded into memory
   # dbDisconnect(con)
-  print("Disconnected from the database.")
+  #print("Disconnected from the database.")
   
-  ########################################
-  #                                      #  
-  # server app logic (Andrew's code)     #
-  #                                      #
-  ########################################
+########################################
+#                                      #  
+# app 1: voting patterns analysis      #
+#                                      #
+########################################
   
-  data <- heatmap_data 
+#set output and formatting for text pop-up when user hovers over a heatmap square
+  # createHoverText <- function(numbers, descriptions, urls, pcts, vote_texts, descs, title, date, names, width = 100) {
+  #   wrapped_descriptions <- sapply(descriptions, function(desc) paste(strwrap(desc, width = width), collapse = "<br>"))
+  #   paste0(
+  #     "<b>", names, "</b> voted <i>", vote_texts, "</i> on <b>", descs, "</b> for bill <b>", numbers, "</b> - <b>", title, "</b> on <b>", date, "</b><br>",
+  #     "<b>Description:</b> ", wrapped_descriptions, "<br>",
+  #     "<b>URL:</b> <a href='", urls, "'>", urls, "</a><br>",
+  #     "<b>", pcts, "</b> voted for this bill"
+  #   )
+  # }
+  
+  createHoverText <- function(numbers, descriptions, urls, pcts, vote_texts, descs, title, date, names, width = 100) {
+    wrapped_descriptions <- sapply(descriptions, function(desc) paste(strwrap(desc, width = width), collapse = "<br>"))
+    paste0(
+      "<b>", names, "</b> voted <i>", vote_texts, "</i> on <b>", descs, "</b> on <b>", date, "</b><br>",
+      "for bill <a href='", urls, "'> <b>", numbers, "</b> - <b>", title, "</b></a><br>",
+      "<b>", pcts, "</b> voted for this bill<br><br>",
+      "<b>Bill Description:</b> ", wrapped_descriptions, "<br>"
+    )
+  }
   
   # App-specific logic
   observeEvent(input$navbarPage == "app1", {
@@ -127,13 +135,14 @@ server <- function(input, output, session) {
                 <span style='font-size: 14px;line-height:0.5;'>\n<b style ='font-size:1.75rem;color: ",color1hex,";'>",color1," votes</b>: Legislator aligned <i>against</i> most ",partytext," and <i>with</i> most ",partytext2,".</span>
                 <span style='font-size: 14px;line-height:0.5;'>\n<b style='font-size:1.75rem;color:",color2hex,";'>",color2," votes</b>: Legislator aligned <i>with</i> most ",partytext, ".</span>","<span style='font-size: 14px;line-height:0.5;'>\n<b style='color: #6DA832;font-size:1.75rem;'>Green votes</b>: Legislator aligned <i>against</i> both parties in bipartisan decisions.<br/><br/>\nBlank spaces indicate the legislators did not vote, either because they weren't assigned to those committees or they missed those votes.\n</span><span style='font-size: 14px;'>Displayed votes exclude ones where all members of a party voted unanimously. The table includes both amendment and bill votes. Data comes from the Florida Legislature's voting records via the Legiscan API.</span>"))
     })
-    filteredData <- reactive({
-      data <- heatmap_data %>% filter(true_pct!= 1 & true_pct != 0)
+    app_vote_patterns_filtered <- reactive({
+      #data <- app_vote_patterns %>% filter(true_pct!= 1 & true_pct != 0)
+      data <- app_vote_patterns
       # Apply filters based on input
-      if (input$year != "All") {data <- data %>% filter(year == input$year)}
+      if (input$year != "All") {data <- data %>% filter(session_year == input$year)}
       
       if (input$final != "All") {
-        data <- data %>% filter(final == input$final)
+        data <- data %>% filter(final_vote == input$final)
       }
       
       if (input$party != "All") {
@@ -151,8 +160,26 @@ server <- function(input, output, session) {
       return(data)
     })
     output$heatmapPlot <- renderPlotly({
-      data <- filteredData()
+      data <- app_vote_patterns_filtered()
       # Determine colors based on party
+      
+      #create hover text
+      data$hover_text <- mapply(
+        createHoverText,
+        numbers = data$bill_number,
+        descs = data$roll_call_desc,
+        title = data$bill_title,
+        date = data$roll_call_date,
+        descriptions = data$bill_desc,
+        urls = data$bill_url,
+        pcts = data$pct_voted_for,
+        vote_texts = data$vote_text,
+        names = data$legislator_name,
+        SIMPLIFY = FALSE  # Keep it as a list
+      )
+      data$hover_text <- sapply(data$hover_text, paste, collapse = " ") # Collapse the list into a single string
+      # data$hover_text = "DEBUG"
+      
       
       numBills <- n_distinct(data$roll_call_id) # Adjust with your actual identifier
       
@@ -161,13 +188,12 @@ server <- function(input, output, session) {
       perBillHeight <- 10 # Height per bill
       totalHeight <- baseHeight + (numBills * perBillHeight) # Total dynamic height
       
-      
       low_color <- if(input$party == "D") "#4575b4" else if(input$party == "R") "#d73027" else "#4575b4"
       mid_color <- "#6DA832"
       high_color <- if(input$party == "D") "#d73027" else if(input$party == "R") "#4575b4" else "#d73027"
       
       # Generate the plot
-      p <- ggplot(data, aes(x = name, y = as.factor(roll_call_id), fill = partisan_metric2, text = hover_text)) +
+      p <- ggplot(data, aes(x = legislator_name, y = as.factor(roll_call_id), fill = partisan_metric, text = hover_text)) +
         geom_tile(color = "white", linewidth = 0.1) +
         scale_fill_gradient2(low = low_color, high = high_color, mid = "#6DA832", midpoint = 1,
         ) +
@@ -206,6 +232,16 @@ server <- function(input, output, session) {
         config(displayModeBar = FALSE)
     })
   })
+  
+  
+  ########################################
+  #                                      #  
+  # app 2: legislator activity overview  #
+  #                                      #
+  ########################################  
+  
+  
+  
   
   observeEvent(input$navbarPage == "app2",{
     values <- reactiveValues(party = character(0), role = character(0), final = character(0),selectedYears = list(),  year2023Active = FALSE,
