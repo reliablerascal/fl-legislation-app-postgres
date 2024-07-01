@@ -8,13 +8,29 @@
 # moved hover_text creation to this front-end app
 # see related scripts for more detail about updates
 
-print("look for password prompt, which is currently needed to start the app")
 
-load("data.RData")
+library(foreach)
+library(profvis)
+library(data.table)
+library(jsonlite)
+library(lubridate)
+library(forcats)
+library(stringr)
+library(dplyr)
+library(purrr)
+library(readr)
+library(tidyr)
+library(tibble)
+library(ggplot2)
+library(tidyverse)
+library(DBI) # added 6/13/24 for Postgres connectivity
+library(RPostgres) # added 6/13/24 for Postgres connectivity
 
-# Source the UI and server components
+#print("look for password prompt, which is currently needed to start the app")
+
+source("read_data.R")
+
 source("ui.R")
 source("server_postgres.R")
-# source("temp1004 server_postgres.R")
 
 shinyApp(ui, server)

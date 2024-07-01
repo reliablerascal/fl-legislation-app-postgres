@@ -8,107 +8,17 @@
 # 6/13/24 RR
 # adapted from Andrew's code, initially to update connections from data.RData to Postgres
 
-library(foreach)
-library(profvis)
-library(data.table)
-library(jsonlite)
-library(lubridate)
-library(forcats)
-library(stringr)
-library(dplyr)
-library(purrr)
-library(readr)
-library(tidyr)
-library(tibble)
-library(ggplot2)
-library(tidyverse)
-library(DBI) # added 6/13/24 for Postgres connectivity
-library(RPostgres) # added 6/13/24 for Postgres connectivity
 
-########################################
-#                                      #  
-# define Postgres connection function  #
-#                                      #
-########################################
-attempt_connection <- function() {
-  # Prompt for password
-  password_db <- readline(
-    prompt="Make sure ye've fired up the Postgres server and hooked up to the database.
-    Now, what be the secret code to yer treasure chest o' data?: ")
-  
-  # Attempt to connect to Postgres database
-  con <- tryCatch(
-    dbConnect(RPostgres::Postgres(), 
-              dbname = "fl_leg_votes", 
-              host = "localhost", 
-              port = 5432, 
-              user = "postgres", 
-              password = password_db),
-    error = function(e) {
-      message("Connection failed: ", e$message)
-      return(NULL)
-    }
-  )
-  return(con)
-}
-
-
-########################################
-#                                      #  
-# Read data from Postgres database     #
-#                                      #
-########################################
 
 server <- function(input, output, session) {
-  
-    # Loop until successful connection
-  repeat {
-    con <- attempt_connection()
-
-    if (!is.null(con) && dbIsValid(con)) {
-      print("Successfully connected to the database!")
-      break
-    } else {
-      message("Failed to connect to the database. Please try again.")
-    }
-  }
-
-  # Ensure the connection is closed when the session ends
-  # session$onSessionEnded(function() {
-  #   if (!is.null(con) && dbIsValid(con)) {
-  #     dbDisconnect(con)
-  #     print("Disconnected from the database.")
-  #   }
-  # })
-  
-  # pull in Postgres data
-  #heatmap_data <- dbGetQuery(con, "SELECT * FROM app_shiny.heatmap_data")
-  r_votes <- dbGetQuery(con, "SELECT * FROM app_shiny.app_r_votes")
-  d_votes <- dbGetQuery(con, "SELECT * FROM app_shiny.app_d_votes")
-  app_vote_patterns <- dbGetQuery(con, "SELECT * FROM app_shiny.app_vote_patterns")
-  #y_labels <- dbGetQuery(con, "SELECT value FROM app_shiny.config WHERE key = 'y_labels'")$value
-
-  # disconnect the database because the data has already been loaded into memory
-  # dbDisconnect(con)
-  #print("Disconnected from the database.")
   
 ########################################
 #                                      #  
 # app 1: voting patterns analysis      #
 #                                      #
 ########################################
-  
-#set output and formatting for text pop-up when user hovers over a heatmap square
-  # createHoverText <- function(numbers, descriptions, urls, pcts, vote_texts, descs, title, date, names, width = 100) {
-  #   wrapped_descriptions <- sapply(descriptions, function(desc) paste(strwrap(desc, width = width), collapse = "<br>"))
-  #   paste0(
-  #     "<b>", names, "</b> voted <i>", vote_texts, "</i> on <b>", descs, "</b> for bill <b>", numbers, "</b> - <b>", title, "</b> on <b>", date, "</b><br>",
-  #     "<b>Description:</b> ", wrapped_descriptions, "<br>",
-  #     "<b>URL:</b> <a href='", urls, "'>", urls, "</a><br>",
-  #     "<b>", pcts, "</b> voted for this bill"
-  #   )
-  # }
-  
+
+#format pop-ups for when user hovers over a heatmap square
   createHoverText <- function(numbers, descriptions, urls, pcts, vote_texts, descs, title, date, names, width = 100) {
     wrapped_descriptions <- sapply(descriptions, function(desc) paste(strwrap(desc, width = width), collapse = "<br>"))
     paste0(
@@ -119,7 +29,7 @@ server <- function(input, output, session) {
     )
   }
   
-  # App-specific logic
+# App-specific logic
   observeEvent(input$navbarPage == "app1", {
     output$dynamicTitle <- renderUI({
       year <- input$year
@@ -135,22 +45,30 @@ server <- function(input, output, session) {
                 <span style='font-size: 14px;line-height:0.5;'>\n<b style ='font-size:1.75rem;color: ",color1hex,";'>",color1," votes</b>: Legislator aligned <i>against</i> most ",partytext," and <i>with</i> most ",partytext2,".</span>
                 <span style='font-size: 14px;line-height:0.5;'>\n<b style='font-size:1.75rem;color:",color2hex,";'>",color2," votes</b>: Legislator aligned <i>with</i> most ",partytext, ".</span>","<span style='font-size: 14px;line-height:0.5;'>\n<b style='color: #6DA832;font-size:1.75rem;'>Green votes</b>: Legislator aligned <i>against</i> both parties in bipartisan decisions.<br/><br/>\nBlank spaces indicate the legislators did not vote, either because they weren't assigned to those committees or they missed those votes.\n</span><span style='font-size: 14px;'>Displayed votes exclude ones where all members of a party voted unanimously. The table includes both amendment and bill votes. Data comes from the Florida Legislature's voting records via the Legiscan API.</span>"))
     })
+#####################
+#                   #  
+# app 1 filter      #
+#                   #
+#####################
     app_vote_patterns_filtered <- reactive({
       #data <- app_vote_patterns %>% filter(true_pct!= 1 & true_pct != 0)
       data <- app_vote_patterns
       # Apply filters based on input
-      if (input$year != "All") {data <- data %>% filter(session_year == input$year)}
+      if (input$year != "All") {
+        data <- data %>% filter(session_year == input$year)
+        }
       
       if (input$final != "All") {
         data <- data %>% filter(final_vote == input$final)
       }
       
       if (input$party != "All") {
+        #first, filter candidates, then filter relevant roll calls
         data <- data %>% dplyr::filter(party == input$party)
         if (input$party == "D") {
-          data <- data %>% dplyr::filter(roll_call_id %in% d_votes$roll_call_id)
+          data <- data %>% filter(is_include_d == 1)
         } else if (input$party == "R") {
-          data <- data %>% dplyr::filter(roll_call_id %in% r_votes$roll_call_id)
+          data <- data %>% filter(is_include_r == 1)
         }
       }
       
@@ -159,6 +77,11 @@ server <- function(input, output, session) {
       }
       return(data)
     })
+#####################
+#                   #  
+# app 1 plot        #
+#                   #
+#####################
     output$heatmapPlot <- renderPlotly({
       data <- app_vote_patterns_filtered()
       # Determine colors based on party
@@ -192,14 +115,28 @@ server <- function(input, output, session) {
       mid_color <- "#6DA832"
       high_color <- if(input$party == "D") "#d73027" else if(input$party == "R") "#4575b4" else "#d73027"
       
+      # configure sort order
+      data$legislator_name <- reorder(data$legislator_name, data$mean_partisan_metric)
+      data$bill_number <- as.character(data$bill_number)
+      data <- data[order(data$bill_number), ]
+      data$roll_call_id <- factor(data$roll_call_id, levels = unique(data$roll_call_id))
+      
+      # create y_labels to render the bill number and the session year
+      # data$y_labels <- paste(data$bill_number, data$session_year, sep = " - ")
+      
       # Generate the plot
-      p <- ggplot(data, aes(x = legislator_name, y = as.factor(roll_call_id), fill = partisan_metric, text = hover_text)) +
+      p <- ggplot(data, aes(x = legislator_name, y = roll_call_id, fill = partisan_metric, text = hover_text)) +
         geom_tile(color = "white", linewidth = 0.1) +
         scale_fill_gradient2(low = low_color, high = high_color, mid = "#6DA832", midpoint = 1,
         ) +
         theme_minimal() +
         #scale_fill_manual(values = color_mapping) + # Apply the dynamic color mapping
-        scale_y_discrete(labels = y_labels) +
+        #scale_y_discrete(labels = y_labels) +
+        #scale_y_discrete(labels = setNames(y_labels, data$roll_call_id)) +  # Set bill_number as labels
+        scale_y_discrete(labels = function(x) {
+          labels <- unique(data[, c("roll_call_id", "bill_number", "session_year")])
+          setNames(paste(labels$bill_number, labels$session_year, sep = " - "), labels$roll_call_id)
+        }) +
         scale_x_discrete(position = "top") +
         theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1, size = 10),
               axis.ticks.y = element_blank(),
@@ -234,20 +171,18 @@ server <- function(input, output, session) {
   })
   
   
+  
   ########################################
   #                                      #  
   # app 2: legislator activity overview  #
   #                                      #
   ########################################  
   
-  
-  
-  
   observeEvent(input$navbarPage == "app2",{
     values <- reactiveValues(party = character(0), role = character(0), final = character(0),selectedYears = list(),  year2023Active = FALSE,
                              year2024Active = FALSE)
     
-    all_legislators <- unique(heatmap_data$name)
+    all_legislators <- unique(app_data$name)
     all_legislators_with_all <- c("All" = "All", all_legislators) #not working, also below I changed the filter away from the >0 length to != "all"
     observeEvent(input$btn_year_2023, {
       values$year2023Active <- !values$year2023Active
@@ -335,7 +270,7 @@ server <- function(input, output, session) {
       }
     })
     filtered_data <- reactive({
-      data <- heatmap_data
+      data <- app_data
       if (length(values$party) > 0) {
         data <- data %>% filter(party %in% values$party)
       }
@@ -369,7 +304,7 @@ server <- function(input, output, session) {
       data
     })
     filtered_legdata <- reactive({
-      data <- heatmap_data
+      data <- app_data
       if (length(values$party) > 0) {
         data <- data %>% filter(party %in% values$party)
       }
@@ -439,7 +374,7 @@ server <- function(input, output, session) {
       # Assuming 'heatmap_data' contains all the necessary legislator information
       selected_legislator <- input$legislator
       if (!is.null(selected_legislator) && selected_legislator != "") {
-        legislator_info <- heatmap_data %>%
+        legislator_info <- app_data %>%
           filter(name == selected_legislator) %>% distinct(name, district, party, role, ballotpedia2) %>% slice(1)
         div(
           h3(a(href = legislator_info$ballotpedia2, target = "_blank", selected_legislator)),
