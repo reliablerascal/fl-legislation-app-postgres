@@ -50,25 +50,6 @@ attempt_connection <- function() {
   app_data <- dbGetQuery(con, "SELECT * FROM app_shiny.app_data")
   jct_bill_categories <- dbGetQuery(con, "SELECT * FROM proc.jct_bill_categories")
   
-  #heatmap_data <- dbGetQuery(con, "SELECT * FROM app_shiny.heatmap_data")
-  #y_labels <- dbGetQuery(con, "SELECT value FROM app_shiny.config WHERE key = 'y_labels'")$value
-  
-  #r_votes <- dbGetQuery(con, "SELECT * FROM app_shiny.app_r_votes")
-  #d_votes <- dbGetQuery(con, "SELECT * FROM app_shiny.app_d_votes")
-  
-  # disconnect the database because the data has already been loaded into memory
   dbDisconnect(con)
   print("Data read to memory, disconnecting from database.")
-  
-############################################
-#                                          #  
-# read additional data stored in R project #
-#                                          #
-############################################  
-
-app_data$name = app_data$legislator_name  
-  # I need y_labels for now...
-  
-  # read data stored in this project; stopgap until I get all postgres data 100% in order
-  #load("data.RData")
   

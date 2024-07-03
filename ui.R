@@ -29,15 +29,31 @@ app1_ui <- fluidPage(
       div(class = "filter-final", 
           selectInput("final", "Final (Third Reading) Vote?", 
                       choices = c("Y","N","All"), 
-                      selected = "Y"))
+                      selected = "Y")),
+      
+      div(class = "sort-by", 
+          selectInput("sort_by", "Sort Legislators By:", 
+                      choices = c("Name","Partisanship","District"), 
+                      selected = "Partisanship")),
+      
+      div(class = "filter-bill-category", 
+          selectInput("bill_category", "Bill Category", 
+                      choices = c("education","All"), 
+                      selected = "All"))
   ),
   plotlyOutput("heatmapPlot"#, height = "150vh"
   ) # Adjust plot height as needed
-  
 )
 
+
+#####################
+#                   #  
+# app 2 HOLD        #
+#                   #
+#####################
 # Define the UI for App 2 ####
 app2_ui <- fluidPage(
+  titlePanel("THIS SECTION BEING RE-ARCHITECTED FOR POSTGRES DEPENDENCE"),
   div(class="filter-group",
       div(class="filter-section", span("Party:"), actionButton("btn_party_R", "R", class="btn-filter btn-party R"), actionButton("btn_party_D", "D", class="btn-filter btn-party D")),
       div(class="filter-section", span("Chamber:"), actionButton("btn_role_Rep", "House", class="btn-filter btn-role Rep"), actionButton("btn_role_Sen", "Senate", class="btn-filter btn-role Sen")),
@@ -349,7 +365,7 @@ div#filter-info {
   #tabs#####
   tabsetPanel(
     tabPanel("Voting Patterns Analysis", value = "voting_patterns", app1_ui),
-    tabPanel("Legislator Activity Overview", value = "legislator_activity", app2_ui),
+    #tabPanel("Legislator Activity Overview", value = "legislator_activity", app2_ui),
     id = "main_nav"
   )
 )

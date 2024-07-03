@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Voting Patterns</title>
+    <style>
+        .legend {
+            display: flex;
+            flex-direction: column;
+            align-items: start;
+            margin-left: 10px;
+            max-width: 600px;
+            border: 1px solid black;
+        }
+        .legend-item {
+            display: flex;
+            align-items: center;
+            margin: 1px 0;
+            margin-left: 5px;
+        }
+        .color-box {
+            width: 20px;
+            height: 20px;
+            display: inline-block;
+            margin-right: 10px;
+        }
+    </style>
+</head>
+<body>
+    <h2 style="text-align: center;">Florida House Voting Patterns: Democrats</h2>
+    <p style="font-size: 14px;">This chart displays each legislator's vote on each amendment and bill roll call where their pary did not vote unanimously.</p>
+    <div class="legend">
+        <div class="legend-item">
+            <div class="color-box" style="background-color: #d73027;"></div>
+            <span style="font-size: 14px;">Legislator aligned <i>against</i> most Democrats and <i>with</i> most Republicans.</span>
+        </div>
+        <div class="legend-item">
+            <div class="color-box" style="background-color: #4575b4;"></div>
+            <span style="font-size: 14px;">Legislator aligned <i>with</i> most Democrats.</span>
+        </div>
+        <div class="legend-item">
+            <div class="color-box" style="background-color: #6DA832;"></div>
+            <span style="font-size: 14px;">Legislator aligned <i>against</i> both parties in bipartisan decisions.</span>
+        </div>
+        <div class="legend-item">
+          <div class="color-box" style="background-color: #FFFFFF; border: 1px solid black;"></div>
+          <span style="font-size: 14px;">Legislator did not vote (missed vote or not assigned to that committee).</span>
+      </div>
+    </div>
+    <p style="font-size: 14px;">Data source: <a href="https://legiscan.com/FL/datasets">LegiScan's Florida Legislative Datasets for all 2023 and 2024 Regular Session</a>.</p>
+</body>
+</html>
