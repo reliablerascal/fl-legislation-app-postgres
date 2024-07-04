@@ -18,29 +18,8 @@ library(shiny)
 # Define the UI for App 1 ####
 app1_ui <- fluidPage(
   uiOutput("dynamicTitle"),
-  div(class="filter-row",
-      style="display:flex; flex-wrap: wrap; justify-content: center; margin-top:1.5vw; margin-bottom: 0px; padding-bottom:0px; margin-left:auto; margin-right:auto;",
-      
-      div(class = "filter-party", selectInput("party", "Select Party:", choices = c("D", "R"))),
-      div(class = "filter-role", selectInput("role", "Select Chamber:", choices = c("House" = "Rep", "Senate" = "Sen"))),
-      
-      div(class = "filter-year",selectInput("year", "Select Session Year:",choices = c(2023,2024,"All"),selected = 2024)),
-      
-      div(class = "filter-final", 
-          selectInput("final", "Final (Third Reading) Vote?", 
-                      choices = c("Y","N","All"), 
-                      selected = "Y")),
-      
-      div(class = "sort-by", 
-          selectInput("sort_by", "Sort Legislators By:", 
-                      choices = c("Name","Partisanship","District"), 
-                      selected = "Partisanship")),
-      
-      div(class = "filter-bill-category", 
-          selectInput("bill_category", "Bill Category", 
-                      choices = c("education","All"), 
-                      selected = "All"))
-  ),
+  uiOutput("dynamicFilters"),
+  uiOutput("dynamicRecordCount"),
   uiOutput("noDataMessage"),
   plotlyOutput("heatmapPlot"#, height = "150vh"
   ) # Adjust plot height as needed

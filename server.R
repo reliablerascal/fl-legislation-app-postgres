@@ -8,7 +8,12 @@
 # 6/13/24 RR
 # adapted from Andrew's code, initially to update connections from data.RData to Postgres
 
+# added req statements (e.g. req(input$year, input$party)) to ensure inputs available before calculating variables
 
+# redundant, but somehow necessary to reload some libraries?
+library(shiny)
+library(dplyr)
+library(plotly)
 
 server <- function(input, output, session) {
   
@@ -31,14 +36,6 @@ server <- function(input, output, session) {
   
 # App-specific logic
   observeEvent(input$navbarPage == "app1", {
-    # count data output
-    # n_legislators <- reactive({
-    #   n_distinct(data_filtered()$legislator_name)
-    # })
-    # 
-    # n_roll_calls <- reactive({
-    #   n_distinct(data_filtered()$roll_call_id)
-    # })
     n_legislators <- reactive({
       data <- data_filtered()
       if (data$is_empty) {
@@ -64,7 +61,7 @@ server <- function(input, output, session) {
     #                                      #
     ########################################
     output$dynamicTitle <- renderUI({
-      #calculate variables
+      req(input$year, input$party)
       year <- input$year
       party_same <- if(input$party == "D") "Democrats" else if(input$party == "R") "Republicans" else "All Parties"
       roleTitle <- if(input$role == "Rep") "Florida House" else if(input$role == "Sen") "Florida Senate" else "Florida Legislature"
@@ -108,7 +105,6 @@ server <- function(input, output, session) {
         '<h2 style="text-align: center;">Florida House Voting Patterns: ', party_same, '</h2>',
         '<p style="font-size: 14px;">This chart displays each legislator\'s vote on each roll call for amendments and bills where their party did not vote unanimously.</p>',
         '<p style="font-size: 14px;">Data source: <a href="https://legiscan.com/FL/datasets">LegiScan\'s Florida Legislative Datasets for all 2023 and 2024 Regular Session</a>.</p>',
-        '<p style="font-size: 14px;">Displaying ',n_legislators(),' legislators across ',n_roll_calls(),' roll call votes.</p>',
         '<div class="legend">',
         '  <div class="legend-item">',
         '    <div class="color-box" style="background-color: ',color_same, ';"></div>',
@@ -131,18 +127,56 @@ server <- function(input, output, session) {
         '</html>'
       ))
       })
-#####################
-#                   #  
-# app 1 filter      #
-#                   #
-#####################
+    
+    
+    
+    
+    output$dynamicRecordCount <- renderUI({
+      HTML(paste0(
+        '<p style="font-size: 14px;">Displaying <strong style="font-size: 18px;">', n_legislators(), 
+        '</strong> legislators across <strong style="font-size: 18px;">', n_roll_calls(), '</strong> roll call votes.</p>'
+      ))
+    })
+    
+    
+########################
+#                      #  
+# app 1 filter display #
+#                      #
+########################
+    createFilterBox <- function(inputId, label, choices, selected = NULL) {
+      div(
+        selectInput(inputId, label, choices = choices, selected = selected)
+      )
+    }
+    
+    output$dynamicFilters <- renderUI({
+        div(class = "filter-row",
+            style = "display:flex; flex-wrap: wrap; justify-content: center; margin-top:1.5vw; margin-bottom: 0px; padding-bottom:0px; margin-left:auto; margin-right:auto;",
+            
+            createFilterBox("party", "Select Party:", c("D", "R")),
+            createFilterBox("role", "Select Chamber:", c("House" = "Rep", "Senate" = "Sen")),
+            createFilterBox("year", "Select Session Year:", c(2023, 2024, "All"), selected = 2024),
+            createFilterBox("final", "Final (Third Reading) Vote?", c("Y", "N", "All"), selected = "Y"),
+            createFilterBox("sort_by", "Sort Legislators By:", c("Name", "Partisanship", "District"), selected = "Partisanship"),
+            createFilterBox("bill_category", "Bill Category", c("education", "All"), selected = "All")
+        )
+    })
+    
+#######################
+#                     #  
+# app 1 filter action #
+#                     #
+#######################
     #filter junction table to restrict bills by category, if applicable
     filtered_jct <- reactive({
+      req(input$bill_category)
       jct_bill_categories %>% filter(bill_category == input$bill_category)
     })
     
     data_filtered <- reactive({
       #data <- app_vote_patterns %>% filter(true_pct!= 1 & true_pct != 0)
+      req(input$party, input$role, input$year, input$final, input$sort_by, input$bill_category)  # Ensure inputs are available
       data <- app_vote_patterns
       
       if (input$year != "All") {
@@ -216,8 +250,8 @@ server <- function(input, output, session) {
       data$hover_text <- sapply(data$hover_text, paste, collapse = " ") # Collapse the list into a single string
       # data$hover_text = "DEBUG"
       
-      
-      numBills <- n_distinct(data$roll_call_id) # Adjust with your actual identifier
+      numBills <- n_roll_calls()
+      #numBills <- n_distinct(data$roll_call_id) # Adjust with your actual identifier
       
       # Dynamic height calculation
       baseHeight <- 500 # Minimum height
@@ -266,13 +300,12 @@ server <- function(input, output, session) {
               plot.title = element_blank(),
               plot.subtitle = element_blank())
       
-      ggplotly(p, tooltip = "text") %>%
+      ggplotly(p, tooltip = "text", height = totalHeight) %>%
         layout(autosize=TRUE,xaxis=list(side="top"),
                font = list(family = "Archivo"),
                margin = list(t=85), #list(l = 0, r = 0, t = 60, b = 10),  # Adjust margins to ensure the full title and subtitle are visible,
                plot_bgcolor = "rgba(255,255,255,0.85)",  # Transparent plot background
-               paper_bgcolor = "rgba(255,255,255,0.85)",
-               height = totalHeight
+               paper_bgcolor = "rgba(255,255,255,0.85)"
         ) %>% 
         config(displayModeBar = FALSE)
     })

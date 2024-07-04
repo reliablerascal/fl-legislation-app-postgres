@@ -1,0 +1,17 @@
+# Ignore RStudio project files and history
+^.*\.Rproj$             # Ignore RStudio project files
+^\.Rproj\.user$         # Ignore RStudio user directory
+^\.RData$               # Ignore R workspace file
+^\.Rhistory$            # Ignore R history file
+
+# Ignore specific directories
+^archive/$              # Ignore archive directory
+^data/$                 # Ignore data directory
+
+# Ignore specific files
+^~code_graveyard.R
+^data.RData$            # Ignore data.RData file
+^legislator_dashboard.Rproj$  # Ignore RStudio project file for legislator dashboard
+^test.html$             # Ignore test HTML file
+^save_data.R$           # Ignore save_data.R script
+^read_data.R$           # Ignore read_data.R script

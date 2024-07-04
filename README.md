@@ -1,13 +1,19 @@
 # Legislator Dashboard
 7/4/24
 
-This work-in-progress repo adapts the Jacksonville Tributary's [interactive Shiny web application](https://github.com/apantazi/legislator_dashboard/blob/main/app.R) (see [original demo app](https://shiny.jaxtrib.org/)), connecting to Postgres rather than CSV or R data. Data is sourced from [LegiScan's 2023 and 2024 legislative session data](https://legiscan.com/FL/datasets). The app consists of two visualizations:
+This work-in-progress repo adapts the Jacksonville Tributary's interactive legislative dashboard, based on my [revised data pipeline](https://github.com/reliablerascal/fl-legislation-etl).
+
+The app consists of two visualizations:
 * **Voting Patterns Analysis**- a heatmap of voting patterns on contested bills by party, chamber, and session year
 * **Legislator Activity Overview**- an interface for reviewing legislative activity by legislator, as well as searching bills
 
+Here's the app:
+* [development version](https://mockingbird.shinyapps.io/fl-leg-app-postgres/)- my new work-in-progress version, which develops the Voting Patterns Analysis (July 2023).
+* [production version](https://shiny.jaxtrib.org)- prior version of the app (May 2023) currently used by the Jacksonville Tributary (see also [dev repo](https://github.com/apantazi/legislator_dashboard/blob/main/app.R))
+
 ## Applications
 
-The repo pipeline consists of the following R applications:
+The app consists of the following R components:
 
 - [app.R](app.R): Orchestrates the Shiny app by setting up the user interface, server logic, and handling reactive expressions for the Shiny web app.
 - [server.R](server.R): Reads the voting_patterns data processed in the ETL pipeline (see [data dictionary](https://docs.google.com/spreadsheets/d/1qPUk0-wx4sislv_TbE6poKOZBvDpdmpJp6_QWNK77I4/edit?gid=1711212896#gid=1711212896)).

@@ -1,7 +1,9 @@
+~code_graveyard.R
 .RData
 .Rhistory
 .RProj.user/
 archive/
+data/
 data.RData
 legislator_dashboard.Rproj
 test.html
