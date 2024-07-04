@@ -26,7 +26,7 @@ library(tidyverse)
 library(DBI) # added 6/13/24 for Postgres connectivity
 library(RPostgres) # added 6/13/24 for Postgres connectivity
 
-#source("read_data.R")
+source("read_data.R")
 
 source("ui.R")
 source("server.R")

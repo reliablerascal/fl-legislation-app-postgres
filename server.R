@@ -32,12 +32,29 @@ server <- function(input, output, session) {
 # App-specific logic
   observeEvent(input$navbarPage == "app1", {
     # count data output
+    # n_legislators <- reactive({
+    #   n_distinct(data_filtered()$legislator_name)
+    # })
+    # 
+    # n_roll_calls <- reactive({
+    #   n_distinct(data_filtered()$roll_call_id)
+    # })
     n_legislators <- reactive({
-      n_distinct(data_filtered()$legislator_name)
+      data <- data_filtered()
+      if (data$is_empty) {
+        return(0)
+      } else {
+        return(n_distinct(data$data$legislator_name))
+      }
     })
-
+    
     n_roll_calls <- reactive({
-      n_distinct(data_filtered()$roll_call_id)
+      data <- data_filtered()
+      if (data$is_empty) {
+        return(0)
+      } else {
+        return(n_distinct(data$data$roll_call_id))
+      }
     })
     
     
@@ -153,33 +170,34 @@ server <- function(input, output, session) {
       if (input$bill_category != "All") {
         data <- data %>% dplyr::filter(bill_id %in% filtered_jct()$bill_id)
       }
-      return(data)
+      
+      # validate(
+      #   need(nrow(data) > 0, "No bills match selected filters.")
+      # )
+      # Return the filtered data and a flag indicating if it's empty
+      return (list(data = data, is_empty = nrow(data) == 0))
     })
-    #####################
-    #                   #  
-    # app 1 sort        #
-    #                   #
-    #####################
-    #sort doesn't work here, needs to be within the plot
     
-    # data_sorted <- reactive({
-    #   data_filtered <- data_filtered()
-    #   if (input$sort_by == "Name") {
-    #     data_sorted <- data_filtered %>% arrange(legislator_name)
-    #   } else if (input$sort_by == "Partisanship") {
-    #     data_sorted <- data_filtered %>% arrange(mean_partisan_metric)
-    #   } else if (input$sort_by == "District") {
-    #     data_sorted <- data_filtered %>% arrange(party)
-    #   }
-    # })
+    output$noDataMessage <- renderUI({
+      filtered_data <- data_filtered()
+      if (filtered_data$is_empty) div("No bills match selected filters.", style = "color: red; font-weight: bold;")
+    })
+    
 #####################
 #                   #  
 # app 1 plot        #
 #                   #
 #####################
     output$heatmapPlot <- renderPlotly({
-      data <- data_filtered()
+      filtered_data <- data_filtered()
       # Determine colors based on party
+      
+      #don't plot if no bills found within selected filter
+      req(!filtered_data$is_empty, "No bills match selected filters.")
+      
+      data <- filtered_data$data
+      
+      if (nrow(data) == 0) return(NULL)
       
       #create hover text
       data$hover_text <- mapply(

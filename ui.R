@@ -41,6 +41,7 @@ app1_ui <- fluidPage(
                       choices = c("education","All"), 
                       selected = "All"))
   ),
+  uiOutput("noDataMessage"),
   plotlyOutput("heatmapPlot"#, height = "150vh"
   ) # Adjust plot height as needed
 )

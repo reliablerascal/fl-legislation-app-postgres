@@ -1,3 +1,7 @@
 .RData
+.Rhistory
+.RProj.user/
 archive/
 data.RData
+legislator_dashboard.Rproj
+test.html
