@@ -3,9 +3,12 @@
 
 This work-in-progress repo adapts the Jacksonville Tributary's interactive legislative dashboard, based on my [revised data pipeline](https://github.com/reliablerascal/fl-legislation-etl).
 
-The app consists of two visualizations:
-* **Voting Patterns Analysis**- a heatmap of voting patterns on contested bills by party, chamber, and session year
-* **Legislator Activity Overview**- an interface for reviewing legislative activity by legislator, as well as searching bills
+The app will consist of the following visualizations:
+|Tab|Intended Audience|Description
+|---|---|---|
+|**Voting Patterns Analysis**|data-savvy journalists at Florida partner outlets|heatmap of voting patterns on contested bills by party, chamber, and session year|
+|**Legislator Activity Overview**<br>(DISCONTINUED)|policy wonks|an interface for reviewing legislative activity by legislator, as well as searching bills|
+|**Representation Alignment Analysis**<br>(NEW)|voters in Florida's August primary|an interface for reviewing legislative activity by legislator, as well as searching bills|
 
 Here's the app:
 * [development version](https://mockingbird.shinyapps.io/fl-leg-app-postgres/)- my new work-in-progress version, which develops the Voting Patterns Analysis (July 2023).
