@@ -29,8 +29,8 @@ library(RPostgres)
 
 ### After re-opening this project...
 ### Run this in the console. second line is needed if there's new or updated data
-# source("read_data.R") # prior to running the app offline
-# source("save_data.R") # prior to uploading the app to Shiny
+#source("read_data.R") # prior to running the app offline
+#source("save_data.R") # prior to uploading the app to Shiny
 
 ### set up dataframes
 all_data <- readRDS("data/all_data.rds")

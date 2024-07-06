@@ -22,7 +22,8 @@ app1_ui <- fluidPage(
   uiOutput("dynamicRecordCount"),
   uiOutput("noDataMessage"),
   plotlyOutput("heatmapPlot"#, height = "150vh"
-  ) # Adjust plot height as needed
+               ),
+  verbatimTextOutput("infoBox")             
 )
 
 
