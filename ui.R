@@ -15,16 +15,46 @@ library(plotly)
 library(shinyWidgets)
 library(shiny)
 
+#####################
+#                   #  
+# app 1A            #
+#                   #
+#####################
 # Define the UI for App 1 ####
+
 app1_ui <- fluidPage(
-  uiOutput("dynamicTitle"),
+  # uiOutput("dynamicTitle"),
+  # uiOutput("methodology"),
+  uiOutput("dynamicLegend"),
   uiOutput("dynamicFilters"),
   uiOutput("dynamicRecordCount"),
   uiOutput("noDataMessage"),
-  plotlyOutput("heatmapPlot"#, height = "150vh"
-               ),
-  verbatimTextOutput("infoBox")             
+  plotlyOutput("heatmapPlot"#, height = "150vh")
+  )
 )
+  # fluidRow tries to prevent plot from overwriting footer, but it fails when switching filters creates different recordset sizes
+  # fluidRow(
+  #   column(12, plotlyOutput("heatmapPlot", height = "150vh"))
+  # ),
+  # fluidRow(
+  #   column(12, uiOutput("methodology"))
+# )
+
+#####################
+#                   #  
+# app 1B            #
+#                   #
+#####################
+# Define the UI for App 1 ####
+# app1b_ui <- fluidPage(
+#   uiOutput("dynamicTitle"),
+#   uiOutput("dynamicFilters"),
+#   uiOutput("dynamicRecordCount"),
+#   uiOutput("noDataMessage"),
+#   plotlyOutput("heatmapPlot"#, height = "150vh"
+#   ),
+#   verbatimTextOutput("infoBox")             
+# )
 
 
 #####################
@@ -346,6 +376,7 @@ div#filter-info {
   #tabs#####
   tabsetPanel(
     tabPanel("Voting Patterns Analysis", value = "voting_patterns", app1_ui),
+    #tabPanel("Voting Patterns Analysis B", value = "voting_patterns2", app1b_ui),
     #tabPanel("Legislator Activity Overview", value = "legislator_activity", app2_ui),
     id = "main_nav"
   )

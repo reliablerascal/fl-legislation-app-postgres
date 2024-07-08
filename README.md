@@ -1,5 +1,5 @@
 # Legislator Dashboard
-7/4/24
+7/7/24
 
 This work-in-progress repo adapts the Jacksonville Tributary's interactive legislative dashboard, based on my [revised data pipeline](https://github.com/reliablerascal/fl-legislation-etl).
 
@@ -7,7 +7,7 @@ The app will consist of the following visualizations:
 |Tab|Intended Audience|Description
 |---|---|---|
 |**Voting Patterns Analysis**|data-savvy journalists at Florida partner outlets|heatmap of voting patterns on contested bills by party, chamber, and session year|
-|**Legislator Activity Overview**<br>(DISCONTINUED)|policy wonks|an interface for reviewing legislative activity by legislator, as well as searching bills|
+|**Legislator Activity Overview**<br>(TEMPORARILY DISCONTINUED)|policy wonks|an interface for reviewing legislative activity by legislator, as well as searching bills|
 |**Representation Alignment Analysis**<br>(NEW)|voters in Florida's August primary|an interface for reviewing legislative activity by legislator, as well as searching bills|
 
 Here's the app:
@@ -25,7 +25,8 @@ The app consists of the following R components:
 ## Improvements in This Version
 In June, I [re-architected the data pipeline](https://github.com/reliablerascal/fl-legislation-etl), which should speed up development and improve maintainability of this web app. The updated data source eliminates record duplicates and facilitates filtering and sorting. Following are the changes made to date:
 * **Legend** displays heatmap color samples and adds count of legislators and roll-call votes in filtered views.
-* **Y-axis** displays district numbers for all legislators
+* Legislators (including district #) are now displayed on Y-axis
+* Tooltips displays vote by party, improved formatting, and hyperlink to bill on LegiScan.
 * Filter added for **bill category**. Note that this currently includeds only a placeholder "education" category with a small number of bills. More work is required to populate a cross-reference table assigning bills to categories.
 * **Sort legislators by** option enables sorting by partisanship rank, legislator name, or district.
 
