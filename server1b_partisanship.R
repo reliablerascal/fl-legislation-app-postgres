@@ -194,8 +194,9 @@ observeEvent(input$navbarPage == "app1", {
         createFilterBox("chamber", "Select Chamber:", c("House", "Senate")),
         createFilterBox("year", "Select Session Year:", c(2023, 2024, "All"), selected = 2024),
         createFilterBox("final", "Final (Third Reading) Vote?", c("Y", "N", "All"), selected = "Y"),
-        createFilterBox("sort_by", "Sort Legislators By:", c("Name", "Partisanship", "District"), selected = "Partisanship"),
-        createFilterBox("bill_category", "Bill Category", c("education", "All"), selected = "All")
+        createFilterBox("bill_category", "Bill Category (demo)", c("education", "All"), selected = "All"),
+        createFilterBox("sort_by_leg", "Sort Legislators By:", c("Name", "Partisanship", "District"), selected = "Partisanship"),
+        createFilterBox("sort_by_rc", "Sort Roll Calls By:", c("Bill Number", "Partisanship"), selected = "Bill Number")
     )
   })
   
@@ -207,7 +208,7 @@ observeEvent(input$navbarPage == "app1", {
   
   data_filtered <- reactive({
     #data <- app_vote_patterns %>% filter(true_pct!= 1 & true_pct != 0)
-    req(input$party, input$chamber, input$year, input$final, input$sort_by, input$bill_category)  # Ensure inputs are available
+    req(input$party, input$chamber, input$year, input$final, input$bill_category, input$sort_by_leg, input$sort_by_rc)  # Ensure inputs are available
     data <- app_vote_patterns
     
     if (input$year != "All") {
@@ -295,18 +296,27 @@ observeEvent(input$navbarPage == "app1", {
     perBillWidth <- 10 # Height per bill
     totalWidth <- baseWidth + (numBills * perBillWidth) # Total dynamic width
     
-    # configure y-axis sort order
-    if (input$sort_by == "Name") {
+    # sort legislators. "reorder" function is used to sort based on another variable
+    if (input$sort_by_leg == "Name") {
       data$legislator_name <- reorder(data$legislator_name, -data$last_name)
-    } else if (input$sort_by == "Partisanship") {
+    } else if (input$sort_by_leg == "Partisanship") {
       data$legislator_name <- reorder(data$legislator_name, -data$mean_partisanship)
-    } else if (input$sort_by == "District") {
+    } else if (input$sort_by_leg == "District") {
       data$legislator_name <- reorder(data$legislator_name, -data$district_number)
     }
     
+    # sort roll calls
     data$bill_number <- as.character(data$bill_number)
-    data <- data[order(data$bill_number), ]
+    if (input$sort_by_rc == "Bill Number") {
+      data <- data[order(data$bill_number), ]
+    } else if (input$sort_by_rc == "Partisanship") {
+      data <- data[order(data$rc_mean_partisanship), ]
+    }
     data$roll_call_id <- factor(data$roll_call_id, levels = unique(data$roll_call_id))
+    
+    # data$bill_number <- as.character(data$bill_number)
+    # data <- data[order(data$bill_number), ]
+    # data$roll_call_id <- factor(data$roll_call_id, levels = unique(data$roll_call_id))
     
     # set axis labels
     labels <- unique(data[, c("roll_call_id", "bill_number", "session_year")])

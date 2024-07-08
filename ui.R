@@ -40,21 +40,6 @@ app1_ui <- fluidPage(
   #   column(12, uiOutput("methodology"))
 # )
 
-#####################
-#                   #  
-# app 1B            #
-#                   #
-#####################
-# Define the UI for App 1 ####
-# app1b_ui <- fluidPage(
-#   uiOutput("dynamicTitle"),
-#   uiOutput("dynamicFilters"),
-#   uiOutput("dynamicRecordCount"),
-#   uiOutput("noDataMessage"),
-#   plotlyOutput("heatmapPlot"#, height = "150vh"
-#   ),
-#   verbatimTextOutput("infoBox")             
-# )
 
 
 #####################
@@ -373,7 +358,12 @@ div#filter-info {
              tags$img(src="https://jaxtrib.org/wp-content/uploads/2021/09/TRB_TributaryLogo_NoTagline_White.png", class="logo-img", alt="The Tributary")
       )
   ),
-  #tabs#####
+  
+  #####################
+  #                   #  
+  # navigation bar    #
+  #                   #
+  #####################
   tabsetPanel(
     tabPanel("Voting Patterns Analysis", value = "voting_patterns", app1_ui),
     #tabPanel("Voting Patterns Analysis B", value = "voting_patterns2", app1b_ui),
