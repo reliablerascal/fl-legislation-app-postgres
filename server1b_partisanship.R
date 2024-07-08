@@ -15,7 +15,7 @@ createHoverText <- function(numbers, descriptions, urls, pcts, pct_d, pct_r, vot
   wrapped_descriptions <- sapply(descriptions, function(desc) paste(strwrap(desc, width = width), collapse = "<br>"))
   paste0(
     "<b>", names, "</b> voted <i>", vote_texts, "</i> on <b>", descs, "</b> on <b>", date, "</b><br>",
-    "for bill <a href='", urls, "'> <b>", numbers, "</b> - <b>", title, "</b></a><br>",
+    "for bill <b>", numbers, "</b> - <b>", title, "</b></a><br>",
     "<b>", pcts, "</b> of total roll call (including absent & no vote) supported this bill.<br>",
     "Support amongst those present: <b>Democrat ", pct_d, "</b> / <b>Republican ", pct_r, "</b>.<br><br>",
     "<b>Bill Description:</b> ", wrapped_descriptions, "<br>"
@@ -45,58 +45,7 @@ observeEvent(input$navbarPage == "app1", {
   
   ########################################
   #                                      #  
-  # app 1: title                         #
-  #                                      #
-  ########################################
-  # output$dynamicTitle <- renderUI({
-  #   req(input$year, input$party)
-  #   year <- input$year
-  #   party_same <- if(input$party == "D") "Democrats" else if(input$party == "R") "Republicans" else "All Parties"
-  #   chamberTitle <- if(input$chamber == "House") "Florida House" else if(input$chamber == "Senate") "Florida Senate" else "Florida Legislature"
-  #   return(fullTitle <- paste0("(DEV VERSION) ", chamberTitle, " Voting Patterns: ", party_same))
-  # })
-  # 
-  #####################
-  #                   #  
-  # methodology       #
-  #                   #
-  #####################
-  
-  output$methodology <- renderUI({
-    HTML(paste0(
-      '<!DOCTYPE html>',
-      '<html lang="en">',
-      '<head>',
-      '<meta charset="UTF-8">',
-      '<meta name="viewport" content="width=device-width, initial-scale=1.0">',
-      '<title>Voting Patterns</title>',
-      '<style>',
-      '.legend {',
-      '  display: flex;',
-      '  flex-direction: column;',
-      '  align-items: start;',
-      '  margin: 0 auto;',
-      '  max-width: 600px;',
-      '  border: 1px solid black;',
-      '}',
-      '</style>',
-      '</head>',
-      '<body>',
-      '<hr>',
-      # '<div class="legend">',
-      '<strong>Methodology</strong>',
-      '<p style="font-size: 12px;">Partisanship for each legislator is calculated across all sessions in 2023 and 2024, as a weighted average of with party/against oppo (0) and against party/with oppo (1), excluding votes with both parties or against both parties.<br>',
-      'Data source: <a href="https://legiscan.com/FL/datasets">LegiScan\'s Florida Legislative Datasets for all 2023 and 2024 Regular Session</a>.<br>',
-      'Live (prior) verson of app <a href="https://shiny.jaxtrib.org/">https://shiny.jaxtrib.org</a>',
-      '</div>',
-      '</body>',
-      '</html>'
-    ))
-  })
-  
-  ########################################
-  #                                      #  
-  # app 1: legend                        #
+  # Header- methodology and legend       #
   #                                      #
   ########################################   
   output$dynamicLegend <- renderUI({
@@ -139,11 +88,16 @@ observeEvent(input$navbarPage == "app1", {
       '</head>',
       '<body>',
       '<h2 style="text-align: center;">(DEV VERSION) Florida House Voting Patterns: ', party_same, '</h2>',
-      
-      
-      '<p">This chart displays each legislator\'s vote on each roll call for amendments and bills where their party did not vote unanimously.</p>',
-      '<p style="font-size: 10px;">Partisanship for each legislator is calculated across all sessions in 2023 and 2024, as a weighted average of with party/against oppo (0) and against party/with oppo (1), excluding votes with both parties or against both parties.</p>',
-      '<p style="font-size: 10px;">Data source: <a href="https://legiscan.com/FL/datasets">LegiScan\'s Florida Legislative Datasets for all 2023 and 2024 Regular Session</a>.</p>',
+      '<div align="left">',
+      'Recommended viewing on desktop display.<br>',
+      'This chart displays each legislator\'s vote on each roll call for bills &amp; amendments where their party voted in favor but not unanimously. ',
+      'Bills may have multiple roll calls; hover over plot for more info about specific roll calls.<br>',
+      'The intended audience for this app is Florida journalists focused on politics, policy, and elections.<br>',
+      '<div style="font-size: 10px;">',
+      'Partisanship for each legislator is calculated across all sessions in 2023 and 2024, as a weighted average of with party/against oppo (0) and against party/with oppo (1), excluding votes with both parties or against both parties.<br>',
+      '<strong>Data source:</strong> <a href="https://legiscan.com/FL/datasets">LegiScan\'s Florida Legislative Datasets for all 2023 and 2024 Regular Session</a>.<br>',
+      'For details on wishlist items, work in progress, and tabled updates, see <a href="https://docs.google.com/document/d/1OGiJH7B_0j3B38gEtgt_FDhkxzL84ZtGistdup2yYHI/edit"><strong>development notes</strong></a>.',
+      '</div>',
       '<div class="legend">',
       '  <div class="legend-item">',
       '    <div class="color-box" style="background-color: ',color_same, ';"></div>',
@@ -175,11 +129,11 @@ observeEvent(input$navbarPage == "app1", {
   })
   
   
-  ########################
-  #                      #  
-  # FILTER               #
-  #                      #
-  ########################
+  ##############################
+  #                            #  
+  # USER FILTER & SORT PARAMS  #
+  #                            #
+  ##############################
   createFilterBox <- function(inputId, label, choices, selected = NULL) {
     div(
       selectInput(inputId, label, choices = choices, selected = selected)
@@ -196,7 +150,7 @@ observeEvent(input$navbarPage == "app1", {
         createFilterBox("final", "Final (Third Reading) Vote?", c("Y", "N", "All"), selected = "Y"),
         createFilterBox("bill_category", "Bill Category (demo)", c("education", "All"), selected = "All"),
         createFilterBox("sort_by_leg", "Sort Legislators By:", c("Name", "Partisanship", "District"), selected = "Partisanship"),
-        createFilterBox("sort_by_rc", "Sort Roll Calls By:", c("Bill Number", "Partisanship"), selected = "Bill Number")
+        createFilterBox("sort_by_rc", "Sort Roll Calls By:", c("Bill Number", "Partisanship"), selected = "Partisanship")
     )
   })
   
@@ -237,10 +191,8 @@ observeEvent(input$navbarPage == "app1", {
       data <- data %>% dplyr::filter(bill_id %in% filtered_jct()$bill_id)
     }
     
-    # validate(
-    #   need(nrow(data) > 0, "No bills match selected filters.")
-    # )
-    # Return the filtered data and a flag indicating if it's empty
+    
+    
     return (list(data = data, is_empty = nrow(data) == 0))
   })
   
@@ -298,7 +250,9 @@ observeEvent(input$navbarPage == "app1", {
     
     # sort legislators. "reorder" function is used to sort based on another variable
     if (input$sort_by_leg == "Name") {
-      data$legislator_name <- reorder(data$legislator_name, -data$last_name)
+      data <- data %>%
+        arrange(desc(last_name))  # Arrange the data by last_name in descending order
+      data$legislator_name <- factor(data$legislator_name, levels = unique(data$legislator_name))  # Set factor levels
     } else if (input$sort_by_leg == "Partisanship") {
       data$legislator_name <- reorder(data$legislator_name, -data$mean_partisanship)
     } else if (input$sort_by_leg == "District") {
@@ -318,34 +272,50 @@ observeEvent(input$navbarPage == "app1", {
     # data <- data[order(data$bill_number), ]
     # data$roll_call_id <- factor(data$roll_call_id, levels = unique(data$roll_call_id))
     
-    # set axis labels
-    labels <- unique(data[, c("roll_call_id", "bill_number", "session_year")])
-    x_labels <- setNames(paste(labels$bill_number, labels$session_year, sep = " - "), labels$roll_call_id)
+    # set y-axis labels for legislators
     labels <- unique(data[, c("legislator_name", "district_number", "last_name")])
     y_labels <- setNames(paste(labels$last_name, " (", labels$district_number, ")", sep = ""), labels$legislator_name)
+    y_urls <- unique(data[, c("legislator_name", "ballotpedia")])
+    y_labels_with_links <- setNames(paste('<a href="', y_urls$ballotpedia, '">', y_labels[as.character(y_urls$legislator_name)], '</a>', sep=""), y_urls$legislator_name)
+    # y_labels_with_links <- ifelse(
+    #   labels$last_name == "Nixon",
+    #   paste('<a href="', y_urls$ballotpedia[match(labels$legislator_name, y_urls$legislator_name)], '"><strong>', y_labels, '</strong></a>', sep=""),
+    #   paste('<a href="', y_urls$ballotpedia[match(labels$legislator_name, y_urls$legislator_name)], '">', y_labels, '</a>', sep="")
+    # )
+    y_labels_with_links <- setNames(y_labels_with_links, labels$legislator_name)
     
-    # set up colors
+    # bill titles tend to be too long for clean rendering on x-axis
+    labels <- unique(data[, c("roll_call_id", "bill_number", "session_year")])
+    x_labels <- setNames(paste(labels$bill_number, labels$session_year, sep = " - "), labels$roll_call_id)
+    x_urls <- unique(data[, c("roll_call_id", "bill_url")])
+    x_labels_with_links <- setNames(paste('<a href="', x_urls$bill_url , '">', x_labels[as.character(labels$roll_call_id)], '</a>', sep=""), labels$roll_call_id)
+    #x_labels_tooltips <- setNames(paste('Bill:', labels$bill_number), labels$roll_call_id)
+    
+    # trying to use tickvals was problematic. x axis labels disappeared entirely
+    # tickvals <- labels$roll_call_id
+    # ticktext <- x_labels_with_links[as.character(tickvals)]
+    # print(length(tickvals) == length(ticktext))
+    # print("ticktext values:")
+    # cat(ticktext, sep = "\n")
+    
+    # set up plot colors
     color_with_party <- if(input$party == "D") "#4575b4" else if(input$party == "R") "#d73027" else "#4575b4"
     color_against_party <- if(input$party == "D") "#d73027" else if(input$party == "R") "#4575b4" else "#d73027"
     color_against_both <- "#6DA832"
     color_na <- "#FFFFFF"
     
-    #gradient-based plot is a hack to speed up plotting, even though scale_fill_manual makes more sense
-    #scale_fill_gradient2(low = color_with_party, high = color_against_both, mid = color_against_party, midpoint = 0.5) +
-    
-    #didn't use scale_fill_manual b/c it takes much longer to render.
+    #gradient-based plot is a hack, but it works quite well. scale_fill_manual takes *much* longer to render. 
     #scale_fill_manual(values = fill_colors, na.value = color_na) +
     #fill_colors <- c("0" = color_with_party, "1" = color_against_party, "99" = color_against_both, "999" = color_na)
-    #scale_fill_gradient2(low = color_with_party, high = color_against_party, mid = color_against_both, midpoint = 0.5) +
-      
+    #x_labels_tooltips <- setNames(paste('Bill:', labels$bill_number), labels$roll_call_id)
     
     # Generate the plot
     p <- ggplot(data, aes(y = legislator_name, x = roll_call_id, fill = partisan_vote_plot, text = hover_text)) +
-      geom_tile(color = "white", linewidth = 0.1) +
+      geom_tile(color = "white", linewidth = 0.5) +
       scale_fill_gradient2(low = color_with_party, mid = color_against_party, high = color_against_both, midpoint = 1) +
       theme_minimal() +
-      scale_y_discrete(labels = y_labels) + 
-      scale_x_discrete(labels = x_labels, position = "top") +
+      scale_y_discrete(labels = y_labels_with_links) + 
+      scale_x_discrete(labels = x_labels_with_links, position = "top") +
       theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1, size = 10),
             axis.ticks.y = element_blank(),
             axis.title.y = element_blank(),
@@ -356,14 +326,26 @@ observeEvent(input$navbarPage == "app1", {
             plot.subtitle = element_blank())
     
     ggplotly(p, tooltip = "text", height = totalHeight, width= totalWidth) %>%
+      ###ATTEMPT TO ADD TOOLTIPS ON X AXIS
+      # add_trace(
+      #   type = 'scatter',
+      #   x = labels$roll_call_id,
+      #   y = rep(length(levels(data$legislator_name)) + 1, length(labels$roll_call_id)),  # Position above the plot
+      #   text = x_labels_tooltips[as.character(labels$roll_call_id)],
+      #   hoverinfo = 'text',
+      #   mode = 'markers',
+      #   marker = list(opacity = 0),
+      #   showlegend = FALSE,
+      #   inherit = FALSE
+      # ) %>%
       layout(
         autosize = TRUE,
         xaxis = list(side = "top"),
         font = list(family = "Archivo"),
-        margin = list(t = 85),  # Adjust margins to ensure the full title and subtitle are visible
+        margin = list(l=200, t = 85, b = 150),  # Fix margins to ensure rows and columns don't get compressed
         plot_bgcolor = "rgba(255,255,255,0.85)",  # Transparent plot background
         paper_bgcolor = "rgba(255,255,255,0.85)"
-      ) %>% 
+      ) %>%
       config(displayModeBar = FALSE)
   })
   

@@ -67,6 +67,3 @@ attempt_connection <- function() {
   
   #re-assign 99 to facilitate faster gradient-based plot
   app_vote_patterns$partisan_vote_plot <- ifelse(app_vote_patterns$partisan_vote_type == 99,2,app_vote_patterns$partisan_vote_type)
-  
-  
-  

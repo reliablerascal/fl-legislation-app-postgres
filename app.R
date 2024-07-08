@@ -29,8 +29,8 @@ library(scales)
 
 ### After re-opening this project...
 ### Run this in the console. second line is needed if there's new or updated data
-source("read_data.R") # prior to running the app offline
-source("save_data.R") # prior to uploading the app to Shiny (saves as RDS = relational data service)
+#source("read_data.R") # prior to running the app offline
+#source("save_data.R") # prior to uploading the app to Shiny (saves as RDS = relational data service)
 
 ### set up dataframes
 all_data <- readRDS("data/all_data.rds")
@@ -59,7 +59,7 @@ server <- function(input, output, session) {
   source("server2_leg_activity.R", local = TRUE)
   
   #source("server1_partisanship.R", local = TRUE)
-  #source("server1b_partisanship.R", local = TRUE)
+  #source("server1c_partisan_fixed_axes.R", local = TRUE)
   #source("server3_district_context.R", local = TRUE)
 }
 
