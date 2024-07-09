@@ -118,6 +118,12 @@ app2_ui <- fluidPage(
 ###########################
 
 app3_ui <- fluidPage(
+  # div(class = "filter-row",
+  #     style = "display:flex; flex-wrap: wrap; justify-content: center; margin-top:1.5vw; margin-bottom: 0px; padding-bottom:0px; margin-left:auto; margin-right:auto;",
+  #     
+  #     selectInput("chamber", "Select Chamber:", choices = c("House", "Senate")),
+  #     selectInput("district", "Select District:", choices = 1:40, selected = 1)  # Placeholder values
+  # ),
   uiOutput("dynamicHeader3"),
   uiOutput("dynamicFilters3"),
   uiOutput("dynamicVotingRecord"),

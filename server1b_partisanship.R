@@ -11,7 +11,6 @@
 
 # App-specific logic
 observeEvent(input$navbar_page == "app1", {
-  print("app1")
   
   n_legislators <- reactive({
     data <- data_filtered()

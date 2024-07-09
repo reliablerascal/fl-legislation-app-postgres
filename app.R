@@ -22,9 +22,11 @@ library(tidyr)
 library(tibble)
 library(ggplot2)
 library(tidyverse)
+
 library(DBI)
 library(RPostgres)
 library(scales)
+library(patchwork)
 
 
 ### After re-opening this project...
