@@ -39,7 +39,7 @@ observeEvent(input$navbarPage == "app3", {
     div(class = "filter-row",
         style = "display:flex; flex-wrap: wrap; justify-content: center; margin-top:1.5vw; margin-bottom: 0px; padding-bottom:0px; margin-left:auto; margin-right:auto;",
         
-        createFilterBox("chamber", "Select Chamber:", c("House", "Senate", selected = "House")),
+        createFilterBox("chamber", "Select Chamber:", c("House", "Senate"), selected = "House"),
         createFilterBox("district", "Select District:", 1:120, selected = 1)
     )
   })
@@ -60,7 +60,7 @@ observeEvent(input$navbarPage == "app3", {
     data <- data %>%
       filter(
         chamber == input$chamber,
-        district_number = input$distrct
+        district_number == input$district
         )
     
     return (list(data = data, is_empty = nrow(data) == 0))
@@ -84,16 +84,12 @@ observeEvent(input$navbarPage == "app3", {
   })
   
   output$dynamicDemographics <- renderUI({
-    req(qry_demo_district, qry_demo_state)
-    demo_district <- qry_demo_district()
-    demo_state <- qry_demo_state()
-    
-    HTML(paste0(
-      '<h4 style="text-align: center;">District Demographics</h4>',
-      percent(demo_district$pct_white), '% white<br>Compared to ', percent(demo_state$pct_white), '% statewide'
-    ))
-    
-    plotOutput("demographicsPlot")
+    tagList(
+      HTML(paste0(
+        '<h4 style="text-align: center;">District Demographics</h4>'
+      )),
+      plotOutput("demographicsPlot")
+    )
   })
   
   output$demographicsPlot <- renderPlot({
@@ -103,7 +99,7 @@ observeEvent(input$navbarPage == "app3", {
     
     # need to have 5x2 for each of category, percent, and demographic
     data <- data.frame(
-      Category = rep(c("District", "State"), 5),
+      Category = factor(rep(c("District", "State"), 5), levels = c("State", "District")),  # Reverse factor levels
       Percent = c(
         demo_district$pct_white, demo_state$pct_white,
         demo_district$pct_black, demo_state$pct_black,
@@ -116,12 +112,17 @@ observeEvent(input$navbarPage == "app3", {
     
     create_plot <- function(demo) {
       ggplot(subset(data, Demographic == demo), aes(x = Category, y = Percent, fill = Category)) +
-        geom_bar(stat = "identity", position = "dodge") +
-        scale_fill_manual(values = c("Selected District" = "#17becf", "State" = "#7f7f7f")) +
-        scale_y_continuous(labels = percent_format()) +
-        labs(title = paste(demo, "Population"), x = "", y = "Percentage") +
+        geom_bar(stat = "identity", position = "dodge", width=1) +
+        scale_fill_manual(values = c("District" = "#17becf", "State" = "#7f7f7f")) +
+        scale_y_continuous(labels = percent_format(),, limits = c(0, 1)) +
+        labs(title = paste(demo, "Population"), x = "", y = "") +
         theme_minimal() +
-        theme(legend.position = "none")
+        theme(
+          legend.position = "none",
+          panel.grid.major = element_blank(),  # Remove major grid lines
+          panel.grid.minor = element_blank()   # Remove minor grid lines
+        ) +
+        coord_flip()
     }
     
     # Create plots for each demographic
@@ -132,7 +133,7 @@ observeEvent(input$navbarPage == "app3", {
     plot_pacific <- create_plot("Pacific")
     
     # Combine plots using patchwork
-    (plot_white + plot_black) / (plot_asian + plot_hispanic) / plot_pacific
+    plot_white / plot_black/ plot_asian/ plot_hispanic / plot_pacific
   })
   
   
