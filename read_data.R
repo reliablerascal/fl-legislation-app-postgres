@@ -46,9 +46,11 @@ attempt_connection <- function() {
   }
   
   # pull in Postgres data
-  app_vote_patterns <- dbGetQuery(con, "SELECT * FROM app_shiny.app_vote_patterns")
-  app_data <- dbGetQuery(con, "SELECT * FROM app_shiny.app_data")
+  app01_vote_patterns <- dbGetQuery(con, "SELECT * FROM app_shiny.app01_vote_patterns")
+  app02_leg_activity <- dbGetQuery(con, "SELECT * FROM app_shiny.app02_leg_activity")
   jct_bill_categories <- dbGetQuery(con, "SELECT * FROM proc.jct_bill_categories")
+  app03_district_context <- dbGetQuery(con, "SELECT * FROM app_shiny.app03_district_context")
+  app03_district_context_state <- dbGetQuery(con, "SELECT * FROM app_shiny.app03_district_context_state")
   
   print("Data read to memory, disconnecting from database.")
   dbDisconnect(con)
@@ -66,4 +68,4 @@ attempt_connection <- function() {
   #app_vote_patterns$partisan_vote_type <- ifelse(is.na(app_vote_patterns$partisan_vote_type),999,app_vote_patterns$partisan_vote_type)
   
   #re-assign 99 to facilitate faster gradient-based plot
-  app_vote_patterns$partisan_vote_plot <- ifelse(app_vote_patterns$partisan_vote_type == 99,2,app_vote_patterns$partisan_vote_type)
+  app01_vote_patterns$partisan_vote_plot <- ifelse(app01_vote_patterns$partisan_vote_type == 99,2,app01_vote_patterns$partisan_vote_type)

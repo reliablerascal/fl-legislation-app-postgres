@@ -8,7 +8,7 @@ observeEvent(input$navbarPage == "app2",{
   values <- reactiveValues(party = character(0), role = character(0), final = character(0),selectedYears = list(),  year2023Active = FALSE,
                            year2024Active = FALSE)
   
-  all_legislators <- unique(app_data$name)
+  all_legislators <- unique(app02_leg_activity$name)
   all_legislators_with_all <- c("All" = "All", all_legislators) #not working, also below I changed the filter away from the >0 length to != "all"
   observeEvent(input$btn_year_2023, {
     values$year2023Active <- !values$year2023Active
@@ -96,7 +96,7 @@ observeEvent(input$navbarPage == "app2",{
     }
   })
   filtered_data <- reactive({
-    data <- app_data
+    data <- app02_leg_activity
     if (length(values$party) > 0) {
       data <- data %>% filter(party %in% values$party)
     }
@@ -130,7 +130,7 @@ observeEvent(input$navbarPage == "app2",{
     data
   })
   filtered_legdata <- reactive({
-    data <- app_data
+    data <- app02_leg_activity
     if (length(values$party) > 0) {
       data <- data %>% filter(party %in% values$party)
     }
@@ -200,7 +200,7 @@ observeEvent(input$navbarPage == "app2",{
     # Assuming 'heatmap_data' contains all the necessary legislator information
     selected_legislator <- input$legislator
     if (!is.null(selected_legislator) && selected_legislator != "") {
-      legislator_info <- app_data %>%
+      legislator_info <- app02_leg_activity %>%
         filter(name == selected_legislator) %>% distinct(name, district, party, role, ballotpedia2) %>% slice(1)
       div(
         h3(a(href = legislator_info$ballotpedia2, target = "_blank", selected_legislator)),

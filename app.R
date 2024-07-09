@@ -2,8 +2,8 @@
 # June and July 2024 RR
 #
 # This is a Shiny app for the Jacksonville Tributary's legislative dashboard
-# my version at https://mockingbird.shinyapps.io/fl-leg-app-postgres/
 # original version by Andrew Pantazi at https://shiny.jaxtrib.org/ 
+# my updated version at https://mockingbird.shinyapps.io/fl-leg-app-postgres/
 
 
 library(shiny)
@@ -29,15 +29,17 @@ library(scales)
 
 ### After re-opening this project...
 ### Run this in the console. second line is needed if there's new or updated data
-#source("read_data.R") # prior to running the app offline
-#source("save_data.R") # prior to uploading the app to Shiny (saves as RDS = relational data service)
+# source("read_data.R") # prior to running the app offline
+# source("save_data.R") # prior to uploading the app to Shiny (saves as RDS = relational data service)
 
 ### set up dataframes
 all_data <- readRDS("data/all_data.rds")
 
-app_vote_patterns <- all_data$app_vote_patterns
-app_data <- all_data$app_data
+app01_vote_patterns <- all_data$app01_vote_patterns
+app02_leg_activity <- all_data$app02_leg_activity
 jct_bill_categories <- all_data$jct_bill_categories
+app03_district_context <- all_data$app03_district_context
+app03_district_context_state <- all_data$app03_district_context_state
 
 source("ui.R")
 
@@ -56,11 +58,8 @@ source("ui.R")
 #local = TRUE ensures each sourced file has access to input/output/session
 server <- function(input, output, session) {
   source("server1b_partisanship.R", local = TRUE)
-  source("server2_leg_activity.R", local = TRUE)
-  
-  #source("server1_partisanship.R", local = TRUE)
-  #source("server1c_partisan_fixed_axes.R", local = TRUE)
-  #source("server3_district_context.R", local = TRUE)
+  # source("server2_leg_activity.R", local = TRUE)
+  source("server3_district_context.R", local = TRUE)
 }
 
 ########################

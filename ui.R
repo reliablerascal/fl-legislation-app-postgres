@@ -23,9 +23,7 @@ library(shiny)
 # Define the UI for App 1 ####
 
 app1_ui <- fluidPage(
-  # uiOutput("dynamicTitle"),
-  # uiOutput("methodology"),
-  uiOutput("dynamicLegend"),
+  uiOutput("dynamicHeader"),
   uiOutput("dynamicFilters"),
   uiOutput("dynamicRecordCount"),
   uiOutput("noDataMessage"),
@@ -112,6 +110,25 @@ app2_ui <- fluidPage(
                 });
       '))
 )
+
+###########################
+#                         #  
+# app 3 district context  #
+#                         #
+###########################
+
+app3_ui <- fluidPage(
+  uiOutput("dynamicHeader3"),
+  uiOutput("dynamicFilters3"),
+  uiOutput("dynamicVotingRecord"),
+  uiOutput("dynamicDemographics")
+)
+
+#####################
+#                   #  
+# navbar page       #
+#                   #
+#####################
 
 # Combine the UIs into a navbarPage ####
 ui <- fluidPage(
@@ -365,9 +382,9 @@ div#filter-info {
   #                   #
   #####################
   tabsetPanel(
-    tabPanel("Voting Patterns Analysis", value = "voting_patterns", app1_ui),
-    #tabPanel("Voting Patterns Analysis B", value = "voting_patterns2", app1b_ui),
-    #tabPanel("Legislator Activity Overview", value = "legislator_activity", app2_ui),
-    id = "main_nav"
+    tabPanel("Voting Patterns Analysis", value = "app1", app1_ui),
+    #tabPanel("Legislator Activity Overview", value = "app2", app2_ui),
+    tabPanel("District Context", value = "app3", app3_ui),
+    id = "navbar_page"
   )
 )

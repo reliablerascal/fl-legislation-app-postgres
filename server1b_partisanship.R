@@ -9,21 +9,10 @@
 #                                      #
 ########################################
 
-#clarify with Andrew- do we want to highlight % of present for party, vs. % of total for bill?
-#format pop-ups for when user hovers over a heatmap square
-createHoverText <- function(numbers, descriptions, urls, pcts, pct_d, pct_r, vote_texts, descs, title, date, names, width = 100) {
-  wrapped_descriptions <- sapply(descriptions, function(desc) paste(strwrap(desc, width = width), collapse = "<br>"))
-  paste0(
-    "<b>", names, "</b> voted <i>", vote_texts, "</i> on <b>", descs, "</b> on <b>", date, "</b><br>",
-    "for bill <b>", numbers, "</b> - <b>", title, "</b></a><br>",
-    "<b>", pcts, "</b> of total roll call (including absent & no vote) supported this bill.<br>",
-    "Support amongst those present: <b>Democrat ", pct_d, "</b> / <b>Republican ", pct_r, "</b>.<br><br>",
-    "<b>Bill Description:</b> ", wrapped_descriptions, "<br>"
-  )
-}
-
 # App-specific logic
-observeEvent(input$navbarPage == "app1", {
+observeEvent(input$navbar_page == "app1", {
+  print("app1")
+  
   n_legislators <- reactive({
     data <- data_filtered()
     if (data$is_empty) {
@@ -43,12 +32,13 @@ observeEvent(input$navbarPage == "app1", {
   })
   
   
+  
   ########################################
   #                                      #  
   # Header- methodology and legend       #
   #                                      #
   ########################################   
-  output$dynamicLegend <- renderUI({
+  output$dynamicHeader <- renderUI({
     req(input$year, input$party)
     year <- input$year
     party_same <- if(input$party == "D") "Democrats" else if(input$party == "R") "Republicans" else "All Parties"
@@ -161,9 +151,9 @@ observeEvent(input$navbarPage == "app1", {
   })
   
   data_filtered <- reactive({
-    #data <- app_vote_patterns %>% filter(true_pct!= 1 & true_pct != 0)
+    #data <- app01_vote_patterns %>% filter(true_pct!= 1 & true_pct != 0)
     req(input$party, input$chamber, input$year, input$final, input$bill_category, input$sort_by_leg, input$sort_by_rc)  # Ensure inputs are available
-    data <- app_vote_patterns
+    data <- app01_vote_patterns
     
     if (input$year != "All") {
       data <- data %>% filter(session_year == input$year)
@@ -206,6 +196,21 @@ observeEvent(input$navbarPage == "app1", {
   # PLOT              #
   #                   #
   #####################
+  #clarify with Andrew- do we want to highlight % of present for party, vs. % of total for bill?
+  #format pop-ups for when user hovers over a heatmap square
+  createHoverText <- function(numbers, descriptions, urls, pcts, pct_d, pct_r, vote_texts, descs, title, date, names, width = 100) {
+    wrapped_descriptions <- sapply(descriptions, function(desc) paste(strwrap(desc, width = width), collapse = "<br>"))
+    paste0(
+      "<b>", names, "</b> voted <i>", vote_texts, "</i> on <b>", descs, "</b> on <b>", date, "</b><br>",
+      "for bill <b>", numbers, "</b> - <b>", title, "</b></a><br>",
+      "<b>", pcts, "</b> of total roll call (including absent & no vote) supported this bill.<br>",
+      "Support amongst those present: <b>Democrat ", pct_d, "</b> / <b>Republican ", pct_r, "</b>.<br><br>",
+      "<b>Bill Description:</b> ", wrapped_descriptions, "<br>"
+    )
+  }
+  
+  
+  
   output$heatmapPlot <- renderPlotly({
     filtered_data <- data_filtered()
     # Determine colors based on party
