@@ -281,11 +281,6 @@ observeEvent(input$navbar_page == "app1", {
     y_labels <- setNames(paste(labels$last_name, " (", labels$district_number, ")", sep = ""), labels$legislator_name)
     y_urls <- unique(data[, c("legislator_name", "ballotpedia")])
     y_labels_with_links <- setNames(paste('<a href="', y_urls$ballotpedia, '">', y_labels[as.character(y_urls$legislator_name)], '</a>', sep=""), y_urls$legislator_name)
-    # y_labels_with_links <- ifelse(
-    #   labels$last_name == "Nixon",
-    #   paste('<a href="', y_urls$ballotpedia[match(labels$legislator_name, y_urls$legislator_name)], '"><strong>', y_labels, '</strong></a>', sep=""),
-    #   paste('<a href="', y_urls$ballotpedia[match(labels$legislator_name, y_urls$legislator_name)], '">', y_labels, '</a>', sep="")
-    # )
     y_labels_with_links <- setNames(y_labels_with_links, labels$legislator_name)
     
     # bill titles tend to be too long for clean rendering on x-axis
@@ -294,13 +289,6 @@ observeEvent(input$navbar_page == "app1", {
     x_urls <- unique(data[, c("roll_call_id", "bill_url")])
     x_labels_with_links <- setNames(paste('<a href="', x_urls$bill_url , '">', x_labels[as.character(labels$roll_call_id)], '</a>', sep=""), labels$roll_call_id)
     #x_labels_tooltips <- setNames(paste('Bill:', labels$bill_number), labels$roll_call_id)
-    
-    # trying to use tickvals was problematic. x axis labels disappeared entirely
-    # tickvals <- labels$roll_call_id
-    # ticktext <- x_labels_with_links[as.character(tickvals)]
-    # print(length(tickvals) == length(ticktext))
-    # print("ticktext values:")
-    # cat(ticktext, sep = "\n")
     
     # set up plot colors
     color_with_party <- if(input$party == "D") "#4575b4" else if(input$party == "R") "#d73027" else "#4575b4"

@@ -126,7 +126,7 @@ app3_ui <- fluidPage(
   # ),
   uiOutput("dynamicHeader3"),
   uiOutput("dynamicFilters3"),
-  uiOutput("dynamicVotingRecord"),
+  uiOutput("dynamicPartisanship"),
   uiOutput("dynamicDemographics")
 )
 
