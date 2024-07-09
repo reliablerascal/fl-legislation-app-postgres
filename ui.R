@@ -203,10 +203,16 @@ ui <- fluidPage(
     }
       .banner {
         background-color: #064875; /* Adjust the background color as needed */
-        padding: 10px 0;
+        padding-top: 10px;
+        padding-bottom: 0;
         text-align: center;
         height: 10vh;
+        margin-bottom: 0;
       }
+      .navbar2 {
+        margin-top: 0;
+        padding-top: 0;
+        }
       img.logo-img {
         height: 80px; /* Adjust the logo size as needed */
       }
@@ -387,10 +393,12 @@ div#filter-info {
   # navigation bar    #
   #                   #
   #####################
-  tabsetPanel(
-    tabPanel("Voting Patterns Analysis", value = "app1", app1_ui),
-    #tabPanel("Legislator Activity Overview", value = "app2", app2_ui),
-    tabPanel("District Context", value = "app3", app3_ui),
-    id = "navbar_page"
+  div(class="navbar2",
+      tabsetPanel(
+      tabPanel("Voting Patterns", value = "app1", app1_ui),
+      #tabPanel("Legislator Activity Overview", value = "app2", app2_ui),
+      tabPanel("District Context", value = "app3", app3_ui),
+      id = "navbar_page"
+      )
   )
 )

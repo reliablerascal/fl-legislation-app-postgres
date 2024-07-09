@@ -115,7 +115,7 @@ observeEvent(input$navbarPage == "app3", {
         geom_bar(stat = "identity", position = "dodge", width=1) +
         scale_fill_manual(values = c("District" = "#17becf", "State" = "#7f7f7f")) +
         scale_y_continuous(labels = percent_format(),, limits = c(0, 1)) +
-        labs(title = paste(demo, "Population"), x = "", y = "") +
+        labs(title = demo, x = "", y = "") +
         theme_minimal() +
         theme(
           legend.position = "none",

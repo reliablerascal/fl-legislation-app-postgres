@@ -76,7 +76,7 @@ observeEvent(input$navbar_page == "app1", {
       '</style>',
       '</head>',
       '<body>',
-      '<h2 style="text-align: center;">(DEV VERSION) Florida House Voting Patterns: ', party_same, '</h2>',
+      '<h2 style="text-align: center;">(DEV) Florida House Voting Patterns: ', party_same, '</h2>',
       '<div align="left">',
       'Recommended viewing on desktop display.<br>',
       'This chart displays each legislator\'s vote on each roll call for bills &amp; amendments where their party voted in favor but not unanimously. ',
