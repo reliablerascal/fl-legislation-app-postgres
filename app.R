@@ -58,7 +58,7 @@ source("ui.R")
 
 #local = TRUE ensures each sourced file has access to input/output/session
 server <- function(input, output, session) {
-  source("server1b_partisanship.R", local = TRUE)
+  source("server1_partisanship.R", local = TRUE)
   # source("server2_leg_activity.R", local = TRUE)
   source("server3_district_context.R", local = TRUE)
 }
