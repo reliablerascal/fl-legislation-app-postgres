@@ -104,23 +104,42 @@ observeEvent(input$navbarPage == "app3", {
       "Democrat"
     }
     
-    rank <- if (data_district$party == "R") {
+    count_legislators_in_party <- function(data, party, chamber) {
+      data %>%
+        filter(party == !!party, chamber == !!chamber) %>%
+        tally()
+    }
+    
+    n_legislators_in_party <- if (same_party == "Republican") {
+      count_legislators_in_party(app03_district_context, "R", input$chamber)$n
+    } else if (same_party == "Democrat") {
+      count_legislators_in_party(app03_district_context, "D", input$chamber)$n
+    }
+    
+    rank_dist <- if (data_district$party == "R") {
       data_district$rank_partisan_dist_R
     } else if (data_district$party == "D") {
       data_district$rank_partisan_dist_D
+    }
+    
+    rank_leg <- if (data_district$party == "R") {
+      data_district$rank_partisan_leg_R
+    } else if (data_district$party == "D") {
+      data_district$rank_partisan_leg_D
     }
     
     tagList(
       HTML(paste0(
     '<h4 style="text-align: left;">Legislative Voting vs. Population Voting</h4>',
     '<div style="text-align: left;">',
-    'This district is ranked #<span style="font-size: 1.5em;">', rank, '</span> most ', same_party,
-    ' of <span style="font-size: 1.5em;">', n_districts, '</span> ', data_district$chamber, ' districts.<br>',
+    'This district is ranked #<span style="font-size: 1.5em;">', rank_dist, '</span> most ', same_party,
+    '-leaning of <span style="font-size: 1.5em;">', n_districts, '</span> ', data_district$chamber, ' districts.<br>',
     'Voting preferences (based on a composite of 2016 Presidential, 2018 Gubernatorial, and 2020 Presidential elections):<br>',
     '<span style="font-size: 1.5em;">', percent(data_district$pct_R), '</span> Republican<br>',
     '<span style="font-size: 1.5em;">', percent(data_district$pct_D), '</span> Democrat<br>',
     '<br>',
-    'In comparison, ', data_district$legislator_name, '\'s voting record is ranked #<span style="font-size: 1.5em;">', data_district$rank_partisan_legislator, '</span> most ', same_party,
+    'In comparison, <span style="font-size: 1.5em;">', data_district$legislator_name, '\'s</span> voting record is ranked #<span style="font-size: 1.5em;">', rank_leg,
+    '</span> most ',same_party , '-leaning amongst <span style="font-size: 1.5em;">', n_legislators_in_party, '</span> ', input$chamber, ' legislators in the ', same_party, ' party.',
     '<hr></div>'
       ))
     )

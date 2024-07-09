@@ -5,7 +5,6 @@
 # original version by Andrew Pantazi at https://shiny.jaxtrib.org/ 
 # my updated version at https://mockingbird.shinyapps.io/fl-leg-app-postgres/
 
-
 library(shiny)
 library(dplyr)
 library(plotly)
