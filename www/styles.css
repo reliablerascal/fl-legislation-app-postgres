@@ -1,0 +1,433 @@
+/* styles.css */
+
+.header-section {
+  font-size: 1.17em;
+  font-weight: bold;
+  text-align: left;
+  margin: 1.33em 0;
+  text-transform: uppercase;
+  background-color: #f0f0f0;
+}
+
+.header-tab {
+  font-size: 2em;
+  font-weight: bold;
+  margin: 0.67em 0;
+  text-transform: uppercase;
+}
+
+.header-tab-small {
+  font-size: 1.5em;
+  font-weight: bold;
+  margin: 0.67em 0;
+  text-transform: uppercase;
+}
+
+.query-input {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  margin-top: 1.5vw;
+  margin-bottom: 0px;
+  padding-bottom: 0px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.legend-box {
+  display: flex;
+  flex-direction: column;
+  align-items: start;
+  margin: 0 auto;
+  max-width: 600px;
+  border: 1px solid black;
+}
+
+.legend-color {
+  width: 20px;
+  height: 20px;
+  display: inline-block;
+  margin-right: 10px;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  margin: 1px 0;
+  margin-left: 5px;
+}
+
+.methodology-notes {
+  font-size: 0.75em;
+  text-align: left;
+  align: left;
+}
+
+.stat-bold {
+  font-size: 1.5em;
+}
+
+.text-warning {
+  color: red;
+  font-weight: bold;
+}
+
+
+
+
+/*#######################################################
+
+OLDER CSS FROM ORIGINAL APP- TO REVIEW AND CLEAN UP
+
+#######################################################*/
+
+/* Body styling */
+body {
+  font-family: 'Archivo', sans-serif;
+  background-color: #fbfdfb;
+  padding-inline: 2%;
+  margin-inline: 2%;
+  margin-block: 1%;
+}
+
+/* Button styling */
+button.btn-filter.active-filter {
+  color: white !important;
+  transform: scale(1.1);
+  box-shadow: 0 6px 10px rgba(0,0,0,0.2);
+  background-color: #ccc;
+}
+
+/* Banner styling */
+.banner {
+  background-color: #064875;
+  padding-top: 10px;
+  padding-bottom: 0;
+  text-align: center;
+  height: 10vh;
+  margin-bottom: 0;
+}
+
+/* Navbar styling */
+.navbar2 {
+  margin-top: 0;
+  padding-top: 0;
+}
+
+/* Logo image styling */
+img.logo-img {
+  height: 80px;
+}
+
+/* Font import */
+@import url('https://fonts.googleapis.com/css2?family=Archivo:ital,wght@0,500;0,600;1,500;1,600&display=swap');
+
+/* Heading styling */
+h1, h2, h3, h4, h5, h6 {
+  font-family: 'Archivo', sans-serif;
+  color: #064875;
+  text-transform: uppercase;
+}
+h2 {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  align-content: center;
+  flex-wrap: wrap;
+}
+
+/* Filter group styling */
+.filter-group {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-evenly;
+  align-items: flex-start;
+  width: 100%;
+  flex-direction: row;
+  align-content: center;
+}
+
+/* Filter section styling */
+.filter-section {
+  margin: 5px;
+  flex-basis: calc(33.333% - 10px);
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  flex-wrap: wrap;
+  align-content: center;
+  justify-content: center;
+  align-items: center;
+}
+
+/* Filter button styling */
+.btn-filter {
+  margin: 5px;
+  padding: 5px 10px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  width: 30%;
+  min-width: 80px;
+  box-sizing: border-box;
+  background-color: #098677;
+  color: white;
+  font-family: 'Archivo', sans-serif;
+}
+
+.btn-filter.selected {
+  filter: saturate(1.5) brightness(1.25) contrast(1.25);
+  transform: scale(1.1);
+}
+
+.content {
+  display: flex;
+  justify-content: space-evenly;
+  width: 100%;
+}
+
+.votes-section {
+  width: 65%;
+}
+
+.legislator-profile {
+  border: 1px solid #ddd;
+  padding: 20px;
+  border-radius: 15px;
+  width: 35%;
+  margin-inline: 4%;
+}
+
+.vote-link {
+  cursor: pointer;
+  text-decoration: underline;
+  color: blue;
+}
+
+.votes {
+  border-color: #8dd4df;
+  padding: 2px;
+  border-style: solid;
+  border-radius: 7px;
+  margin-block: 5px;
+}
+
+.independent-vote {
+  border-color: #ffc41d;
+}
+
+.maverick-vote {
+  border-color: #098677;
+}
+
+.regular-vote {
+  border-color: #064875;
+}
+
+.profile-filter-section {
+  margin-block: 5%;
+  line-height: 1.5;
+}
+
+label#voteType-label {
+  line-height: .95;
+}
+
+.vote-details-button {
+  background-color: #064875;
+  color: #fbfdfb;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 1.5rem;
+  width: auto;
+}
+
+.navigation {
+  background-color: #fbf7ed;
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  align-content: center;
+  justify-content: space-evenly;
+  align-items: center;
+  margin-top: 10px;
+  padding-top: 10px;
+}
+
+label#items_per_page-label {
+  font-size: 1.2rem;
+}
+
+.items {
+  font-size: 1.2rem;
+}
+
+.btn-page:hover, .vote-link:hover, .info-button:hover {
+  transform: scale(1.05);
+  box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+}
+
+.container-fluid {
+  padding: 0px;
+}
+
+div#filterFeedback {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  align-content: center;
+  flex-wrap: wrap;
+  flex-direction: column;
+  padding-inline: 5px;
+}
+
+button#info, button#filterinfo {
+  font-size: 1rem;
+  display: contents;
+}
+
+div.filter-section span {
+  font-family: 'Archivo', sans-serif;
+  color: #064875;
+  text-transform: uppercase;
+  font-size: 1.7rem;
+  font-weight: bold;
+}
+
+div.filter-section label {
+  font-family: 'Archivo', sans-serif;
+  color: #064875;
+  text-transform: uppercase;
+  font-size: 1.7rem;
+  font-weight: bold;
+}
+
+.btn-filter:hover, .btn-page:hover {
+  transform: scale(1.05);
+  box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+}
+
+@media (max-width: 768px) {
+  .content {
+    flex-direction: column-reverse;
+  }
+  .legislator-profile {
+    display: flex;
+    flex-direction: column;
+    flex-wrap: wrap;
+    align-content: center;
+    justify-content: center;
+    width: 100%;
+    margin: 1vw;
+    padding: 0;
+  }
+  .votes-section {
+    display: flex;
+    flex-direction: column;
+    flex-wrap: wrap;
+    align-content: center;
+    justify-content: center;
+    width: 100%;
+    margin: 1vw;
+    padding: 0;
+  }
+}
+
+div#votefilterinfo {
+  padding-inline: 5px;
+}
+
+div#filter-info {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  flex-direction: row;
+  justify-content: center;
+}
+
+.navigation .form-group.shiny-input-container {
+  width: max-content;
+  padding: 1px;
+}
+
+.form-group.shiny-input-container {
+  padding: 1px;
+}
+
+.shiny-input-container:not(.shiny-input-container-inline) {
+  width: 300px;
+  max-width: 80%;
+}
+
+body, .shiny-output-error {
+  max-width: 100%;
+  margin: 0 auto;
+  padding: 0 10px;
+}
+
+@media (min-width: 768px) {
+  body, .shiny-output-error {
+    max-width: 95%;
+  }
+}
+
+ul.nav-tabs {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  padding-left: 0;
+  margin-bottom: 0;
+  list-style: none;
+  background-color: #064875;
+}
+
+.nav-tabs > li {
+  margin: 5px;
+  border: 3px solid #00204D;
+  border-radius: 10px;
+}
+
+.nav-tabs > li > a {
+  display: block;
+  padding: 10px 15px;
+  color: #064875;
+  background-color: #FBFBFB;
+  transition: background-color 0.3s, color 0.3s;
+  border-radius: 8px;
+}
+
+.nav-tabs > li.active > a,
+.nav-tabs > li.active > a:hover,
+.nav-tabs > li.active > a:focus {
+  color: #FBFBFB;
+  background-color: #00204D;
+  border-color: #000;
+}
+
+.nav-tabs > li.active > a {
+  font-weight: 1000;
+  font-size: 130%;
+}
+
+.nav-tabs > li > a:hover {
+  font-weight: 500;
+  font-size: 105%;
+}
+
+.nav-tabs > li > a:hover,
+.nav-tabs > li > a:focus {
+  background-color: #098677;
+  color: #FBFBFB;
+  border-color: #8dd4df;
+}
+
+a,
+a:hover,
+a:focus {
+  color: #8dd4df;
+}
+
+.container-fluid, .navbar {
+  text-align: center;
+}

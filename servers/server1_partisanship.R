@@ -46,74 +46,48 @@ observeEvent(input$navbar_page == "app1", {
     color_same <-if(input$party == "D") "#4575b4" else if(input$party == "R") "#d73027"
       
     HTML(paste0(
-      '<!DOCTYPE html>',
-      '<html lang="en">',
-      '<head>',
-      '<meta charset="UTF-8">',
-      '<meta name="viewport" content="width=device-width, initial-scale=1.0">',
-      '<title>Voting Patterns</title>',
-      '<style>',
-      '.legend {',
-      '  display: flex;',
-      '  flex-direction: column;',
-      '  align-items: start;',
-      '  margin: 0 auto;',
-      '  max-width: 600px;',
-      '  border: 1px solid black;',
-      '}',
-      '.legend-item {',
-      '  display: flex;',
-      '  align-items: center;',
-      '  margin: 1px 0;',
-      '  margin-left: 5px;',
-      '}',
-      '.color-box {',
-      '  width: 20px;',
-      '  height: 20px;',
-      '  display: inline-block;',
-      '  margin-right: 10px;',
-      '}',
-      '</style>',
-      '</head>',
-      '<body>',
-      '<h2 style="text-align: center;">(DEV) Florida House Voting Patterns: ', party_same, '</h2>',
+      '<div class="header-tab">(DEV) Florida House Voting Patterns: ', party_same, '</div>',
       '<div align="left">',
-      'Recommended viewing on desktop display.<br>',
-      'This chart displays each legislator\'s vote on each roll call for bills &amp; amendments where their party voted in favor but not unanimously. ',
+      '<em>Recommended viewing on desktop, not mobile.</em><br>',
+      'This tab displays each legislator\'s vote on each roll call for bills &amp; amendments where their party voted in favor but not unanimously. ',
       'Bills may have multiple roll calls; hover over plot for more info about specific roll calls.<br>',
-      'The intended audience for this app is Florida journalists focused on politics, policy, and elections.<br>',
-      '<div style="font-size: 10px;">',
+      'The intended audience includes Florida journalists focused on politics, policy, and elections.<br>',
+      '<div class="legend-box">',
+      '  <div class="legend-item">',
+      '    <div class="legend-color" style="background-color: ',color_same, ';"></div>',
+      '    Legislator aligned&nbsp;&nbsp;<em>with</em>&nbsp;&nbsp;most ', party_same,'.',
+      '  </div>',
+      '  <div class="legend-item">',
+      '    <div class="legend-color" style="background-color: ',color_oppo, ';"></div>',
+      '    Legislator aligned&nbsp;&nbsp;<em>against</em>&nbsp;&nbsp;most ',party_same,' and&nbsp;&nbsp;<em>with</em>&nbsp;&nbsp;most ',party_oppo,'.',
+      '  </div>',
+      '  <div class="legend-item">',
+      '    <div class="legend-color" style="background-color: #6DA832;"></div>',
+      '    Legislator aligned&nbsp;&nbsp;<em>against</em>&nbsp;&nbsp;both parties in bipartisan decisions.',
+      '  </div>',
+      '  <div class="legend-item">',
+      '    <div class="legend-color" style="background-color: #FFFFFF; border: 1px solid black;"></div>',
+      '    Legislator did not vote (missed vote or not assigned to that committee).',
+      '  </div>',
+      '</div>'
+    ))
+  })
+  
+  output$staticFooter <- renderUI({
+    HTML(paste0(
+      '<div class="header-section">Methodology</div>',
+      '<div class="methodology-notes">',
       'Partisanship for each legislator is calculated across all sessions in 2023 and 2024, as a weighted average of with party/against oppo (0) and against party/with oppo (1), excluding votes with both parties or against both parties.<br>',
       '<strong>Data source:</strong> <a href="https://legiscan.com/FL/datasets">LegiScan\'s Florida Legislative Datasets for all 2023 and 2024 Regular Session</a>.<br>',
-      'For details on wishlist items, work in progress, and tabled updates, see <a href="https://docs.google.com/document/d/1OGiJH7B_0j3B38gEtgt_FDhkxzL84ZtGistdup2yYHI/edit"><strong>development notes</strong></a>.',
-      '</div>',
-      '<div class="legend">',
-      '  <div class="legend-item">',
-      '    <div class="color-box" style="background-color: ',color_same, ';"></div>',
-      '    <span style="font-size: 14px;">Legislator aligned <i>with</i> most ', party_same,'.</span>',
-      '  </div>',
-      '  <div class="legend-item">',
-      '    <div class="color-box" style="background-color: ',color_oppo, ';"></div>',
-      '    <span style="font-size: 14px;">Legislator aligned <i>against</i> most ',party_same,' and <i>with</i> most ',party_oppo,'.</span>',
-      '  </div>',
-      '  <div class="legend-item">',
-      '    <div class="color-box" style="background-color: #6DA832;"></div>',
-      '    <span style="font-size: 14px;">Legislator aligned <i>against</i> both parties in bipartisan decisions.</span>',
-      '  </div>',
-      '  <div class="legend-item">',
-      '    <div class="color-box" style="background-color: #FFFFFF; border: 1px solid black;"></div>',
-      '    <span style="font-size: 14px;">Legislator did not vote (missed vote or not assigned to that committee).</span>',
-      '  </div>',
-      '</div>',
-      '</body>',
-      '</html>'
+      'For details on wishlist items and work in progress, see <a href="https://docs.google.com/document/d/1OGiJH7B_0j3B38gEtgt_FDhkxzL84ZtGistdup2yYHI/edit"><strong>development notes</strong></a>.',
+      '</div>'
     ))
   })
   
   output$dynamicRecordCount <- renderUI({
     HTML(paste0(
-      '<p style="font-size: 14px;">Displaying <strong style="font-size: 18px;">', n_legislators(), 
-      '</strong> legislators across <strong style="font-size: 18px;">', n_roll_calls(), '</strong> roll call votes.</p>'
+      '<p>Displaying <span class="bold-stat">', n_legislators(), "</span> ", 
+      'legislators across <span class="bold-stat">', n_roll_calls(), '</span> roll call votes.</p>'
     ))
   })
   
@@ -130,9 +104,7 @@ observeEvent(input$navbar_page == "app1", {
   }
   
   output$dynamicFilters <- renderUI({
-    div(class = "filter-row",
-        style = "display:flex; flex-wrap: wrap; justify-content: center; margin-top:1.5vw; margin-bottom: 0px; padding-bottom:0px; margin-left:auto; margin-right:auto;",
-        
+    div(class = "filter-row query-input",
         createFilterBox("party", "Select Party:", c("D", "R")),
         createFilterBox("chamber", "Select Chamber:", c("House", "Senate")),
         createFilterBox("year", "Select Session Year:", c(2023, 2024, "All"), selected = 2024),
@@ -187,7 +159,7 @@ observeEvent(input$navbar_page == "app1", {
   
   output$noDataMessage <- renderUI({
     filtered_data <- data_filtered()
-    if (filtered_data$is_empty) div("No bills match selected filters.", style = "color: red; font-weight: bold;")
+    if (filtered_data$is_empty) div("No bills match selected filters.", class = "text-warning")
   })
   
   #####################

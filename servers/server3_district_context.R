@@ -1,4 +1,4 @@
-# SERVER_DISTRICT_CONTEXT.R
+# SERVER3_DISTRICT_CONTEXT.R
 # This app shows demographic and electoral political leaning characteristics of each district compared to legislators' voting records
 
 ########################################
@@ -19,11 +19,12 @@ observeEvent(input$navbarPage == "app3", {
     data_district <- qry_demo_district()
     
     HTML(paste0(
-      '<h2 style="text-align: center;">Representation Alignment for ',
-      '<br>', data_district$legislator_name, ' (', data_district$party, ')',
-      '<br>', input$chamber, ' district ', input$district, '</h2>',
+      '<div class = "header-tab-small">Representation Alignment for </div>',
+      '<h2>', data_district$legislator_name, ' (', data_district$party, ')</h2>',
+      '<h3>', input$chamber, ' district ', input$district, '</h3>',
       '<div align="left">',
-      'This page displays each legislator\'s partisan leanings compared to their district\'s voting record and demographics.'
+      'This tab displays each legislator\'s partisan leanings compared to their district\'s voting record and demographics.',
+      'The intended audience includes prospective voters in <a href="https://ballotpedia.org/Florida_elections,_2024#Offices_on_the_ballot">Florida\'s primary election on August 20</a>.<br>'
     ))
   })
   
@@ -40,11 +41,9 @@ observeEvent(input$navbarPage == "app3", {
   }
   
   output$dynamicFilters3 <- renderUI({
-    div(class = "filter-row",
-        style = "display:flex; flex-wrap: wrap; justify-content: center; margin-top:1.5vw; margin-bottom: 0px; padding-bottom:0px; margin-left:auto; margin-right:auto;",
-        
+    div(class = "filter-row query-input",
         createFilterBox("chamber", "Select Chamber:", c("House", "Senate"), selected = "House"),
-        createFilterBox("district", "Select District:", 1:120, selected = 1),
+        createFilterBox("district", "Select District:", 1:120, selected = 1)
         #createFilterBox("legislator", "Select Legislator:", c("Adam Anderson", "Adam Botana"), selected = 1),
     )
   })
@@ -130,16 +129,15 @@ observeEvent(input$navbarPage == "app3", {
     
     tagList(
       HTML(paste0(
-    '<h4 style="text-align: left;">Legislative Voting vs. Population Voting</h4>',
-    '<div style="text-align: left;">',
-    'This district is ranked #<span style="font-size: 1.5em;">', rank_dist, '</span> most ', same_party,
-    '-leaning of <span style="font-size: 1.5em;">', n_districts, '</span> ', data_district$chamber, ' districts.<br>',
-    'Voting preferences (based on a composite of 2016 Presidential, 2018 Gubernatorial, and 2020 Presidential elections):<br>',
-    '<span style="font-size: 1.5em;">', percent(data_district$pct_R), '</span> Republican<br>',
-    '<span style="font-size: 1.5em;">', percent(data_district$pct_D), '</span> Democrat<br>',
+    '<div class="header-section">Legislative Voting vs. Population Voting</div>',
+    '<div align="left">',
+    '<span class="stat-bold">', data_district$legislator_name, '\'s</span> voting record is ranked #<span class="stat-bold">', rank_leg,
+    '</span> most ',same_party , '-leaning amongst <span class="stat-bold">', n_legislators_in_party, '</span> ', input$chamber, ' legislators in the ', same_party, ' party.',
     '<br>',
-    'In comparison, <span style="font-size: 1.5em;">', data_district$legislator_name, '\'s</span> voting record is ranked #<span style="font-size: 1.5em;">', rank_leg,
-    '</span> most ',same_party , '-leaning amongst <span style="font-size: 1.5em;">', n_legislators_in_party, '</span> ', input$chamber, ' legislators in the ', same_party, ' party.',
+    'In comparison, this district is ranked #<span class="stat-bold">', rank_dist, '</span> most ', same_party,
+    '-leaning of <span class="stat-bold">', n_districts, '</span> ', data_district$chamber, ' districts:<br>',
+    '<span class="stat-bold">', percent(data_district$pct_R), '</span> Republican<br>',
+    '<span class="stat-bold">', percent(data_district$pct_D), '</span> Democrat<br>',
     '<hr></div>'
       ))
     )
@@ -155,7 +153,7 @@ observeEvent(input$navbarPage == "app3", {
   output$dynamicDemographics <- renderUI({
     tagList(
       HTML(paste0(
-        '<h4 style="text-align: left;">District Demographics</h4>'
+        '<div class = "header-section">District Demographics</div>'
       )),
       plotOutput("demographicsPlot")
     )
@@ -168,15 +166,15 @@ observeEvent(input$navbarPage == "app3", {
     
     # need to have 5x2 for each of category, percent, and demographic
     data <- data.frame(
-      Category = factor(rep(c("District", "State"), 5), levels = c("State", "District")),  # Reverse factor levels
+      Category = factor(rep(c("District", "State"), 4), levels = c("State", "District")),  # Reverse factor levels
       Percent = c(
         demo_district$pct_white, demo_state$pct_white,
         demo_district$pct_black, demo_state$pct_black,
         demo_district$pct_asian, demo_state$pct_asian,
-        demo_district$pct_hispanic, demo_state$pct_hispanic,
-        demo_district$pct_pacific, demo_state$pct_pacific
+        demo_district$pct_hispanic, demo_state$pct_hispanic
+        # demo_district$pct_napi, demo_state$pct_napi
       ),
-      Demographic = rep(c("White", "Black", "Asian", "Hispanic", "Pacific"), each = 2)
+      Demographic = rep(c("White", "Black", "Asian", "Hispanic"), each = 2)
     )
     
     create_plot <- function(demo) {
@@ -199,13 +197,33 @@ observeEvent(input$navbarPage == "app3", {
     plot_black <- create_plot("Black")
     plot_asian <- create_plot("Asian")
     plot_hispanic <- create_plot("Hispanic")
-    plot_pacific <- create_plot("Pacific")
+    # plot_napi <- create_plot("Pacific")
     
     # Combine plots using patchwork
-    plot_white / plot_black/ plot_asian/ plot_hispanic / plot_pacific
+    plot_white / plot_black/ plot_asian/ plot_hispanic
   })
   
-  
+  ########################################
+  #                                      #  
+  # Footer- methodology                  #
+  #                                      #
+  ########################################   
+  output$staticFooter3 <- renderUI({
+    HTML(paste0(
+      '<hr>',
+      '<div class="header-section">Methodology</div>',
+      '<div class="methodology-notes">',
+      'Legislator partisanship is calculated across all legislative sessions in 2023 and 2024, as a weighted average of votes with party/against oppo (0) and against party/with oppo (1), excluding votes with both parties or against both parties.<br>',
+      'District partisanship is calculated based on voting in the 2016 Presidential, 2018 Gubernatorial, and 2020 Presidential elections.<br>',
+      '<strong>Data sources:</strong>',
+      '<ul>',
+      '<li>Legislator voting info from <a href="https://legiscan.com/FL/datasets">LegiScan\'s Florida Legislative Datasets for all 2023 and 2024 Regular Session</a>.<br>',
+      '<li>District demographics and election results curated by <a href="https://davesredistricting.org/maps#state::FL">Dave\'s Redistricting</a>.',
+      '</ul>',
+      'For details on wishlist items and work in progress, see <a href="https://docs.google.com/document/d/1e3KDrnpXjKL4OJqFR49hqti77TntPRL7k4AkqSfsefU/edit"><strong>development notes</strong></a>.',
+      '<br></div>'
+    ))
+  })
 
   
 # END OBSERVER EVENT  
