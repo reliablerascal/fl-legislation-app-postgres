@@ -23,8 +23,8 @@ The app consists of the following visualizations:
 The app consists of the following R components:
 
 - [app.R](app.R): Orchestrates the Shiny app by setting up the user interface, server logic, and handling reactive expressions for the Shiny web app.
-- [server1_partisanship.R](server1_partisanship.R): Application logic for voting patterns app.
-- [server3_district_context.R](server3_district_context.R): Application logic for district context app.
+- [server1_partisanship.R](servers/server1_partisanship.Rserver1_partisanship.R): Application logic for voting patterns app.
+- [server3_district_context.R](servers/server1_partisanship.Rserver3_district_context.R): Application logic for district context app.
 - [ui.R](ui.R): Defines the Shiny app user interface.
 
 See [data pipeline repo](https://github.com/reliablerascal/fl-legislation-etl) for a detailed overview of data used in these apps.
