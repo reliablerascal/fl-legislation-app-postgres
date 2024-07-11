@@ -86,8 +86,8 @@ observeEvent(input$navbar_page == "app1", {
   
   output$dynamicRecordCount <- renderUI({
     HTML(paste0(
-      '<p>Displaying <span class="bold-stat">', n_legislators(), "</span> ", 
-      'legislators across <span class="bold-stat">', n_roll_calls(), '</span> roll call votes.</p>'
+      '<p>Displaying <span class="stat-bold">', n_legislators(), "</span> ", 
+      'legislators across <span class="stat-bold">', n_roll_calls(), '</span> roll call votes.</p>'
     ))
   })
   
