@@ -230,7 +230,7 @@ observeEvent(input$navbar_page == "app1", {
         arrange(desc(last_name))  # Arrange the data by last_name in descending order
       data$legislator_name <- factor(data$legislator_name, levels = unique(data$legislator_name))  # Set factor levels
     } else if (input$sort_by_leg == "Partisanship") {
-      data$legislator_name <- reorder(data$legislator_name, -data$mean_partisanship)
+      data$legislator_name <- reorder(data$legislator_name, -data$leg_mean_partisanship)
     } else if (input$sort_by_leg == "District") {
       data$legislator_name <- reorder(data$legislator_name, -data$district_number)
     }

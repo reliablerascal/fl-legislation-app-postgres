@@ -14,8 +14,8 @@
 #                       #
 ######################### 
 ### Run this in the console after re-opening this project, then comment it out
-# source("read_data.R") # prior to running the app offline
-# source("save_data.R") # prior to uploading the app to Shiny (saves as RDS = relational data service)
+source("read_data.R") # prior to running the app offline
+source("save_data.R") # prior to uploading the app to Shiny (saves as RDS = relational data service)
 
 #########################
 #                       #  
