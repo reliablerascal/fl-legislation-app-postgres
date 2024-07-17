@@ -54,18 +54,3 @@ attempt_connection <- function() {
   
   print("Data read to memory, disconnecting from database.")
   dbDisconnect(con)
-  
-########################################
-#                                      #  
-# late data prep (should move to ETL)  #
-#                                      #
-########################################
-  
-  #code as factor if I use scale_fill_manual in ggplot. this slowed down plotting substantially
-  #app_vote_patterns$partisan_vote_type <- factor(app_vote_patterns$partisan_vote_type, levels = c(0, 1, 99, NA))
-  
-  #pre-handle n/a vote to see if that speeds up plotting (it didn't)
-  #app_vote_patterns$partisan_vote_type <- ifelse(is.na(app_vote_patterns$partisan_vote_type),999,app_vote_patterns$partisan_vote_type)
-  
-  #re-assign 99 to facilitate faster gradient-based plot
-  app01_vote_patterns$partisan_vote_plot <- ifelse(app01_vote_patterns$partisan_vote_type == 99,2,app01_vote_patterns$partisan_vote_type)

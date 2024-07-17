@@ -3,7 +3,7 @@
 
 This work-in-progress repo develops the Jacksonville Tributary's interactive legislative dashboard based on my [revised data pipeline](https://github.com/reliablerascal/fl-legislation-etl).
 
-Here's the **[development version](https://mockingbird.shinyapps.io/fl-leg-app-postgres/)** of the web app, as described in this repo (the prior version is still live at [production version](https://shiny.jaxtrib.org)).
+Here's the **[development version](https://mockingbird.shinyapps.io/fl-leg-app-postgres/)** of the web app, as described in this repo.
 
 The app consists of the following visualizations:
 |Tab|Intended Audience|Description

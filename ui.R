@@ -25,8 +25,9 @@ library(shiny)
 app1_ui <- fluidPage(
   tags$head(tags$link(rel = "stylesheet", type = "text/css", href = "styles.css")),
   uiOutput("dynamicHeader"),
-  uiOutput("staticFooter"),
+  uiOutput("staticMethodology3"),
   uiOutput("dynamicFilters"),
+  uiOutput("dynamicLegend"),
   uiOutput("dynamicRecordCount"),
   uiOutput("noDataMessage"),
   plotlyOutput("heatmapPlot"#, height = "150vh")

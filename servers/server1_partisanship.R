@@ -38,28 +38,41 @@ observeEvent(input$navbar_page == "app1", {
   #                                      #
   ########################################   
   output$dynamicHeader <- renderUI({
+    # req(input$year, input$party)
+    # year <- input$year
+    # party_same <- if(input$party == "D") "Democrats" else if(input$party == "R") "Republicans" else "All Parties"
+    # party_oppo <- if(input$party == "D") "Republicans" else if(input$party == "R") "Democrats" else "All Parties"
+    #   
+    HTML(paste0(
+      '<div class="header-tab">(DEV) Voting Patterns in Florida State Legislature</div>',
+      '<div align="left">',
+      '<em>Recommended viewing on desktop, not mobile.</em><br>',
+      'This tab displays each legislator\'s vote on each roll call for bills &amp; amendments where their party voted in favor but not unanimously. ',
+      'Bills may have multiple roll calls; hover over plot for more info about specific roll calls.<br>',
+      'The intended audience includes Florida journalists focused on politics, policy, and elections.<br>',
+      '</div>'
+    ))
+  })
+  
+  output$dynamicLegend <- renderUI({
     req(input$year, input$party)
     year <- input$year
     party_same <- if(input$party == "D") "Democrats" else if(input$party == "R") "Republicans" else "All Parties"
     party_oppo <- if(input$party == "D") "Republicans" else if(input$party == "R") "Democrats" else "All Parties"
     color_oppo <-if(input$party == "D") "#d73027" else if(input$party == "R") "#4575b4"
     color_same <-if(input$party == "D") "#4575b4" else if(input$party == "R") "#d73027"
-      
+    
     HTML(paste0(
-      '<div class="header-tab">(DEV) Florida House Voting Patterns: ', party_same, '</div>',
-      '<div align="left">',
-      '<em>Recommended viewing on desktop, not mobile.</em><br>',
-      'This tab displays each legislator\'s vote on each roll call for bills &amp; amendments where their party voted in favor but not unanimously. ',
-      'Bills may have multiple roll calls; hover over plot for more info about specific roll calls.<br>',
-      'The intended audience includes Florida journalists focused on politics, policy, and elections.<br>',
+      '<hr><div align="left">',
+      '<div class="header-section">', input$chamber, ' ', party_same, '</div>',
       '<div class="legend-box">',
       '  <div class="legend-item">',
-      '    <div class="legend-color" style="background-color: ',color_same, ';"></div>',
-      '    Legislator aligned&nbsp;&nbsp;<em>with</em>&nbsp;&nbsp;most ', party_same,'.',
+      '    <div class="legend-color" style="background-color: ', color_same, ';"></div>',
+      '    Legislator aligned&nbsp;&nbsp;<em>with</em>&nbsp;&nbsp;most ', party_same, '.',
       '  </div>',
       '  <div class="legend-item">',
-      '    <div class="legend-color" style="background-color: ',color_oppo, ';"></div>',
-      '    Legislator aligned&nbsp;&nbsp;<em>against</em>&nbsp;&nbsp;most ',party_same,' and&nbsp;&nbsp;<em>with</em>&nbsp;&nbsp;most ',party_oppo,'.',
+      '    <div class="legend-color" style="background-color: ', color_oppo, ';"></div>',
+      '    Legislator aligned&nbsp;&nbsp;<em>against</em>&nbsp;&nbsp;most ', party_same, ' and&nbsp;&nbsp;<em>with</em>&nbsp;&nbsp;most ', party_oppo, '.',
       '  </div>',
       '  <div class="legend-item">',
       '    <div class="legend-color" style="background-color: #6DA832;"></div>',
@@ -69,6 +82,7 @@ observeEvent(input$navbar_page == "app1", {
       '    <div class="legend-color" style="background-color: #FFFFFF; border: 1px solid black;"></div>',
       '    Legislator did not vote (missed vote or not assigned to that committee).',
       '  </div>',
+      '</div>',
       '</div>'
     ))
   })
@@ -174,8 +188,8 @@ observeEvent(input$navbar_page == "app1", {
     paste0(
       "<b>", names, "</b> voted <i>", vote_texts, "</i> on <b>", descs, "</b> on <b>", date, "</b><br>",
       "for bill <b>", numbers, "</b> - <b>", title, "</b></a><br>",
-      "<b>", pcts, "</b> of total roll call (including absent & no vote) supported this bill.<br>",
-      "Support amongst those present: <b>Democrat ", pct_d, "</b> / <b>Republican ", pct_r, "</b>.<br><br>",
+      "<b>", pcts, "</b> of roll call present supported this bill (",
+      "<b>Democrat ", pct_d, "</b> / <b>Republican ", pct_r, ")<br><br>",
       "<b>Bill Description:</b> ", wrapped_descriptions, "<br>"
     )
   }
@@ -203,7 +217,7 @@ observeEvent(input$navbar_page == "app1", {
       date = data$roll_call_date,
       descriptions = data$bill_desc,
       urls = data$bill_url,
-      pcts = percent(data$pct_of_total),
+      pcts = percent(data$pct_of_present, accuracy = 1),
       pct_d = percent(data$D_pct_of_present, accuracy = 1),
       pct_r = percent(data$R_pct_of_present, accuracy = 1),
       vote_texts = data$vote_text,
@@ -230,7 +244,7 @@ observeEvent(input$navbar_page == "app1", {
         arrange(desc(last_name))  # Arrange the data by last_name in descending order
       data$legislator_name <- factor(data$legislator_name, levels = unique(data$legislator_name))  # Set factor levels
     } else if (input$sort_by_leg == "Partisanship") {
-      data$legislator_name <- reorder(data$legislator_name, -data$leg_mean_partisanship)
+      data$legislator_name <- reorder(data$legislator_name, data$leg_party_loyalty)
     } else if (input$sort_by_leg == "District") {
       data$legislator_name <- reorder(data$legislator_name, -data$district_number)
     }
@@ -240,7 +254,7 @@ observeEvent(input$navbar_page == "app1", {
     if (input$sort_by_rc == "Bill Number") {
       data <- data[order(data$bill_number), ]
     } else if (input$sort_by_rc == "Partisanship") {
-      data <- data[order(data$rc_mean_partisanship), ]
+      data <- data[order(-data$rc_mean_partisanship), ]
     }
     data$roll_call_id <- factor(data$roll_call_id, levels = unique(data$roll_call_id))
     

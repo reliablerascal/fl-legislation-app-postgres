@@ -129,16 +129,30 @@ observeEvent(input$navbarPage == "app3", {
     
     tagList(
       HTML(paste0(
-    '<div class="header-section">Legislative Voting vs. Population Voting</div>',
-    '<div align="left">',
-    '<span class="stat-bold">', data_district$legislator_name, '\'s</span> voting record is ranked #<span class="stat-bold">', rank_leg,
-    '</span> most ',same_party , '-leaning amongst <span class="stat-bold">', n_legislators_in_party, '</span> ', input$chamber, ' legislators in the ', same_party, ' party.',
-    '<br>',
-    'In comparison, this district is ranked #<span class="stat-bold">', rank_dist, '</span> most ', same_party,
-    '-leaning of <span class="stat-bold">', n_districts, '</span> ', data_district$chamber, ' districts:<br>',
-    '<span class="stat-bold">', percent(data_district$pct_R), '</span> Republican<br>',
-    '<span class="stat-bold">', percent(data_district$pct_D), '</span> Democrat<br>',
-    '<hr></div>'
+        '<table style="width:100%; border-collapse: collapse;">',
+        '<tr>',
+        '<th style="width:50%; text-align:left; border-right: 1px solid black; padding-right: 10px;"><span class="header-section">Legislative Voting</span></th>',
+        '<th style="width:50%; text-align:left; padding-left: 10px;"><span class="header-section">Population Voting</span></th>',
+        '</tr>',
+        '<tr>',
+        '<td style="vertical-align:top; width:50%; border-right: 1px solid black; padding-right: 10px;" align=left>',
+        '<span class="stat-bold">', data_district$legislator_name, '\'s</span> voting record is ranked #<span class="stat-bold">', rank_leg,
+        '</span> most ',same_party , '-leaning amongst <span class="stat-bold">', n_legislators_in_party, '</span> ', input$chamber, ' legislators in the ', same_party, ' party.<br>',
+        '<br>Of their ', data_district$leg_n_votes_denominator, ' yea or nay votes:<br>',
+        'Party Line Votes: <span class="stat-bold">', data_district$leg_n_votes_party_line, ' (', percent(data_district$leg_n_votes_party_line/data_district$leg_n_votes_denominator,accuracy = 0.1), ')</span><br>',
+        'Cross Party Votes: <span class="stat-bold">', data_district$leg_n_votes_cross_party, ' (', percent(data_district$leg_n_votes_cross_party/data_district$leg_n_votes_denominator, accuracy = 0.1), ')</span><br>',
+        'Independent Votes: <span class="stat-bold">', data_district$leg_n_votes_independent, ' (', percent(data_district$leg_n_votes_independent/data_district$leg_n_votes_denominator, accuracy = 0.1), ')</span><br>',
+        '</td>',
+        '<td style="vertical-align:top; width:50%; padding-left: 10px;"  align=left>',
+        'In comparison, this district is ranked #<span class="stat-bold">', rank_dist, '</span> most ', same_party,
+        '-leaning of <span class="stat-bold">', n_districts, '</span> ', data_district$chamber, ' districts:<br>',
+        '<span class="stat-bold">', data_district$party_lean, ' + ', data_district$party_lean_points_abs, '</span><br>',
+        '<span class="stat-bold">', percent(data_district$pct_R), '</span> Republican<br>',
+        '<span class="stat-bold">', percent(data_district$pct_D), '</span> Democrat<br>',
+        '</td>',
+        '</tr>',
+        '</table>',
+        '<hr>'
       ))
     )
   })
@@ -208,7 +222,7 @@ observeEvent(input$navbarPage == "app3", {
   # Footer- methodology                  #
   #                                      #
   ########################################   
-  output$staticFooter3 <- renderUI({
+  output$staticMethodology3 <- renderUI({
     HTML(paste0(
       '<hr>',
       '<div class="header-section">Methodology</div>',
