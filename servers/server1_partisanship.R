@@ -87,13 +87,13 @@ observeEvent(input$navbar_page == "app1", {
     ))
   })
   
-  output$staticFooter <- renderUI({
+  output$staticMethodology1 <- renderUI({
     HTML(paste0(
       '<div class="header-section">Methodology</div>',
       '<div class="methodology-notes">',
-      'Partisanship for each legislator is calculated across all sessions in 2023 and 2024, as a weighted average of with party/against oppo (0) and against party/with oppo (1), excluding votes with both parties or against both parties.<br>',
+      'Party loyalty for each legislator is calculated across all sessions in 2023 and 2024, as a weighted average of with party/against oppo (1) and against party/with oppo (0), excluding votes with both parties or against both parties.<br>',
       '<strong>Data source:</strong> <a href="https://legiscan.com/FL/datasets">LegiScan\'s Florida Legislative Datasets for all 2023 and 2024 Regular Session</a>.<br>',
-      'For details on wishlist items and work in progress, see <a href="https://docs.google.com/document/d/1OGiJH7B_0j3B38gEtgt_FDhkxzL84ZtGistdup2yYHI/edit"><strong>development notes</strong></a>.',
+      'For details on wishlist items and work in progress, see <a href="https://docs.google.com/document/d/1OGiJH7B_0j3B38gEtgt_FDhkxzL84ZtGistdup2yYHI/edit" target="_blank"><strong>development notes</strong></a>.',
       '</div>'
     ))
   })
@@ -124,8 +124,8 @@ observeEvent(input$navbar_page == "app1", {
         createFilterBox("year", "Select Session Year:", c(2023, 2024, "All"), selected = 2024),
         createFilterBox("final", "Final (Third Reading) Vote?", c("Y", "N", "All"), selected = "Y"),
         createFilterBox("bill_category", "Bill Category (demo)", c("education", "All"), selected = "All"),
-        createFilterBox("sort_by_leg", "Sort Legislators By:", c("Name", "Partisanship", "District"), selected = "Partisanship"),
-        createFilterBox("sort_by_rc", "Sort Roll Calls By:", c("Bill Number", "Partisanship"), selected = "Partisanship")
+        createFilterBox("sort_by_leg", "Sort Legislators By:", c("Name", "Party Loyalty", "District"), selected = "Party Loyalty"),
+        createFilterBox("sort_by_rc", "Sort Roll Calls By:", c("Bill Number", "Party Unity"), selected = "Party Unity")
     )
   })
   
@@ -189,7 +189,7 @@ observeEvent(input$navbar_page == "app1", {
       "<b>", names, "</b> voted <i>", vote_texts, "</i> on <b>", descs, "</b> on <b>", date, "</b><br>",
       "for bill <b>", numbers, "</b> - <b>", title, "</b></a><br>",
       "<b>", pcts, "</b> of roll call present supported this bill (",
-      "<b>Democrat ", pct_d, "</b> / <b>Republican ", pct_r, ")<br><br>",
+      "<b>Democrat ", pct_d, "</b> / <b>Republican ", pct_r, ")</b><br><br>",
       "<b>Bill Description:</b> ", wrapped_descriptions, "<br>"
     )
   }
@@ -225,7 +225,8 @@ observeEvent(input$navbar_page == "app1", {
       SIMPLIFY = FALSE  # Keep it as a list
     )
     data$hover_text <- sapply(data$hover_text, paste, collapse = " ") # Collapse the list into a single string
-    
+    data <- data %>%
+      mutate(rank_partisan_leg = coalesce(rank_partisan_leg_D, rank_partisan_leg_R))
     
     # Dynamic plot size calculation
     numLegislators <- n_legislators()
@@ -243,8 +244,8 @@ observeEvent(input$navbar_page == "app1", {
       data <- data %>%
         arrange(desc(last_name))  # Arrange the data by last_name in descending order
       data$legislator_name <- factor(data$legislator_name, levels = unique(data$legislator_name))  # Set factor levels
-    } else if (input$sort_by_leg == "Partisanship") {
-      data$legislator_name <- reorder(data$legislator_name, data$leg_party_loyalty)
+    } else if (input$sort_by_leg == "Party Loyalty") {
+      data$legislator_name <- reorder(data$legislator_name, -data$rank_partisan_leg)
     } else if (input$sort_by_leg == "District") {
       data$legislator_name <- reorder(data$legislator_name, -data$district_number)
     }
@@ -253,7 +254,7 @@ observeEvent(input$navbar_page == "app1", {
     data$bill_number <- as.character(data$bill_number)
     if (input$sort_by_rc == "Bill Number") {
       data <- data[order(data$bill_number), ]
-    } else if (input$sort_by_rc == "Partisanship") {
+    } else if (input$sort_by_rc == "Party Unity") {
       data <- data[order(-data$rc_mean_partisanship), ]
     }
     data$roll_call_id <- factor(data$roll_call_id, levels = unique(data$roll_call_id))

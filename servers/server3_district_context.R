@@ -138,10 +138,13 @@ observeEvent(input$navbarPage == "app3", {
         '<td style="vertical-align:top; width:50%; border-right: 1px solid black; padding-right: 10px;" align=left>',
         '<span class="stat-bold">', data_district$legislator_name, '\'s</span> voting record is ranked #<span class="stat-bold">', rank_leg,
         '</span> most ',same_party , '-leaning amongst <span class="stat-bold">', n_legislators_in_party, '</span> ', input$chamber, ' legislators in the ', same_party, ' party.<br>',
-        '<br>Of their ', data_district$leg_n_votes_denominator, ' yea or nay votes:<br>',
-        'Party Line Votes: <span class="stat-bold">', data_district$leg_n_votes_party_line, ' (', percent(data_district$leg_n_votes_party_line/data_district$leg_n_votes_denominator,accuracy = 0.1), ')</span><br>',
-        'Cross Party Votes: <span class="stat-bold">', data_district$leg_n_votes_cross_party, ' (', percent(data_district$leg_n_votes_cross_party/data_district$leg_n_votes_denominator, accuracy = 0.1), ')</span><br>',
-        'Independent Votes: <span class="stat-bold">', data_district$leg_n_votes_independent, ' (', percent(data_district$leg_n_votes_independent/data_district$leg_n_votes_denominator, accuracy = 0.1), ')</span><br>',
+        '<br>Of their ', data_district$leg_n_votes_denom_loyalty, ' votes included in calculating party loyalty:<br>',
+        'Party Line Votes: <span class="stat-bold">', data_district$leg_n_votes_party_line, ' (', percent(data_district$leg_n_votes_party_line/data_district$leg_n_votes_denom_loyalty,accuracy = 0.1), ')</span><br>',
+        'Cross Party Votes: <span class="stat-bold">', data_district$leg_n_votes_cross_party, ' (', percent(data_district$leg_n_votes_cross_party/data_district$leg_n_votes_denom_loyalty, accuracy = 0.1), ')</span><br>',
+        '<br>Not included in the loyalty calculation:<br>',
+        'Independent Votes: <span class="stat-bold">', data_district$leg_n_votes_independent, '</span><br>',
+        '*Other Votes: <span class="stat-bold">', data_district$leg_n_votes_other, '</span><br>',
+        '<a href = "', data_district$ballotpedia ,'" target="_blank">', data_district$legislator_name, ' on Ballotpedia</a>',
         '</td>',
         '<td style="vertical-align:top; width:50%; padding-left: 10px;"  align=left>',
         'In comparison, this district is ranked #<span class="stat-bold">', rank_dist, '</span> most ', same_party,
@@ -194,14 +197,22 @@ observeEvent(input$navbarPage == "app3", {
     create_plot <- function(demo) {
       ggplot(subset(data, Demographic == demo), aes(x = Category, y = Percent, fill = Category)) +
         geom_bar(stat = "identity", position = "dodge", width=1) +
+        geom_text(aes(label = scales::percent(Percent,accuracy=0.1)), 
+                  position = position_dodge(width = 1), 
+                  vjust = 0.5,
+                  hjust = -0.1,
+                  size = 7) +
         scale_fill_manual(values = c("District" = "#17becf", "State" = "#7f7f7f")) +
         scale_y_continuous(labels = percent_format(),, limits = c(0, 1)) +
         labs(title = demo, x = "", y = "") +
         theme_minimal() +
         theme(
           legend.position = "none",
-          panel.grid.major = element_blank(),  # Remove major grid lines
-          panel.grid.minor = element_blank()   # Remove minor grid lines
+          panel.grid.major = element_blank(),
+          panel.grid.minor = element_blank(),
+          axis.text.x = element_blank(),
+          axis.ticks.x = element_blank(),
+          axis.text.y = element_text(size = 12, hjust = 1, margin = margin(r = -5))
         ) +
         coord_flip()
     }
@@ -219,6 +230,23 @@ observeEvent(input$navbarPage == "app3", {
   
   ########################################
   #                                      #  
+  # Footer- profile                      #
+  #                                      #
+  ########################################   
+  # output$dynamicLegProfile <- renderUI({
+  #   data_district <- qry_demo_district()
+  #   
+  #   HTML(paste0(
+  #     '<hr>',
+  #     '<div class="header-section">Legislator Profile</div>',
+  #     '<div align="left">',
+  #     '<a href = "', data_district$ballotpedia ,'" target="_blank">Ballotpedia Profile</a>',
+  #     '</div>'
+  #   ))
+  # })
+  
+  ########################################
+  #                                      #  
   # Footer- methodology                  #
   #                                      #
   ########################################   
@@ -227,18 +255,18 @@ observeEvent(input$navbarPage == "app3", {
       '<hr>',
       '<div class="header-section">Methodology</div>',
       '<div class="methodology-notes">',
-      'Legislator partisanship is calculated across all legislative sessions in 2023 and 2024, as a weighted average of votes with party/against oppo (0) and against party/with oppo (1), excluding votes with both parties or against both parties.<br>',
-      'District partisanship is calculated based on voting in the 2016 Presidential, 2018 Gubernatorial, and 2020 Presidential elections.<br>',
+      '*Other votes include those marked absent or "no vote", voting with party when party is equally divided, and voting against party when oppo is equally divided.</span><br>',
+      'Legislator party loyalty is calculated across all legislative sessions in 2023 and 2024, as a weighted average of votes with party/against oppo (1) and against party/with oppo (0), excluding votes with both parties or against both parties.<br>',
+      'District electoral lean is calculated based on voting in the 2016 Presidential, 2018 Gubernatorial, and 2020 Presidential elections.<br>',
       '<strong>Data sources:</strong>',
       '<ul>',
       '<li>Legislator voting info from <a href="https://legiscan.com/FL/datasets">LegiScan\'s Florida Legislative Datasets for all 2023 and 2024 Regular Session</a>.<br>',
       '<li>District demographics and election results curated by <a href="https://davesredistricting.org/maps#state::FL">Dave\'s Redistricting</a>.',
       '</ul>',
-      'For details on wishlist items and work in progress, see <a href="https://docs.google.com/document/d/1e3KDrnpXjKL4OJqFR49hqti77TntPRL7k4AkqSfsefU/edit"><strong>development notes</strong></a>.',
-      '<br></div>'
+      'For details on wishlist items and work in progress, see <a href="https://docs.google.com/document/d/1e3KDrnpXjKL4OJqFR49hqti77TntPRL7k4AkqSfsefU/edit" target="_blank"><strong>development notes</strong></a>.',
+      '<br><br></div>'
     ))
   })
-
   
 # END OBSERVER EVENT  
 })

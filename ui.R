@@ -25,7 +25,7 @@ library(shiny)
 app1_ui <- fluidPage(
   tags$head(tags$link(rel = "stylesheet", type = "text/css", href = "styles.css")),
   uiOutput("dynamicHeader"),
-  uiOutput("staticMethodology3"),
+  uiOutput("staticMethodology1"),
   uiOutput("dynamicFilters"),
   uiOutput("dynamicLegend"),
   uiOutput("dynamicRecordCount"),
@@ -120,7 +120,8 @@ app3_ui <- fluidPage(
   uiOutput("dynamicFilters3"),
   uiOutput("dynamicPartisanship"),
   uiOutput("dynamicDemographics"),
-  uiOutput("staticFooter3")
+  #uiOutput("dynamicLegProfile"),
+  uiOutput("staticMethodology3")
 )
 
 #####################
