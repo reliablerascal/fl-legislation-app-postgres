@@ -10,15 +10,6 @@
 
 #########################
 #                       #  
-# Data prep             #
-#                       #
-######################### 
-### Run this in the console after re-opening this project, then comment it out
- # source("read_data.R") # prior to running the app offline
- # source("save_data.R") # prior to uploading the app to Shiny (saves as RDS = relational data service)
-
-#########################
-#                       #  
 # The App               #
 #                       #
 ######################### 
@@ -26,24 +17,40 @@
 library(shiny)
 library(dplyr)
 library(plotly)
-library(foreach)
-library(profvis)
-library(data.table)
-library(jsonlite)
-library(lubridate)
-library(forcats)
-library(stringr)
-library(purrr)
-library(readr)
-library(tidyr)
-library(tibble)
 library(ggplot2)
-library(tidyverse)
+library(patchwork) # combines multiple ggplot2 plots into a single cohesive layout. Used for demographics bar charts
 
 library(DBI)
 library(RPostgres)
 library(scales)
-library(patchwork)
+
+# 7/22/24 removed performance libraries, since they may not be used 
+#library(foreach) # enables parallel processing for intense computation- but might not be being used
+#library(profvis) # tool for profiling code performance
+#library(data.table) # used for fast/efficient join operations
+
+# 7/22/24 other libraries removed b/c they seem more like ETL/ data prep functions
+#library(jsonlite) # probably not needed since I parsed data into relational format
+#library(lubridate) # parsing dates and times, etc.- shouldn't need it at this phase
+#library(forcats) # tools for working with categorical variables (factors)
+#library(stringr) #string operations
+#library(purrr) # apply a function to each element in a list, etc.
+#library(readr) # reads "rectangular" data (like csvs)
+
+#library(tidyr)
+#library(tibble)
+#library(tidyverse)
+
+
+
+#########################
+#                       #  
+# Data prep             #
+#                       #
+######################### 
+### Run this in the console after re-opening this project, then comment it out
+#source("read_data.R") # prior to running the app offline
+#source("save_data.R") # prior to uploading the app to Shiny (saves as RDS = relational data service)
 
 
 
