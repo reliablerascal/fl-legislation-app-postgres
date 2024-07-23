@@ -21,7 +21,7 @@ observeEvent(input$navbarPage == "app3", {
     HTML(paste0(
       '<div class = "header-tab-small">Representation Alignment for </div>',
       '<h2>', data_district$legislator_name, ' (', data_district$party, ')</h2>',
-      '<h3>', input$chamber, ' district ', input$district, '</h3>',
+      '<h3>', data_district$chamber, ' district ', data_district$district, '</h3>',
       '<div align="left">',
       'This tab displays each legislator\'s partisan leanings compared to their district\'s voting record and demographics.',
       'The intended audience includes prospective voters in <a href="https://ballotpedia.org/Florida_elections,_2024#Offices_on_the_ballot">Florida\'s primary election on August 20</a>.<br>'
@@ -41,10 +41,19 @@ observeEvent(input$navbarPage == "app3", {
   }
   
   output$dynamicFilters3 <- renderUI({
+    legislators <- unique(app03_district_context$legislator_name)
+    
     div(class = "filter-row query-input",
-        createFilterBox("chamber", "Select Chamber:", c("House", "Senate"), selected = "House"),
-        createFilterBox("district", "Select District:", 1:120, selected = 1)
-        #createFilterBox("legislator", "Select Legislator:", c("Adam Anderson", "Adam Botana"), selected = 1),
+        radioButtons("filter_method", "Filter By:", choices = c("District", "Legislator Name"), selected = "District"),
+        conditionalPanel(
+          condition = "input.filter_method == 'District'",
+          createFilterBox("chamber", "Select Chamber:", c("House", "Senate"), selected = "House"),
+          createFilterBox("district", "Select District:", 1:120, selected = 1)
+        ),
+        conditionalPanel(
+          condition = "input.filter_method == 'Legislator Name'",
+          selectInput("legislator", "Select Legislator:", choices = legislators, selected = legislators[1])
+        )
     )
   })
   
@@ -57,29 +66,22 @@ observeEvent(input$navbarPage == "app3", {
     }
   })
   
-  data_filtered <- reactive({
-    req(input$chamber, input$district)  # Ensure inputs are available
+  
+  
+  # Reactive subset of app03_district_context based on input$chamber and input$district, or input$legislator
+  qry_demo_district <- reactive({
+    req(input$filter_method)
     data <- app03_district_context
     
-    data <- data %>%
-      filter(
-        chamber == input$chamber,
-        district_number == input$district
-        )
+    if (input$filter_method == "District") {
+      req(input$chamber, input$district)  # Ensure inputs are available
+      data <- data[data$chamber == input$chamber & data$district_number == input$district, ]
+    } else if (input$filter_method == "Legislator Name") {
+      req(input$legislator)
+      data <- data[data$legislator_name == input$legislator, ]
+    }
     
-    return (list(data = data, is_empty = nrow(data) == 0))
-  })
-  
-  # Reactive subset of app03_district_context based on input$chamber and input$district
-  qry_demo_district <- reactive({
-    req(input$chamber, input$district)
-    app03_district_context %>%
-      filter(chamber == input$chamber & district_number == input$district)
-  })
-  
-  # Reactive state data (assuming only one record in app03_district_context_state)
-  qry_demo_state <- reactive({
-    app03_district_context_state
+    return (data)
   })
   
   ########################################
@@ -90,6 +92,7 @@ observeEvent(input$navbarPage == "app3", {
   
   output$dynamicPartisanship <- renderUI({
     data_district <- qry_demo_district()
+    # data_district <- data_district$data
     
     n_districts <- if (data_district$chamber == "House") {
       120
@@ -177,21 +180,21 @@ observeEvent(input$navbarPage == "app3", {
   })
   
   output$demographicsPlot <- renderPlot({
-    req(qry_demo_district, qry_demo_state)
+    req(qry_demo_district)
     demo_district <- qry_demo_district()
-    demo_state <- qry_demo_state()
+    demo_state <- app03_district_context_state
     
     # need to have 5x2 for each of category, percent, and demographic
     data <- data.frame(
-      Category = factor(rep(c("District", "State"), 4), levels = c("State", "District")),  # Reverse factor levels
+      Category = factor(rep(c("District", "State"), 5), levels = c("State", "District")),  # Reverse factor levels
       Percent = c(
         demo_district$pct_white, demo_state$pct_white,
         demo_district$pct_black, demo_state$pct_black,
         demo_district$pct_asian, demo_state$pct_asian,
-        demo_district$pct_hispanic, demo_state$pct_hispanic
-        # demo_district$pct_napi, demo_state$pct_napi
+        demo_district$pct_hispanic, demo_state$pct_hispanic,
+        demo_district$pct_napi, demo_state$pct_napi
       ),
-      Demographic = rep(c("White", "Black", "Asian", "Hispanic"), each = 2)
+      Demographic = rep(c("White", "Black", "Asian", "Hispanic", "Native American/Pacific Islander"), each = 2)
     )
     
     create_plot <- function(demo) {
@@ -202,7 +205,7 @@ observeEvent(input$navbarPage == "app3", {
                   vjust = 0.5,
                   hjust = -0.1,
                   size = 7) +
-        scale_fill_manual(values = c("District" = "#17becf", "State" = "#7f7f7f")) +
+        scale_fill_manual(values = c("District" = "#17becf", "State" = "#dfdfdf")) +
         scale_y_continuous(labels = percent_format(),, limits = c(0, 1)) +
         labs(title = demo, x = "", y = "") +
         theme_minimal() +
@@ -222,10 +225,10 @@ observeEvent(input$navbarPage == "app3", {
     plot_black <- create_plot("Black")
     plot_asian <- create_plot("Asian")
     plot_hispanic <- create_plot("Hispanic")
-    # plot_napi <- create_plot("Pacific")
+    plot_napi <- create_plot("Native American/Pacific Islander")
     
     # Combine plots using patchwork
-    plot_white / plot_black/ plot_asian/ plot_hispanic
+    plot_white / plot_black/ plot_asian/ plot_hispanic/ plot_napi
   })
   
   ########################################

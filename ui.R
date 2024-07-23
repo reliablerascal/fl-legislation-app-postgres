@@ -22,18 +22,22 @@ library(shiny)
 #####################
 # Define the UI for App 1 ####
 
+#check for mobile access, so we can simplify heatmap accordingly
 app1_ui <- fluidPage(
-  tags$head(tags$link(rel = "stylesheet", type = "text/css", href = "styles.css")),
+  tags$head(
+    tags$link(rel = "stylesheet", type = "text/css", href = "styles.css"),
+    tags$script(HTML("
+      Shiny.setInputValue('is_mobile', /iPhone|iPad|iPod|Android/i.test(navigator.userAgent));
+    "))),
+  # c_disconnect_message(),
   uiOutput("dynamicHeader"),
   uiOutput("staticMethodology1"),
   uiOutput("dynamicFilters"),
   uiOutput("dynamicLegend"),
   uiOutput("dynamicRecordCount"),
   uiOutput("noDataMessage"),
-  plotlyOutput("heatmapPlot"#, height = "150vh")
-  )
+  plotlyOutput("heatmapPlot")
 )
-
 
 
 
@@ -45,6 +49,7 @@ app1_ui <- fluidPage(
 
 app3_ui <- fluidPage(
   tags$head(tags$link(rel = "stylesheet", type = "text/css", href = "https://mockingbird.shinyapps.io/fl-leg-app-postgres/styles.css")),
+  # c_disconnect_message(),
   uiOutput("dynamicHeader3"),
   uiOutput("dynamicFilters3"),
   uiOutput("dynamicPartisanship"),

@@ -1,3 +1,7 @@
+# OLD SERVER1 PARTISANSHIP
+# version from 7/22/24 AM
+
+
 # redundant, but somehow necessary to reload some libraries?
 # library(shiny)
 # library(dplyr)
@@ -101,9 +105,21 @@ observeEvent(input$navbar_page == "app1", {
   output$dynamicRecordCount <- renderUI({
     HTML(paste0(
       '<p>Displaying <span class="stat-bold">', n_legislators(), "</span> ", 
-      'legislators across <span class="stat-bold">', n_roll_calls(), '</span> roll call votes.</p>'
+      'legislators across <span class="stat-bold">', n_roll_calls(), '</span> roll calls with at least one same party member dissenting from the party majority</p>'
     ))
   })
+  
+  # THIS SECTION WILL BREAK EVERYTHING BUT I NEED TO IMPLEMENT A VARIANT OF IT
+  # output$dynamicRecordCount <- renderUI({
+  #   print("rc test")
+  #   req(input$year, input$chamber, input$party)
+  #   party_same <- if(input$party == "D") "Democrat" else if(input$party == "R") "Republican" else "All Parties"
+  #   
+  #   HTML(paste0(
+  #     '<p>Displaying <span class="stat-bold">', n_legislators(), '</span> ', input$chamber, ' ', party_same, 's<br>', 
+  #     'across the <span class="stat-bold">', n_roll_calls(), '</span> roll calls in ', input$year, ' with at least one dissenting ', input$chamber, ' ', party_same,'</p>'
+  #   ))
+  # })
   
   
   ##############################
@@ -288,6 +304,9 @@ observeEvent(input$navbar_page == "app1", {
     #fill_colors <- c("0" = color_with_party, "1" = color_against_party, "99" = color_against_both, "999" = color_na)
     #x_labels_tooltips <- setNames(paste('Bill:', labels$bill_number), labels$roll_call_id)
     
+    # check if mobile access
+    is_mobile <- ifelse(is.null(input$is_mobile), FALSE, input$is_mobile)
+    
     # Generate the plot
     p <- ggplot(data, aes(y = legislator_name, x = roll_call_id, fill = partisan_vote_plot, text = hover_text)) +
       geom_tile(color = "white", linewidth = 0.5) +
@@ -303,6 +322,11 @@ observeEvent(input$navbar_page == "app1", {
             legend.position = "none",
             plot.title = element_blank(),
             plot.subtitle = element_blank())
+    
+    # nix hovertext if mobile
+    if (!is_mobile) {
+      p <- p + aes(text = hover_text)
+    }
     
     ggplotly(p, tooltip = "text", height = totalHeight, width= totalWidth) %>%
       ###ATTEMPT TO ADD TOOLTIPS ON X AXIS
@@ -329,7 +353,7 @@ observeEvent(input$navbar_page == "app1", {
   })
   
   
-
   
-# END OBSERVER EVENT  
+  
+  # END OBSERVER EVENT  
 })
