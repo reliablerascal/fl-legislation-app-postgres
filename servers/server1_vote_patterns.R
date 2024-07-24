@@ -306,6 +306,7 @@ observeEvent(input$navbar_page == "app1", {
     
     # check if mobile access
     is_mobile <- ifelse(is.null(input$is_mobile), FALSE, input$is_mobile)
+    # is_mobile <- TRUE # for testing on desktop
     
     # Generate the plot
     p <- ggplot(data, aes(y = legislator_name, x = roll_call_id, fill = partisan_vote_plot, text = hover_text)) +
@@ -328,19 +329,7 @@ observeEvent(input$navbar_page == "app1", {
       p <- p + aes(text = hover_text)
     }
     
-    ggplotly(p, tooltip = "text", height = totalHeight, width= totalWidth) %>%
-      ###ATTEMPT TO ADD TOOLTIPS ON X AXIS
-      # add_trace(
-      #   type = 'scatter',
-      #   x = labels$roll_call_id,
-      #   y = rep(length(levels(data$legislator_name)) + 1, length(labels$roll_call_id)),  # Position above the plot
-      #   text = x_labels_tooltips[as.character(labels$roll_call_id)],
-      #   hoverinfo = 'text',
-      #   mode = 'markers',
-      #   marker = list(opacity = 0),
-      #   showlegend = FALSE,
-      #   inherit = FALSE
-      # ) %>%
+    plotly_output <- ggplotly(p, tooltip = "text", height = totalHeight, width= totalWidth) %>%
       layout(
         autosize = TRUE,
         xaxis = list(side = "top"),
@@ -348,8 +337,13 @@ observeEvent(input$navbar_page == "app1", {
         margin = list(l=200, t = 85, b = 150),  # Fix margins to ensure rows and columns don't get compressed
         plot_bgcolor = "rgba(255,255,255,0.85)",  # Transparent plot background
         paper_bgcolor = "rgba(255,255,255,0.85)"
-      ) %>%
-      config(displayModeBar = FALSE)
+      )
+    if (is_mobile) {
+      plotly_output <- plotly_output %>%
+        layout(dragmode = FALSE) %>%
+        config(scrollZoom = FALSE)
+    }
+    return(plotly_output)
   })
   
   

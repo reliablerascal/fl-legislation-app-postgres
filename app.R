@@ -101,7 +101,7 @@ server <- function(input, output, session) {
   # log_message <- function(message) {
   #   cat(message, "\n", file = "debug_log.txt", append = TRUE)
   # }
-  source("servers/server1_partisanship.R", local = TRUE)
+  source("servers/server1_vote_patterns.R", local = TRUE)
   # source("servers/server2_leg_activity.R", local = TRUE)
   source("servers/server3_district_context.R", local = TRUE)
 }
