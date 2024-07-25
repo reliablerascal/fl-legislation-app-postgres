@@ -6,6 +6,7 @@
 # library(shiny)
 # library(dplyr)
 # library(plotly)
+library(shinyjs)
 
 ########################################
 #                                      #  
@@ -46,13 +47,14 @@ observeEvent(input$navbar_page == "app1", {
     # party_same <- if(input$party == "D") "Democrats" else if(input$party == "R") "Republicans" else "All Parties"
     # party_oppo <- if(input$party == "D") "Republicans" else if(input$party == "R") "Democrats" else "All Parties"
     #   
-    is_mobile <- ifelse(is.null(input$is_mobile), FALSE, input$is_mobile)
-    is_mobile_desc <- ifelse(is_mobile, '<em>Recommended viewing on desktop, not mobile.</em><br>','')
-    
+    # is_mobile <- ifelse(is.null(input$is_mobile), FALSE, input$is_mobile)
+    # print(paste0('mobile detected?',is_mobile))
+    # is_mobile <- !is_mobile
+    # is_mobile_desc <- ifelse(is_mobile, '<em>Recommended viewing on desktop, not mobile.</em><br>','')
+    # 
     HTML(paste0(
       '<div class="header-tab">(DEV) Voting Patterns in Florida State Legislature</div>',
       '<div align="left">',
-      is_mobile_desc,
       'This tab displays each legislator\'s vote on each roll call for bills &amp; amendments where their party voted in favor but not unanimously. ',
       'Bills may have multiple roll calls; hover over plot for more info about specific roll calls.<br>',
       'The intended audience includes Florida journalists focused on politics, policy, and elections.<br>',
@@ -215,6 +217,7 @@ observeEvent(input$navbar_page == "app1", {
   
   
   output$heatmapPlot <- renderPlotly({
+    #req(input$isMobile)
     filtered_data <- data_filtered()
     # Determine colors based on party
     
@@ -306,13 +309,12 @@ observeEvent(input$navbar_page == "app1", {
     #fill_colors <- c("0" = color_with_party, "1" = color_against_party, "99" = color_against_both, "999" = color_na)
     #x_labels_tooltips <- setNames(paste('Bill:', labels$bill_number), labels$roll_call_id)
     
-    # check if mobile access
-    is_mobile <- ifelse(is.null(input$is_mobile), FALSE, input$is_mobile)
-    print(is_mobile)
-    # is_mobile <- TRUE # for testing on desktop
     
-    # Generate the plot
-    p <- ggplot(data, aes(y = legislator_name, x = roll_call_id, fill = partisan_vote_plot, text = hover_text)) +
+    print("input$isMobile")
+    print(input$isMobile)
+    #is_mobile <- ifelse(is.null(input$isMobile), FALSE, input$isMobile)
+    
+    p <- ggplot(data, aes(y = legislator_name, x = roll_call_id, fill = partisan_vote_plot)) +
       geom_tile(color = "white", linewidth = 0.5) +
       scale_fill_gradient2(low = color_with_party, mid = color_against_party, high = color_against_both, midpoint = 1) +
       theme_minimal() +
@@ -327,30 +329,29 @@ observeEvent(input$navbar_page == "app1", {
             plot.title = element_blank(),
             plot.subtitle = element_blank())
     
-    # nix hovertext if mobile
-    if (!is_mobile) {
+    if (!input$isMobile) {
       p <- p + aes(text = hover_text)
     }
     
-    plotly_output <- ggplotly(p, tooltip = "text", height = totalHeight, width= totalWidth) %>%
+    plotly_output <- ggplotly(p, tooltip = "text", height = totalHeight, width = totalWidth) %>%
       layout(
         autosize = TRUE,
         xaxis = list(side = "top"),
         font = list(family = "Archivo"),
-        margin = list(l=200, t = 85, b = 150),  # Fix margins to ensure rows and columns don't get compressed
-        plot_bgcolor = "rgba(255,255,255,0.85)",  # Transparent plot background
+        margin = list(l = 200, t = 85, b = 150),
+        plot_bgcolor = "rgba(255,255,255,0.85)",
         paper_bgcolor = "rgba(255,255,255,0.85)"
       )
-    if (is_mobile) {
+    if (input$isMobile) {
       plotly_output <- plotly_output %>%
         layout(dragmode = FALSE) %>%
         config(scrollZoom = FALSE)
     }
     return(plotly_output)
   })
+})   # END OBSERVER EVENT  
+
   
   
   
   
-  # END OBSERVER EVENT  
-})

@@ -44,22 +44,50 @@ c_disconnect_message <- function() {
 #####################
 # Define the UI for App 1 ####
 
+# tags$script(HTML("
+#       Shiny.setInputValue('is_mobile', /iPhone|iPad|iPod|Android/i.test(navigator.userAgent));
+#     "))),
 #check for mobile access, so we can simplify heatmap accordingly
-app1_ui <- fluidPage(
-  tags$head(
-    tags$link(rel = "stylesheet", type = "text/css", href = "styles.css"),
+app1_ui <- fluidPage( 
+  tags$head( 
+    tags$link(rel = "stylesheet", type = "text/css", href = "styles.css"), 
+    tags$script(src = "https://cdn.jsdelivr.net/npm/mobile-detect@1.4.5/mobile-detect.min.js"), # Include MobileDetect.js 
     tags$script(HTML("
-      Shiny.setInputValue('is_mobile', /iPhone|iPad|iPod|Android/i.test(navigator.userAgent));
-    "))),
-  c_disconnect_message(),
-  uiOutput("dynamicHeader"),
-  uiOutput("staticMethodology1"),
-  uiOutput("dynamicFilters"),
-  uiOutput("dynamicLegend"),
-  uiOutput("dynamicRecordCount"),
-  uiOutput("noDataMessage"),
-  plotlyOutput("heatmapPlot")
+      $(document).on('shiny:connected', function(event) {
+        var md = new MobileDetect(window.navigator.userAgent);
+        if (md.mobile()) {
+          Shiny.setInputValue('isMobile', true);
+        } else {
+          Shiny.setInputValue('isMobile', false);
+        }
+      });
+    "))
+  ),
+  c_disconnect_message(), 
+  uiOutput("dynamicHeader"), 
+  uiOutput("staticMethodology1"), 
+  uiOutput("dynamicFilters"), 
+  uiOutput("dynamicLegend"), 
+  uiOutput("dynamicRecordCount"), 
+  uiOutput("noDataMessage"), 
+  plotlyOutput("heatmapPlot") 
 )
+
+# app1_ui <- fluidPage(
+#   tags$head(
+#     tags$link(rel = "stylesheet", type = "text/css", href = "styles.css"),
+#     tags$script("
+#       Shiny.setInputValue('is_mobile', /iPhone|iPad|iPod|Android/i.test(navigator.userAgent));
+#     ")),
+#   c_disconnect_message(),
+#   uiOutput("dynamicHeader"),
+#   uiOutput("staticMethodology1"),
+#   uiOutput("dynamicFilters"),
+#   uiOutput("dynamicLegend"),
+#   uiOutput("dynamicRecordCount"),
+#   uiOutput("noDataMessage"),
+#   plotlyOutput("heatmapPlot")
+# )
 
 
 
@@ -152,7 +180,7 @@ ui <- fluidPage(
       tabPanel("Voting Patterns", value = "app1", app1_ui),
       #tabPanel("Legislator Activity Overview", value = "app2", app2_ui),
       id = "navbar_page",
-      selected = "app3" #start on this app by default
+      selected = "app1" #start on this app by default
       )
   )
 )
