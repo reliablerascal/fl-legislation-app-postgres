@@ -24,25 +24,6 @@ library(scales)
 
 library(shinydisconnect) #customize Shiny app disconnect message
 
-# 7/22/24 removed performance libraries, since they may not be used 
-#library(foreach) # enables parallel processing for intense computation- but might not be being used
-#library(profvis) # tool for profiling code performance
-#library(data.table) # used for fast/efficient join operations
-
-# 7/22/24 other libraries removed b/c they seem more like ETL/ data prep functions
-#library(jsonlite) # probably not needed since I parsed data into relational format
-#library(lubridate) # parsing dates and times, etc.- shouldn't need it at this phase
-#library(forcats) # tools for working with categorical variables (factors)
-#library(stringr) #string operations
-#library(purrr) # apply a function to each element in a list, etc.
-#library(readr) # reads "rectangular" data (like csvs)
-
-#library(tidyr)
-#library(tibble)
-#library(tidyverse)
-
-
-
 #########################
 #                       #  
 # Data prep             #
@@ -61,32 +42,12 @@ jct_bill_categories <- all_data$jct_bill_categories
 app03_district_context <- all_data$app03_district_context
 app03_district_context_state <- all_data$app03_district_context_state
 
-#########################
-#                       #  
-# Global functions      #
-#                       #
-######################### 
-c_disconnect_message <- function() {
-  disconnectMessage(
-    text = "Your session has been disconnected due to inactivity. Please refresh the page.",
-    refresh = "Refresh",
-    background = "#ffcccc",
-    colour = "#ff0000",
-    size = 24,
-    overlayColour = "#ffffff",
-    overlayOpacity = 0.75,
-    top = "center",
-    refreshColour = "#0000ff"
-  )
-}
-
 ########################
 #                      #  
 # User Interface       #
 #                      #
 ########################
 source("ui.R")
-
 
 ########################
 #                      #  

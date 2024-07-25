@@ -42,15 +42,17 @@ observeEvent(input$navbar_page == "app1", {
   #                                      #
   ########################################   
   output$dynamicHeader <- renderUI({
-    # req(input$year, input$party)
     # year <- input$year
     # party_same <- if(input$party == "D") "Democrats" else if(input$party == "R") "Republicans" else "All Parties"
     # party_oppo <- if(input$party == "D") "Republicans" else if(input$party == "R") "Democrats" else "All Parties"
     #   
+    is_mobile <- ifelse(is.null(input$is_mobile), FALSE, input$is_mobile)
+    is_mobile_desc <- ifelse(is_mobile, '<em>Recommended viewing on desktop, not mobile.</em><br>','')
+    
     HTML(paste0(
       '<div class="header-tab">(DEV) Voting Patterns in Florida State Legislature</div>',
       '<div align="left">',
-      '<em>Recommended viewing on desktop, not mobile.</em><br>',
+      is_mobile_desc,
       'This tab displays each legislator\'s vote on each roll call for bills &amp; amendments where their party voted in favor but not unanimously. ',
       'Bills may have multiple roll calls; hover over plot for more info about specific roll calls.<br>',
       'The intended audience includes Florida journalists focused on politics, policy, and elections.<br>',
@@ -306,6 +308,7 @@ observeEvent(input$navbar_page == "app1", {
     
     # check if mobile access
     is_mobile <- ifelse(is.null(input$is_mobile), FALSE, input$is_mobile)
+    print(is_mobile)
     # is_mobile <- TRUE # for testing on desktop
     
     # Generate the plot

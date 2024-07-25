@@ -14,6 +14,28 @@ library(DT)
 library(plotly)
 library(shinyWidgets)
 library(shiny)
+library(shinydisconnect) # not sure why this is needed here AND in app.R, but it prevents Error in c_disconnect_message() : could not find function "c_disconnect_message"
+
+#########################
+#                       #  
+# Global functions      #
+#                       #
+#########################
+# perplexingly, I had to put this here (and not in app.R) to prevent "Error in c_disconnect_message() : could not find function "c_disconnect_message""... despite defining it BEFORE sourcing ui.r
+
+c_disconnect_message <- function() {
+  disconnectMessage(
+    text = "Your session has been disconnected due to inactivity. Please refresh the page.",
+    refresh = "Refresh",
+    background = "#ffcccc",
+    colour = "#ff0000",
+    size = 24,
+    overlayColour = "#ffffff",
+    overlayOpacity = 0.75,
+    top = "center",
+    refreshColour = "#0000ff"
+  )
+}
 
 #####################
 #                   #  
@@ -29,7 +51,7 @@ app1_ui <- fluidPage(
     tags$script(HTML("
       Shiny.setInputValue('is_mobile', /iPhone|iPad|iPod|Android/i.test(navigator.userAgent));
     "))),
-  # c_disconnect_message(),
+  c_disconnect_message(),
   uiOutput("dynamicHeader"),
   uiOutput("staticMethodology1"),
   uiOutput("dynamicFilters"),
@@ -49,7 +71,7 @@ app1_ui <- fluidPage(
 
 app3_ui <- fluidPage(
   tags$head(tags$link(rel = "stylesheet", type = "text/css", href = "https://mockingbird.shinyapps.io/fl-leg-app-postgres/styles.css")),
-  # c_disconnect_message(),
+  c_disconnect_message(),
   uiOutput("dynamicHeader3"),
   uiOutput("dynamicFilters3"),
   uiOutput("dynamicPartisanship"),
