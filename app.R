@@ -47,7 +47,7 @@ app03_district_context_state <- all_data$app03_district_context_state
 # User Interface       #
 #                      #
 ########################
-source("ui.R")
+source("ui.R", TRUE)
 
 ########################
 #                      #  

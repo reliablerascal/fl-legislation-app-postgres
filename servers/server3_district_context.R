@@ -47,38 +47,38 @@ observeEvent(input$navbarPage == "app3", {
         radioButtons("filter_method", "Filter By:", choices = c("District", "Legislator Name"), selected = "District"),
         conditionalPanel(
           condition = "input.filter_method == 'District'",
-          createFilterBox("chamber", "Select Chamber:", c("House", "Senate"), selected = "House"),
-          createFilterBox("district", "Select District:", 1:120, selected = 1)
+          createFilterBox("chamber3", "Select Chamber:", c("House", "Senate"), selected = "House"),
+          createFilterBox("district3", "Select District:", 1:120, selected = 1)
         ),
         conditionalPanel(
           condition = "input.filter_method == 'Legislator Name'",
-          selectInput("legislator", "Select Legislator:", choices = legislators, selected = legislators[1])
+          selectInput("legislator3", "Select Legislator:", choices = legislators, selected = legislators[1])
         )
     )
   })
   
   # Observe the chamber selection and update the district options accordingly
-  observeEvent(input$chamber, {
-    if (input$chamber == "House") {
-      updateSelectInput(session, "district", choices = 1:120, selected = 1)
-    } else if (input$chamber == "Senate") {
-      updateSelectInput(session, "district", choices = 1:40, selected = 1)
+  observeEvent(input$chamber3, {
+    if (input$chamber3 == "House") {
+      updateSelectInput(session, "district3", choices = 1:120, selected = 1)
+    } else if (input$chamber3 == "Senate") {
+      updateSelectInput(session, "district3", choices = 1:40, selected = 1)
     }
   })
   
   
   
-  # Reactive subset of app03_district_context based on input$chamber and input$district, or input$legislator
+  # Reactive subset of app03_district_context based on input$chamber3 and input$district3, or input$legislator3
   qry_demo_district <- reactive({
     req(input$filter_method)
     data <- app03_district_context
     
     if (input$filter_method == "District") {
-      req(input$chamber, input$district)  # Ensure inputs are available
-      data <- data[data$chamber == input$chamber & data$district_number == input$district, ]
+      req(input$chamber3, input$district3)  # Ensure inputs are available
+      data <- data[data$chamber == input$chamber3 & data$district_number == input$district3, ]
     } else if (input$filter_method == "Legislator Name") {
-      req(input$legislator)
-      data <- data[data$legislator_name == input$legislator, ]
+      req(input$legislator3)
+      data <- data[data$legislator_name == input$legislator3, ]
     }
     
     return (data)
@@ -113,9 +113,9 @@ observeEvent(input$navbarPage == "app3", {
     }
     
     n_legislators_in_party <- if (same_party == "Republican") {
-      count_legislators_in_party(app03_district_context, "R", input$chamber)$n
+      count_legislators_in_party(app03_district_context, "R", input$chamber3)$n
     } else if (same_party == "Democrat") {
-      count_legislators_in_party(app03_district_context, "D", input$chamber)$n
+      count_legislators_in_party(app03_district_context, "D", input$chamber3)$n
     }
     
     rank_dist <- if (data_district$party == "R") {
@@ -140,7 +140,7 @@ observeEvent(input$navbarPage == "app3", {
         '<tr>',
         '<td style="vertical-align:top; width:50%; border-right: 1px solid black; padding-right: 10px;" align=left>',
         '<span class="stat-bold">', data_district$legislator_name, '\'s</span> voting record is ranked #<span class="stat-bold">', rank_leg,
-        '</span> most ',same_party , '-leaning amongst <span class="stat-bold">', n_legislators_in_party, '</span> ', input$chamber, ' legislators in the ', same_party, ' party.<br>',
+        '</span> most ',same_party , '-leaning amongst <span class="stat-bold">', n_legislators_in_party, '</span> ', input$chamber3, ' legislators in the ', same_party, ' party.<br>',
         '<br>Of their ', data_district$leg_n_votes_denom_loyalty, ' votes included in calculating party loyalty:<br>',
         'Party Line Votes: <span class="stat-bold">', data_district$leg_n_votes_party_line, ' (', percent(data_district$leg_n_votes_party_line/data_district$leg_n_votes_denom_loyalty,accuracy = 0.1), ')</span><br>',
         'Cross Party Votes: <span class="stat-bold">', data_district$leg_n_votes_cross_party, ' (', percent(data_district$leg_n_votes_cross_party/data_district$leg_n_votes_denom_loyalty, accuracy = 0.1), ')</span><br>',

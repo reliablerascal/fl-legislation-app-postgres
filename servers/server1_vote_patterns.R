@@ -104,24 +104,24 @@ observeEvent(input$navbar_page == "app1", {
     ))
   })
   
-  output$dynamicRecordCount <- renderUI({
-    HTML(paste0(
-      '<p>Displaying <span class="stat-bold">', n_legislators(), "</span> ", 
-      'legislators across <span class="stat-bold">', n_roll_calls(), '</span> roll calls with at least one same party member dissenting from the party majority</p>'
-    ))
-  })
-  
-  # THIS SECTION WILL BREAK EVERYTHING BUT I NEED TO IMPLEMENT A VARIANT OF IT
   # output$dynamicRecordCount <- renderUI({
-  #   print("rc test")
-  #   req(input$year, input$chamber, input$party)
-  #   party_same <- if(input$party == "D") "Democrat" else if(input$party == "R") "Republican" else "All Parties"
-  #   
   #   HTML(paste0(
-  #     '<p>Displaying <span class="stat-bold">', n_legislators(), '</span> ', input$chamber, ' ', party_same, 's<br>', 
-  #     'across the <span class="stat-bold">', n_roll_calls(), '</span> roll calls in ', input$year, ' with at least one dissenting ', input$chamber, ' ', party_same,'</p>'
+  #     '<p>Displaying <span class="stat-bold">', n_legislators(), "</span> ", 
+  #     'legislators across <span class="stat-bold">', n_roll_calls(), '</span> roll calls with at least one same party member dissenting from the party majority</p>'
   #   ))
   # })
+  
+  # THIS SECTION WILL BREAK EVERYTHING BUT I NEED TO IMPLEMENT A VARIANT OF IT
+  output$dynamicRecordCount <- renderUI({
+    # print("rc test")
+    req(input$year, input$chamber, input$party)
+    party_same <- if(input$party == "D") "Democrat" else if(input$party == "R") "Republican" else "All Parties"
+
+    HTML(paste0(
+      '<p>Displaying <span class="stat-bold">', n_legislators(), '</span> ', input$chamber, ' ', party_same, 's<br>',
+      'across the <span class="stat-bold">', n_roll_calls(), '</span> roll calls in ', input$year, ' with at least one dissenting ', input$chamber, ' ', party_same,'</p>'
+    ))
+  })
   
   
   ##############################
