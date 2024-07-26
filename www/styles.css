@@ -51,7 +51,6 @@
 }
 
 .legend-item {
-  display: flex;
   align-items: center;
   margin: 1px 0;
   margin-left: 5px;
