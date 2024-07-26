@@ -99,7 +99,7 @@ observeEvent(input$navbar_page == "app1", {
     HTML(paste0(
       '<div class="header-section">Methodology</div>',
       '<div class="methodology-notes">',
-      'Party loyalty for each legislator is calculated across all sessions in 2023 and 2024, as a weighted average of with party/against oppo (1) and against party/with oppo (0), excluding votes with both parties or against both parties.<br>',
+      'Party loyalty for each legislator is calculated across all sessions in 2023 and 2024, as a weighted average of with party/against oppo (1) and against party/with oppo (0), excluding votes on bipartisan roll calls.<br>',
       '<strong>Data source:</strong> <a href="https://legiscan.com/FL/datasets">LegiScan\'s Florida Legislative Datasets for all 2023 and 2024 Regular Session</a>.<br>',
       'For details on wishlist items and work in progress, see <a href="https://docs.google.com/document/d/1OGiJH7B_0j3B38gEtgt_FDhkxzL84ZtGistdup2yYHI/edit" target="_blank"><strong>development notes</strong></a>.',
       '</div>'
@@ -276,7 +276,7 @@ observeEvent(input$navbar_page == "app1", {
     if (input$sort_by_rc == "Bill Number") {
       data <- data[order(data$bill_number), ]
     } else if (input$sort_by_rc == "Party Unity") {
-      data <- data[order(-data$rc_mean_partisanship), ]
+      data <- data[order(data$rc_mean_partisanship, decreasing=TRUE), ]
     }
     data$roll_call_id <- factor(data$roll_call_id, levels = unique(data$roll_call_id))
     
@@ -310,9 +310,9 @@ observeEvent(input$navbar_page == "app1", {
     #x_labels_tooltips <- setNames(paste('Bill:', labels$bill_number), labels$roll_call_id)
     
     
-    print("input$isMobile")
-    print(input$isMobile)
-    #is_mobile <- ifelse(is.null(input$isMobile), FALSE, input$isMobile)
+    # print("input$isMobile")
+    # print(input$isMobile)
+    # is_mobile <- ifelse(is.null(input$isMobile), FALSE, input$isMobile)
     
     p <- ggplot(data, aes(y = legislator_name, x = roll_call_id, fill = partisan_vote_plot)) +
       geom_tile(color = "white", linewidth = 0.5) +
