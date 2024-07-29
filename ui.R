@@ -174,13 +174,37 @@ ui <- fluidPage(
   # navigation bar    #
   #                   #
   #####################
-  div(class="navbar2",
-      tabsetPanel(
+
+
+div(class="navbar2",
+    tabsetPanel(
       tabPanel("District Context", value = "app3", app3_ui),
       tabPanel("Voting Patterns", value = "app1", app1_ui),
       #tabPanel("Legislator Activity Overview", value = "app2", app2_ui),
+      tabPanel("Partisanship Scatterplot", value = "app4", 
+               fluidPage(
+                 div(class = "header-tab", "Legislator vs District Partisanship"),
+                 sidebarLayout(
+                   sidebarPanel(
+                     div(class = "filter-row query-input",
+                         selectInput("chamber4", "Select Chamber:", 
+                                     choices = c("All", "House", "Senate"),
+                                     selected = "All"),
+                         selectInput("party4", "Select Party:", 
+                                     choices = c("All", "D", "R"),
+                                     selected = "All")
+                     )
+                   ),
+                   mainPanel(
+                     plotlyOutput("scatterplot"),
+                     htmlOutput("medianInfo"),
+                     htmlOutput("explanationText")
+                   )
+                 )
+               )
+      ),
       id = "navbar_page",
-      selected = "app1" #start on this app by default
-      )
-  )
+      selected = "app1"
+    )
+)
 )
