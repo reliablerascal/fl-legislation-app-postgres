@@ -62,10 +62,6 @@
   align: left;
 }
 
-.stat-bold {
-  font-size: 1.5em;
-}
-
 .text-warning {
   color: red;
   font-weight: bold;
@@ -429,4 +425,20 @@ a:focus {
 
 .container-fluid, .navbar {
   text-align: center;
+}
+
+.stat-bold {
+  font-weight: bold;
+  color: #064875;
+  font-size: 1.1em;
+}
+
+.methodology-notes {
+  font-size: 0.9em;
+  line-height: 1.4;
+  margin-top: 1em;
+}
+
+.methodology-notes ul {
+  margin-left: 20px;
 }
