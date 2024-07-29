@@ -65,6 +65,7 @@ server <- function(input, output, session) {
   source("servers/server1_vote_patterns.R", local = TRUE)
   # source("servers/server2_leg_activity.R", local = TRUE)
   source("servers/server3_district_context.R", local = TRUE)
+  source("servers/server4_partisanship_scatterplot.R", local = TRUE)
 }
 
 ########################
