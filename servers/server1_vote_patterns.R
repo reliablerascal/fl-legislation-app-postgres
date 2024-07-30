@@ -43,15 +43,7 @@ observeEvent(input$navbar_page == "app1", {
   #                                      #
   ########################################   
   output$dynamicHeader <- renderUI({
-    # year <- input$year
-    # party_same <- if(input$party == "D") "Democrats" else if(input$party == "R") "Republicans" else "All Parties"
-    # party_oppo <- if(input$party == "D") "Republicans" else if(input$party == "R") "Democrats" else "All Parties"
-    #   
-    # is_mobile <- ifelse(is.null(input$is_mobile), FALSE, input$is_mobile)
-    # print(paste0('mobile detected?',is_mobile))
-    # is_mobile <- !is_mobile
-    # is_mobile_desc <- ifelse(is_mobile, '<em>Recommended viewing on desktop, not mobile.</em><br>','')
-    # 
+    
     HTML(paste0(
       '<div class="header-tab">(DEV) Voting Patterns in Florida State Legislature</div>',
       '<div align="left">',
@@ -106,14 +98,6 @@ observeEvent(input$navbar_page == "app1", {
     ))
   })
   
-  # output$dynamicRecordCount <- renderUI({
-  #   HTML(paste0(
-  #     '<p>Displaying <span class="stat-bold">', n_legislators(), "</span> ", 
-  #     'legislators across <span class="stat-bold">', n_roll_calls(), '</span> roll calls with at least one same party member dissenting from the party majority</p>'
-  #   ))
-  # })
-  
-  # THIS SECTION WILL BREAK EVERYTHING BUT I NEED TO IMPLEMENT A VARIANT OF IT
   output$dynamicRecordCount <- renderUI({
     # print("rc test")
     req(input$year, input$chamber, input$party)
@@ -144,7 +128,7 @@ observeEvent(input$navbar_page == "app1", {
         createFilterBox("year", "Select Session Year:", c(2023, 2024, "All"), selected = 2024),
         createFilterBox("final", "Final (Third Reading) Vote?", c("Y", "N", "All"), selected = "Y"),
         createFilterBox("bill_category", "Bill Category (demo)", c("education", "All"), selected = "All"),
-        createFilterBox("sort_by_leg", "Sort Legislators By:", c("Name", "Party Loyalty", "District"), selected = "Party Loyalty"),
+        createFilterBox("sort_by_leg", "Sort Legislators By:", c("Name", "Party Loyalty", "District #", "Electorate Lean"), selected = "Party Loyalty"),
         createFilterBox("sort_by_rc", "Sort Roll Calls By:", c("Bill Number", "Party Unity"), selected = "Party Unity")
     )
   })
@@ -267,8 +251,13 @@ observeEvent(input$navbar_page == "app1", {
       data$legislator_name <- factor(data$legislator_name, levels = unique(data$legislator_name))  # Set factor levels
     } else if (input$sort_by_leg == "Party Loyalty") {
       data$legislator_name <- reorder(data$legislator_name, -data$rank_partisan_leg)
-    } else if (input$sort_by_leg == "District") {
+    } else if (input$sort_by_leg == "District #") {
       data$legislator_name <- reorder(data$legislator_name, -data$district_number)
+    } else if (input$sort_by_leg == "Electorate Lean") {
+      if (input$party == "R") {
+        data$legislator_name <- reorder(data$legislator_name, -data$rank_partisan_dist_R)
+      } else
+      {data$legislator_name <- reorder(data$legislator_name, -data$rank_partisan_dist_D)}
     }
     
     # sort roll calls

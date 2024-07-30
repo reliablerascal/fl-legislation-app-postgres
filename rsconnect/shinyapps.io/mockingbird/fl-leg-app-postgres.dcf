@@ -5,6 +5,6 @@ account: mockingbird
 server: shinyapps.io
 hostUrl: https://api.shinyapps.io/v1
 appId: 12275450
-bundleId: 8908079
+bundleId: 8912253
 url: https://mockingbird.shinyapps.io/fl-leg-app-postgres/
 version: 1
