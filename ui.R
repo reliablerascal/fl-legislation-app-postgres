@@ -73,22 +73,6 @@ app1_ui <- fluidPage(
   plotlyOutput("heatmapPlot") 
 )
 
-# app1_ui <- fluidPage(
-#   tags$head(
-#     tags$link(rel = "stylesheet", type = "text/css", href = "styles.css"),
-#     tags$script("
-#       Shiny.setInputValue('is_mobile', /iPhone|iPad|iPod|Android/i.test(navigator.userAgent));
-#     ")),
-#   c_disconnect_message(),
-#   uiOutput("dynamicHeader"),
-#   uiOutput("staticMethodology1"),
-#   uiOutput("dynamicFilters"),
-#   uiOutput("dynamicLegend"),
-#   uiOutput("dynamicRecordCount"),
-#   uiOutput("noDataMessage"),
-#   plotlyOutput("heatmapPlot")
-# )
-
 
 
 ###########################
@@ -112,17 +96,17 @@ app3_ui <- fluidPage(
 
 ###########################
 #                         #  
-# app 4 experiments       #
+# app 5 legislator lookup #
 #                         #
 ###########################
 
 app5_ui <- fluidPage(
   tags$head(tags$link(rel = "stylesheet", type = "text/css", href = "https://mockingbird.shinyapps.io/fl-leg-app-postgres/styles.css")),
   c_disconnect_message(),
-  titlePanel("Find Your Elected Representatives"),
+ titlePanel("Find Your Elected Representatives"),
   sidebarLayout(
     sidebarPanel(
-      textInput("address", "Enter your address:", ""),
+      textInput("address", "Your address (include city and state):", ""),
       actionButton("submit", "Find Representatives")
     ),
     mainPanel(

@@ -86,13 +86,13 @@ observeEvent(input$submit, {
     if (!is.na(coordinates$lat) && !is.na(coordinates$long)) {
       representatives <- get_representatives(coordinates$lat, coordinates$long)
       output$representatives <- renderTable({
-        print("a-rendrin' el table")
         print(representatives$results)
         if (!is.null(representatives$results)) {
           df <- data.frame(
-            # Jurisdiction = representatives$results$jurisdiction$name,
-            # Title = representatives$results$current_role$title,
-            # District = representatives$results$current_role$district,
+            #Image = representatives$results$image,
+            Jurisdiction = representatives$results$`jurisdiction.name`,
+            Title = representatives$results$`current_role.title`,
+            District = representatives$results$`current_role.district`,
             Name = representatives$results$name,
             Party = representatives$results$party
             
