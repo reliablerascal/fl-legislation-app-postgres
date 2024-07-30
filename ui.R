@@ -108,6 +108,31 @@ app3_ui <- fluidPage(
   uiOutput("staticMethodology3")
 )
 
+
+
+###########################
+#                         #  
+# app 4 experiments       #
+#                         #
+###########################
+
+app5_ui <- fluidPage(
+  tags$head(tags$link(rel = "stylesheet", type = "text/css", href = "https://mockingbird.shinyapps.io/fl-leg-app-postgres/styles.css")),
+  c_disconnect_message(),
+  titlePanel("Find Your Elected Representatives"),
+  sidebarLayout(
+    sidebarPanel(
+      textInput("address", "Enter your address:", ""),
+      actionButton("submit", "Find Representatives")
+    ),
+    mainPanel(
+      tableOutput("representatives")
+    )
+  )
+)
+
+
+
 #####################
 #                   #  
 # navbar page       #
@@ -176,9 +201,10 @@ ui <- fluidPage(
   #####################
   div(class="navbar2",
       tabsetPanel(
-      tabPanel("District Context", value = "app3", app3_ui),
-      tabPanel("Voting Patterns", value = "app1", app1_ui),
-      #tabPanel("Legislator Activity Overview", value = "app2", app2_ui),
+        tabPanel("Voting Patterns", value = "app1", app1_ui),
+        tabPanel("District Context", value = "app3", app3_ui),
+        tabPanel("Legislator Lookup", value = "app5", app5_ui),
+      #tabPanel("Legislator Activity", value = "app2", app2_ui),
       id = "navbar_page",
       selected = "app1" #start on this app by default
       )

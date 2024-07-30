@@ -18,9 +18,10 @@ library(plotly)
 library(ggplot2)
 library(patchwork) # combines multiple ggplot2 plots into a single cohesive layout. Used for demographics bar charts
 
-library(DBI)
-library(RPostgres)
-library(scales)
+library(DBI) # access fl_leg_votes database
+library(RPostgres) # access fl_leg_votes database
+library(scales) # format as percent
+library(config) # for securely tracking API keys on shinyapps.io
 
 library(shinydisconnect) #customize Shiny app disconnect message
 
@@ -65,6 +66,7 @@ server <- function(input, output, session) {
   source("servers/server1_vote_patterns.R", local = TRUE)
   # source("servers/server2_leg_activity.R", local = TRUE)
   source("servers/server3_district_context.R", local = TRUE)
+  source("servers/server5_legislator_lookup.R", local = TRUE)
 }
 
 ########################
