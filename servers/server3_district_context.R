@@ -41,7 +41,15 @@ observeEvent(input$navbarPage == "app3", {
   }
   
   output$dynamicFilters3 <- renderUI({
+    sort_legislators_by_last_name <- function(legislators) {
+      # Extract last names assuming legislator_name is in "First Last" format
+      last_names <- sapply(strsplit(legislators, " "), function(x) x[length(x)])
+      sorted_indices <- order(last_names)
+      legislators[sorted_indices]
+    }
+    
     legislators <- unique(app03_district_context$legislator_name)
+    sorted_legislators <- sort_legislators_by_last_name(legislators)
     
     div(class = "filter-row query-input",
         radioButtons("filter_method", "Filter By:", choices = c("District", "Legislator Name"), selected = "District"),
@@ -52,7 +60,7 @@ observeEvent(input$navbarPage == "app3", {
         ),
         conditionalPanel(
           condition = "input.filter_method == 'Legislator Name'",
-          selectInput("legislator3", "Select Legislator:", choices = legislators, selected = legislators[1])
+          selectInput("legislator3", "Select Legislator:", choices = sorted_legislators, selected = sorted_legislators[1])
         )
     )
   })
