@@ -1,5 +1,5 @@
 # Legislator Dashboard
-7/30/24
+7/31/24
 
 This repo tracks development of the Jacksonville Tributary's interactive legislative dashboard, which is based on roll call vote data from [Legiscan](https://legiscan.com/FL/datasets) as well as elections and demographic data from [Dave's Redistricting](https://davesredistricting.org/maps#state::FL). Data is prepared for display in an [ETL data pipeline](https://github.com/reliablerascal/fl-legislation-etl).
 
@@ -40,7 +40,7 @@ This is a new app, incorporating some partisanship data from the Voting Patterns
 
 ## Ongoing Development
 See the following documents for info on past and current development:
-* [changelog](docs/changelog.md)- updates in the alpha and beta versions
+* [changelog](docs/changelog.md)- lists updates in the alpha and beta versions
 * [Voting Patterns development notes](https://docs.google.com/document/d/1OGiJH7B_0j3B38gEtgt_FDhkxzL84ZtGistdup2yYHI/edit?usp=drive_link)
 * [District Context development notes](https://docs.google.com/document/d/1e3KDrnpXjKL4OJqFR49hqti77TntPRL7k4AkqSfsefU/edit?usp=drive_link)
 
