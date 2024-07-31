@@ -38,7 +38,7 @@ library(shinydisconnect) #customize Shiny app disconnect message
 all_data <- readRDS("data/all_data.rds")
 
 app01_vote_patterns <- all_data$app01_vote_patterns
-# app02_leg_activity <- all_data$app02_leg_activity
+#app02_leg_activity <- all_data$app02_leg_activity
 jct_bill_categories <- all_data$jct_bill_categories
 app03_district_context <- all_data$app03_district_context
 app03_district_context_state <- all_data$app03_district_context_state

@@ -1,5 +1,19 @@
 /* styles.css */
 
+/* added for use with 3-column district context table */
+.flex-section {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  flex-wrap: wrap;
+}
+
+.flex-item {
+  flex: 1;
+  min-width: 300px;
+  margin: 10px;
+}
+
 .header-section {
   font-size: 1.17em;
   font-weight: bold;

@@ -115,12 +115,12 @@ app1_ui <- fluidPage(
 app3_ui <- fluidPage(
   tags$head(tags$link(rel = "stylesheet", type = "text/css", href = "https://mockingbird.shinyapps.io/fl-leg-app-postgres/styles.css")),
   c_disconnect_message(),
-  uiOutput("dynamicHeader3"),
-  uiOutput("dynamicFilters3"),
-  uiOutput("dynamicPartisanship"),
-  uiOutput("dynamicDemographics"),
-  #uiOutput("dynamicLegProfile"),
-  uiOutput("staticMethodology3")
+  fluidRow(column(12, uiOutput("dynamicHeader3"))),
+  fluidRow(column(12, uiOutput("dynamicFilters3"))),
+  # fluidRow(column(12, uiOutput("dynamicPartisanship"))),
+  # fluidRow(column(12, uiOutput("dynamicDemographics"))),
+  fluidRow(column(12, uiOutput("dynamicContextComparison"))),
+  fluidRow(column(12, uiOutput("staticMethodology3")))
 )
 
 
