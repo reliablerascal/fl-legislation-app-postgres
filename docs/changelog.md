@@ -1,6 +1,7 @@
 # Change Log (alpha)
 
 ## Week of 29 July
+
 ### App- District Context
 * District partisan lean now calculated as a weighted average (10% - 2016 Pres, 10% - 2018 Gov, 50% - 2020 Pres, 30% - 2022 Gov)
 * Legislator lookup sorted by last name (not first name)

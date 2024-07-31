@@ -9,5 +9,4 @@ archive/
 config.yml
 data/
 data.RData
-fl-legislation-app-postgres.Rproj
 servers/archive
