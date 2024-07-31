@@ -339,8 +339,3 @@ observeEvent(input$navbar_page == "app1", {
     return(plotly_output)
   })
 })   # END OBSERVER EVENT  
-
-  
-  
-  
-  

@@ -37,17 +37,6 @@
   text-transform: uppercase;
 }
 
-.query-input {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  margin-top: 1.5vw;
-  margin-bottom: 0px;
-  padding-bottom: 0px;
-  margin-left: auto;
-  margin-right: auto;
-}
-
 .legend-box {
   display: flex;
   flex-direction: column;
@@ -74,6 +63,25 @@
   font-size: 0.75em;
   text-align: left;
   align: left;
+}
+
+.query-input {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  margin-top: 1.5vw;
+  margin-bottom: 0px;
+  padding-bottom: 0px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.staging-banner {
+  background-color: red;
+  color: white;
+  text-align: center;
+  padding: 5px;
+  font-size: 16px;
 }
 
 .stat-bold {

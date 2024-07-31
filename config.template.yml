@@ -1,0 +1,8 @@
+# to test locally
+# copy this file as config.yml
+# and replace with your own API keys
+
+default:
+  api_key_geocodio: YOUR-GEOCODIO-API-KEY
+
+  api_key_plural: YOUR-PLURAL-POLICY-API-KEY
