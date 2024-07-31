@@ -1,3 +1,6 @@
+# note that .gitignore will also stash local files
+# to prevent them from being overwritten while checking out origin branches
+
 ~code_graveyard.R
 .RData
 .Rhistory
@@ -6,6 +9,5 @@ archive/
 config.yml
 data/
 data.RData
-legislator_dashboard.Rproj
+fl-legislation-app-postgres.Rproj
 servers/archive
-test.html
