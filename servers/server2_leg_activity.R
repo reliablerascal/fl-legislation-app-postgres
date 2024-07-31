@@ -96,7 +96,19 @@ observeEvent(input$navbarPage == "app2",{
     }
   })
   filtered_data <- reactive({
+    if (is.null(app02_leg_activity)) {
+      print("app02_leg_activity is NULL")
+      return(data.frame())
+    }
+    
+    if (!is.data.frame(app02_leg_activity)) {
+      print("app02_leg_activity is not a data frame")
+      return(data.frame())
+    }
+    
     data <- app02_leg_activity
+    print(paste("nrows in app02:",nrow(app02_leg_activity)))
+    print(paste("nrows in data:",nrow(data)))
     if (length(values$party) > 0) {
       data <- data %>% filter(party %in% values$party)
     }
@@ -119,8 +131,8 @@ observeEvent(input$navbarPage == "app2",{
       data <- data %>% filter(grepl(input$searchText, title, fixed = TRUE) | grepl(input$searchText, description, fixed = TRUE))
     }
     # Apply legislator filter based on dropdown selection
-    if (!is.null(input$legislator) && input$legislator != "All") {
-      data <- data %>% filter(grepl(input$legislator, legislator_name, fixed = TRUE))
+    if (!is.null(input$legislator2) && input$legislator2 != "All") {
+      data <- data %>% filter(grepl(input$legislator2, legislator_name, fixed = TRUE))
     }
     
     if(length(values$selectedYears) > 0) {
@@ -156,7 +168,7 @@ observeEvent(input$navbarPage == "app2",{
     data
   })
   observe({
-    current_selection <- input$legislator
+    current_selection <- input$legislator2
     filtered_legislators <- unique(filtered_legdata()$name)
     
     if (!is.null(input$legislator_enter_pressed)) {
@@ -198,7 +210,7 @@ observeEvent(input$navbarPage == "app2",{
   })
   output$legislatorProfile <- renderUI({
     # Assuming 'heatmap_data' contains all the necessary legislator information
-    selected_legislator <- input$legislator
+    selected_legislator <- input$legislator2
     if (!is.null(selected_legislator) && selected_legislator != "") {
       legislator_info <- app02_leg_activity %>%
         filter(name == selected_legislator) %>% distinct(name, district, party, role, ballotpedia2) %>% slice(1)
@@ -213,14 +225,25 @@ observeEvent(input$navbarPage == "app2",{
   current_page <- reactiveVal(1)
   items_per_page <- reactive({ as.numeric(input$items_per_page) })
   paginated_data <- reactive({
-    if (nrow(filtered_data()) == 0) return(data.frame())
+    #debug 7/31/24
+    filtered <- filtered_data()
+    print(paste("Filtered data type:", class(filtered)))
+    if (is.null(filtered) || nrow(filtered) == 0) {
+      print("Filtered data is NULL or empty")  # Debugging print
+      return(data.frame())
+    }
+    
+    #if (nrow(filtered_data()) == 0) return(data.frame())
     start_index <- (current_page() - 1) * items_per_page() + 1
     end_index <- min(nrow(filtered_data()), start_index + items_per_page() - 1)
     filtered_data()[start_index:end_index, ]
   })
   output$votesDisplay <- renderUI({
     data <- paginated_data()
-    if (is.null(input$legislator) || input$legislator == "" || nrow(data) == 0) {
+    
+    # debug 7/31/24
+    print(paste("Votes display data rows:", nrow(data)))  
+    if (is.null(input$legislator2) || input$legislator2 == "" || nrow(data) == 0) {
       return(div(class = "no-data", "No bills available for display."))
     }
     

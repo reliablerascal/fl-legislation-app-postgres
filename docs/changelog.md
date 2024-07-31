@@ -2,8 +2,8 @@
 
 ## Week of 29 July
 ### District Context App
+* Layout presented in three columns (legislator, elections, demographics)
 * Legislator lookup sorted by last name (not first name)
-
 
 ### Voting Patterns App
 * Added sort legislators by district electorate lean

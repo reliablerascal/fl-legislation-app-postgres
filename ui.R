@@ -73,7 +73,38 @@ app1_ui <- fluidPage(
   plotlyOutput("heatmapPlot") 
 )
 
-
+###############################
+#                             #  
+# app 2 legislative activity  #
+#                             #
+###############################
+# app2_ui <- fluidPage(
+#   div(class="filter-group",
+#       div(class="filter-section", span("Party:"), actionButton("btn_party_R", "R", class="btn-filter btn-party R"), actionButton("btn_party_D", "D", class="btn-filter btn-party D")),
+#       div(class="filter-section", span("Chamber:"), actionButton("btn_role_Rep", "House", class="btn-filter btn-role Rep"), actionButton("btn_role_Sen", "Senate", class="btn-filter btn-role Sen")),
+#       div(class="filter-section", span("Final Vote:"), actionButton("btn_final_Y", "Yes", class="btn-filter btn-final Y"), actionButton("btn_final_N", "No", class="btn-filter btn-final N"))
+#   ),
+#   div(class="filter-group",
+#       div(class="filter-section", textInput("searchText", "Search Bills:", placeholder="Type to search in titles or descriptions...")),
+#       div(class="filter-section",selectizeInput("legislator", "Select Legislator:", choices = NULL,options = list('create' = TRUE, 'persist' = FALSE, 'placeholder' = 'Type to search...', 'onInitialize' = I("function() { this.on('dropdown_open', function() { $('.selectize-dropdown-content').perfectScrollbar(); }); }"))))
+#   ),
+#   div(id="filter-info", style="display: flex; align-items: center; margin-bottom: 20px;",
+#       textOutput("filterFeedback"),
+#       uiOutput("votefilterinfo") # This will dynamically generate additional info or tooltip content
+#   ),
+#   div(class="content",
+#       div(class="votes-section", uiOutput("votesDisplay")),
+#       div(class="legislator-profile",
+#       div(class = "filter-section",
+#         span("Session Year:"),
+#         actionButton("btn_year_2023", "2023", class = "btn-filter"),
+#         actionButton("btn_year_2024", "2024", class = "btn-filter")
+#       ),
+#       uiOutput("legislatorProfile"),
+#       div(class="profile-filter-section", checkboxGroupInput("voteType", label=HTML('Key Vote Type: <button id="info" type="button" class="btn btn-default action-button shiny-bound-input" onclick="Shiny.setInputValue(\'info_clicked\', true, {priority: \'event\'});"><i class="fas fa-info-circle"></i></button>'), choices=list("Voted Against Both Parties"="Independent", "Voted With Other Party"="Maverick", "Voted With Own Party"="Normal")))
+#           )
+#     )
+#   )
 
 ###########################
 #                         #  
@@ -169,12 +200,15 @@ ui <- fluidPage(
     tags$meta(property = "article:published_time", content = "2024-02-22T03:02:59+00:00"),
     tags$meta(property = "article:modified_time", content = "2024-02-22T03:02:59+00:00"),
     tags$link(href = "https://fonts.googleapis.com/css2?family=Archivo:ital,wght@0,500;0,600;1,500;1,600&display=swap", rel = "stylesheet"),
-    tags$link(rel = "stylesheet", type = "text/css", href = "styles.css")
+    tags$link(rel = "stylesheet", type = "text/css", href = "styles.css"),
+    # track URL to identify staging vs. production
+    tags$script('var hostname = window.location.hostname; Shiny.onInputChange("app_url", hostname);')
   ),
   # Banner #####
   div(class = "banner",
       tags$a(href = "https://jaxtrib.org/", 
              tags$img(src = "https://jaxtrib.org/wp-content/uploads/2021/09/TRB_TributaryLogo_NoTagline_White.png", class = "logo-img", alt = "The Tributary")
+      # uiOutput("stagingBanner")
       )
   ),
   
@@ -186,9 +220,9 @@ ui <- fluidPage(
   div(class="navbar2",
       tabsetPanel(
         tabPanel("Voting Patterns", value = "app1", app1_ui),
+        #tabPanel("Legislator Activity", value = "app2", app2_ui),
         tabPanel("District Context", value = "app3", app3_ui),
         tabPanel("Legislator Lookup", value = "app5", app5_ui),
-      #tabPanel("Legislator Activity", value = "app2", app2_ui),
       id = "navbar_page",
       selected = "app1" #start on this app by default
       )
