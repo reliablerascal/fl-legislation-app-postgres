@@ -92,86 +92,75 @@ observeEvent(input$navbarPage == "app3", {
     return (data)
   })
   
-  ########################################
-  #                                      #  
-  # comparative partisanship             #
-  #                                      #
-  ######################################## 
+  count_legislators_in_party <- function(data, party, chamber) {
+    data %>%
+      filter(party == !!party, chamber == !!chamber) %>%
+      tally()
+  }
   
-  output$dynamicPartisanship <- renderUI({
+  #############################
+  #                           #  
+  # party loyalty             #
+  #                           #
+  #############################
+  # Helper Output for Party Loyalty
+  output$helper3_party_loyalty <- renderUI({
     data_district <- qry_demo_district()
-    # data_district <- data_district$data
     
-    n_districts <- if (data_district$chamber == "House") {
-      120
-    } else if (data_district$chamber == "Senate") {
-      40
-    }
-    
-    same_party <- if (data_district$party == "R") {
-      "Republican"
-    } else if (data_district$party == "D") {
-      "Democrat"
-    }
-    
-    count_legislators_in_party <- function(data, party, chamber) {
-      data %>%
-        filter(party == !!party, chamber == !!chamber) %>%
-        tally()
-    }
+    same_party <- if (data_district$party == "R") "Republican" else "Democrat"
     
     n_legislators_in_party <- if (same_party == "Republican") {
       count_legislators_in_party(app03_district_context, "R", input$chamber3)$n
-    } else if (same_party == "Democrat") {
+    } else {
       count_legislators_in_party(app03_district_context, "D", input$chamber3)$n
     }
     
-    rank_dist <- if (data_district$party == "R") {
-      data_district$rank_partisan_dist_R
-    } else if (data_district$party == "D") {
-      data_district$rank_partisan_dist_D
-    }
+    rank_leg <- if (data_district$party == "R") data_district$rank_partisan_leg_R else data_district$rank_partisan_leg_D
     
-    rank_leg <- if (data_district$party == "R") {
-      data_district$rank_partisan_leg_R
-    } else if (data_district$party == "D") {
-      data_district$rank_partisan_leg_D
-    }
-    
-    tagList(
-      HTML(paste0(
-        '<table style="width:100%; border-collapse: collapse;">',
-        '<tr>',
-        '<th style="width:50%; text-align:left; border-right: 1px solid black; padding-right: 10px;"><span class="header-section">Legislative Voting</span></th>',
-        '<th style="width:50%; text-align:left; padding-left: 10px;"><span class="header-section">Population Voting</span></th>',
-        '</tr>',
-        '<tr>',
-        '<td style="vertical-align:top; width:50%; border-right: 1px solid black; padding-right: 10px;" align=left>',
-        '<span class="stat-bold">', data_district$legislator_name, '\'s</span> voting record is ranked #<span class="stat-bold">', rank_leg,
-        '</span> most ',same_party , '-leaning amongst <span class="stat-bold">', n_legislators_in_party, '</span> ', input$chamber3, ' legislators in the ', same_party, ' party.<br>',
-        '<br>Of their ', data_district$leg_n_votes_denom_loyalty, ' votes included in calculating party loyalty:<br>',
-        'Party Line Partisan: <span class="stat-bold">', data_district$leg_n_votes_party_line_partisan, ' (', percent(data_district$leg_n_votes_party_line_partisan/data_district$leg_n_votes_denom_loyalty,accuracy = 0.1), ')</span><br>',
-        'Cross Party Votes: <span class="stat-bold">', data_district$leg_n_votes_cross_party, ' (', percent(data_district$leg_n_votes_cross_party/data_district$leg_n_votes_denom_loyalty, accuracy = 0.1), ')</span><br>',
-        '<br>Not included in the loyalty calculation:<br>',
-        'Party Line Bipartisan: <span class="stat-bold">', data_district$leg_n_votes_party_line_bipartisan, '</span><br>',
-        'Independent (vs. both parties): <span class="stat-bold">', data_district$leg_n_votes_independent, '</span><br>',
-        'Absent or No Vote: <span class="stat-bold">', data_district$leg_n_votes_absent_nv, '</span><br>',
-        '*Other Votes: <span class="stat-bold">', data_district$leg_n_votes_other, '</span><br>',
-        '<a href = "', data_district$ballotpedia ,'" target="_blank">', data_district$legislator_name, ' on Ballotpedia</a>',
-        '</td>',
-        '<td style="vertical-align:top; width:50%; padding-left: 10px;"  align=left>',
-        'In comparison, this district is ranked #<span class="stat-bold">', rank_dist, '</span> most ', same_party,
-        '-leaning of <span class="stat-bold">', n_districts, '</span> ', data_district$chamber, ' districts:<br>',
-        '<span class="stat-bold">', data_district$avg_party_lean, ' + ', data_district$avg_party_lean_points_abs, '</span><br>',
-        '<span class="stat-bold">', percent(data_district$avg_pct_R), '</span> Republican<br>',
-        '<span class="stat-bold">', percent(data_district$avg_pct_D), '</span> Democrat<br>',
-        '</td>',
-        '</tr>',
-        '</table>',
-        '<hr>'
-      ))
-    )
+    HTML(paste0(
+      '<div class="flex-item">',
+      '<div class="header-section">Legislative Voting</div>',
+      '<span class="stat-bold">', data_district$legislator_name, '\'s</span> voting record is ranked<br>#<span class="stat-bold">', rank_leg,
+      '</span> most ', same_party, '-leaning<br>amongst <span class="stat-bold">', n_legislators_in_party, '</span> ', input$chamber3, ' legislators in the ', same_party, ' party.<br>',
+      '<br>Of their ', data_district$leg_n_votes_denom_loyalty, ' votes included in calculating party loyalty:<br>',
+      'Party Line Partisan: <span class="stat-bold">', data_district$leg_n_votes_party_line_partisan, ' (', percent(data_district$leg_n_votes_party_line_partisan/data_district$leg_n_votes_denom_loyalty, accuracy = 0.1), ')</span><br>',
+      'Cross Party Votes: <span class="stat-bold">', data_district$leg_n_votes_cross_party, ' (', percent(data_district$leg_n_votes_cross_party/data_district$leg_n_votes_denom_loyalty, accuracy = 0.1), ')</span><br>',
+      '<br>Not included in the loyalty calculation:<br>',
+      'Party Line Bipartisan: <span class="stat-bold">', data_district$leg_n_votes_party_line_bipartisan, '</span><br>',
+      'Independent (vs. both parties): <span class="stat-bold">', data_district$leg_n_votes_independent, '</span><br>',
+      'Absent or No Vote: <span class="stat-bold">', data_district$leg_n_votes_absent_nv, '</span><br>',
+      '*Other Votes: <span class="stat-bold">', data_district$leg_n_votes_other, '</span><br>',
+      '<a href = "', data_district$ballotpedia, '" target="_blank">', data_district$legislator_name, ' on Ballotpedia</a>',
+      '</div>'
+    ))
   })
+  
+  #############################
+  #                           #  
+  # district lean             #
+  #                           #
+  #############################
+  output$helper3_district_lean <- renderUI({
+    data_district <- qry_demo_district()
+    
+    same_party <- if (data_district$party == "R") "Republican" else "Democrat"
+    
+    n_districts <- if (data_district$chamber == "House") 120 else 40
+    
+    rank_dist <- if (data_district$party == "R") data_district$rank_partisan_dist_R else data_district$rank_partisan_dist_D
+    
+    HTML(paste0(
+      '<div class="flex-item">',
+      '<div class="header-section">Population Voting</div>',
+      'In comparison, this district is ranked<br>#<span class="stat-bold">', rank_dist, '</span> most ', same_party,
+      '-leaning<br>amongst <span class="stat-bold">', n_districts, '</span> ', data_district$chamber, ' districts:<br>',
+      '<span class="stat-bold">', data_district$avg_party_lean, ' + ', data_district$avg_party_lean_points_abs, '</span><br>',
+      '<span class="stat-bold">', percent(data_district$avg_pct_R), '</span> Republican<br>',
+      '<span class="stat-bold">', percent(data_district$avg_pct_D), '</span> Democrat<br>',
+      '</div>'
+    ))
+  })
+  
   
   
   ########################################
@@ -180,7 +169,7 @@ observeEvent(input$navbarPage == "app3", {
   #                                      #
   ########################################   
   
-  output$dynamicDemographics <- renderUI({
+  output$helper3_demographics <- renderUI({
     tagList(
       HTML(paste0(
         '<div class = "header-section">District Demographics</div>'
@@ -240,6 +229,22 @@ observeEvent(input$navbarPage == "app3", {
     # Combine plots using patchwork
     plot_white / plot_black/ plot_asian/ plot_hispanic/ plot_napi
   })
+  
+  ########################################
+  #                                      #  
+  # Combined output                      #
+  #                                      #
+  ######################################## 
+  output$dynamicContextComparison <- renderUI({
+    tagList(
+      HTML('<div class="flex-section">'),
+      uiOutput("helper3_party_loyalty"),
+      uiOutput("helper3_district_lean"),
+      uiOutput("helper3_demographics"),
+      HTML('</div>')
+    )
+  })
+  
   
   ########################################
   #                                      #  
