@@ -53,13 +53,9 @@ app1_ui <- fluidPage(
     
     tags$script(src = "https://cdn.jsdelivr.net/npm/mobile-detect@1.4.5/mobile-detect.min.js"), # Include MobileDetect.js 
     tags$script(HTML("
-      $(document).on('shiny:connected', function(event) {
+       $(document).on('shiny:connected', function(event) {
         var md = new MobileDetect(window.navigator.userAgent);
-        if (md.mobile()) {
-          Shiny.setInputValue('isMobile', true);
-        } else {
-          Shiny.setInputValue('isMobile', false);
-        }
+        Shiny.setInputValue('isMobile', !!md.mobile());
       });
     "))
   ),
