@@ -16,6 +16,8 @@ library(shinyWidgets)
 library(shiny)
 library(shinydisconnect) # not sure why this is needed here AND in app.R, but it prevents Error in c_disconnect_message() : could not find function "c_disconnect_message"
 
+verbatimTextOutput("debug_output")
+
 #########################
 #                       #  
 # Global functions      #
@@ -44,13 +46,11 @@ c_disconnect_message <- function() {
 #####################
 # Define the UI for App 1 ####
 
-# tags$script(HTML("
-#       Shiny.setInputValue('is_mobile', /iPhone|iPad|iPod|Android/i.test(navigator.userAgent));
-#     "))),
-#check for mobile access, so we can simplify heatmap accordingly
 app1_ui <- fluidPage( 
   tags$head( 
-    tags$link(rel = "stylesheet", type = "text/css", href = "styles.css"), 
+    #tags$link(rel = "stylesheet", type = "text/css", href = "styles.css"), 
+    tags$link(rel = "stylesheet", type = "text/css", href = "https://data.jaxtrib.org/dev/styles.css"),
+    
     tags$script(src = "https://cdn.jsdelivr.net/npm/mobile-detect@1.4.5/mobile-detect.min.js"), # Include MobileDetect.js 
     tags$script(HTML("
       $(document).on('shiny:connected', function(event) {
@@ -73,23 +73,6 @@ app1_ui <- fluidPage(
   plotlyOutput("heatmapPlot") 
 )
 
-# app1_ui <- fluidPage(
-#   tags$head(
-#     tags$link(rel = "stylesheet", type = "text/css", href = "styles.css"),
-#     tags$script("
-#       Shiny.setInputValue('is_mobile', /iPhone|iPad|iPod|Android/i.test(navigator.userAgent));
-#     ")),
-#   c_disconnect_message(),
-#   uiOutput("dynamicHeader"),
-#   uiOutput("staticMethodology1"),
-#   uiOutput("dynamicFilters"),
-#   uiOutput("dynamicLegend"),
-#   uiOutput("dynamicRecordCount"),
-#   uiOutput("noDataMessage"),
-#   plotlyOutput("heatmapPlot")
-# )
-
-
 
 ###########################
 #                         #  
@@ -98,15 +81,102 @@ app1_ui <- fluidPage(
 ###########################
 
 app3_ui <- fluidPage(
-  tags$head(tags$link(rel = "stylesheet", type = "text/css", href = "https://mockingbird.shinyapps.io/fl-leg-app-postgres/styles.css")),
+  #tags$head(tags$link(rel = "stylesheet", type = "text/css", href = "https://mockingbird.shinyapps.io/fl-leg-app-postgres/styles.css")),
+  tags$head(tags$link(rel = "stylesheet", type = "text/css", href = "https://data.jaxtrib.org/dev/styles.css")),
   c_disconnect_message(),
-  uiOutput("dynamicHeader3"),
-  uiOutput("dynamicFilters3"),
-  uiOutput("dynamicPartisanship"),
-  uiOutput("dynamicDemographics"),
-  #uiOutput("dynamicLegProfile"),
-  uiOutput("staticMethodology3")
+  # uiOutput("app3UI"),
+  # uiOutput("dynamicHeader3"),
+  # uiOutput("dynamicFilters3"),
+  # uiOutput("dynamicPartisanship"),
+  # uiOutput("dynamicDemographics"),
+  # #uiOutput("dynamicLegProfile"),
+  # votingHistoryUI("votingHistory"),
+  # uiOutput("staticMethodology3")
+  fluidRow(column(12, uiOutput("dynamicHeader3"))),
+  fluidRow(column(12, uiOutput("dynamicFilters3"))),
+  fluidRow(column(12, uiOutput("dynamicContextComparison"))),
+  votingHistoryUI("votingHistory"),
+  fluidRow(column(12, uiOutput("staticMethodology3")))
 )
+
+
+
+
+
+
+###########################
+
+#                         #  
+
+# app 4 partisan scatterplot #
+
+#                         #
+
+###########################
+app4_ui <- 
+  fluidPage(
+    div(class = "header-tab", "Legislator vs District Partisanship"),
+    sidebarLayout(
+      sidebarPanel(
+        div(class = "filter-row query-input",
+            selectInput("chamber4", "Select Chamber:", 
+                        choices = c("All", "House", "Senate"),
+                        selected = "All"),
+            selectInput("party4", "Select Party:", 
+                        choices = c("All", "D", "R"),
+                        selected = "All")
+        )
+      ),
+      mainPanel(
+        plotlyOutput("scatterplot"),
+        htmlOutput("medianInfo"),
+        htmlOutput("explanationText")
+      )
+    )
+  )
+
+
+###########################
+
+#                         #  
+
+# app 5 legislator lookup #
+
+#                         #
+
+###########################
+
+
+
+app5_ui <- fluidPage(
+  
+  #tags$head(tags$link(rel = "stylesheet", type = "text/css", href = "https://mockingbird.shinyapps.io/fl-leg-app-postgres/styles.css")),
+  tags$head(tags$link(rel = "stylesheet", type = "text/css", href = "https://data.jaxtrib.org/dev/styles.css")),
+  
+  
+  c_disconnect_message(),
+  
+  titlePanel("Find Your Elected Representatives"),
+  
+  sidebarLayout(
+    
+    sidebarPanel(
+      
+      textInput("address", "Your address (include city and state):", ""),
+      
+      actionButton("submit", "Find Representatives")
+      
+    ),
+    
+    mainPanel(
+      
+      tableOutput("representatives")
+      
+    )
+    
+  )
+)
+
 
 #####################
 #                   #  
@@ -160,7 +230,8 @@ ui <- fluidPage(
     tags$meta(property = "article:published_time", content = "2024-02-22T03:02:59+00:00"),
     tags$meta(property = "article:modified_time", content = "2024-02-22T03:02:59+00:00"),
     tags$link(href = "https://fonts.googleapis.com/css2?family=Archivo:ital,wght@0,500;0,600;1,500;1,600&display=swap", rel = "stylesheet"),
-    tags$link(rel = "stylesheet", type = "text/css", href = "styles.css")
+    #tags$link(rel = "stylesheet", type = "text/css", href = "styles.css")
+    tags$link(rel = "stylesheet", type = "text/css", href = "https://data.jaxtrib.org/dev/styles.css")
   ),
   # Banner #####
   div(class = "banner",
@@ -178,31 +249,11 @@ ui <- fluidPage(
 
 div(class="navbar2",
     tabsetPanel(
-      tabPanel("District Context", value = "app3", app3_ui),
       tabPanel("Voting Patterns", value = "app1", app1_ui),
-      #tabPanel("Legislator Activity Overview", value = "app2", app2_ui),
-      tabPanel("Partisanship Scatterplot", value = "app4", 
-               fluidPage(
-                 div(class = "header-tab", "Legislator vs District Partisanship"),
-                 sidebarLayout(
-                   sidebarPanel(
-                     div(class = "filter-row query-input",
-                         selectInput("chamber4", "Select Chamber:", 
-                                     choices = c("All", "House", "Senate"),
-                                     selected = "All"),
-                         selectInput("party4", "Select Party:", 
-                                     choices = c("All", "D", "R"),
-                                     selected = "All")
-                     )
-                   ),
-                   mainPanel(
-                     plotlyOutput("scatterplot"),
-                     htmlOutput("medianInfo"),
-                     htmlOutput("explanationText")
-                   )
-                 )
-               )
-      ),
+      #tabPanel("Legislator Activity", value = "app2", app2_ui),
+      tabPanel("District Context", value = "app3", app3_ui),
+      tabPanel("Legislator Lookup", value = "app5", app5_ui),
+      tabPanel("Partisanship Scatterplot", value = "app4",app4_ui),
       id = "navbar_page",
       selected = "app1"
     )
