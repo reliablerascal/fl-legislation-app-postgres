@@ -51,17 +51,17 @@ c_disconnect_message <- function() {
 app1_ui <- fluidPage( 
   tags$head( 
     tags$link(rel = "stylesheet", type = "text/css", href = "styles.css"), 
-    tags$script(src = "https://cdn.jsdelivr.net/npm/mobile-detect@1.4.5/mobile-detect.min.js"), # Include MobileDetect.js 
-    tags$script(HTML("
-      $(document).on('shiny:connected', function(event) {
-        var md = new MobileDetect(window.navigator.userAgent);
-        if (md.mobile()) {
-          Shiny.setInputValue('isMobile', true);
-        } else {
-          Shiny.setInputValue('isMobile', false);
-        }
-      });
-    "))
+    # tags$script(src = "https://cdn.jsdelivr.net/npm/mobile-detect@1.4.5/mobile-detect.min.js"), # Include MobileDetect.js 
+    # tags$script(HTML("
+    #   $(document).on('shiny:connected', function(event) {
+    #     var md = new MobileDetect(window.navigator.userAgent);
+    #     if (md.mobile()) {
+    #       Shiny.setInputValue('isMobile', true);
+    #     } else {
+    #       Shiny.setInputValue('isMobile', false);
+    #     }
+    #   });
+    # "))
   ),
   c_disconnect_message(), 
   uiOutput("dynamicHeader"), 
