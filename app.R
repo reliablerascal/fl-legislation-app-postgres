@@ -21,7 +21,7 @@ library(patchwork) # combines multiple ggplot2 plots into a single cohesive layo
 library(DBI) # access fl_leg_votes database
 library(RPostgres) # access fl_leg_votes database
 library(scales) # format as percent
-library(config) # for securely tracking API keys on shinyapps.io
+#library(config) # for securely tracking API keys on shinyapps.io
 
 library(shinydisconnect) #customize Shiny app disconnect message
 
