@@ -1,4 +1,4 @@
-# OLD SERVER1 PARTISANSHIP
+# server1_vote_patterns.R
 # version from 7/22/24 AM
 
 
@@ -143,21 +143,23 @@ observeEvent(input$navbar_page == "app1", {
         createFilterBox("chamber", "Select Chamber:", c("House", "Senate")),
         createFilterBox("year", "Select Session Year:", c(2023, 2024, "All"), selected = 2024),
         createFilterBox("final", "Final (Third Reading) Vote?", c("Y", "N", "All"), selected = "Y"),
-        createFilterBox("bill_category", "Bill Category (demo)", c("education", "All"), selected = "All"),
+        #createFilterBox("bill_category", "Bill Category (demo)", c("education", "All"), selected = "All"),
         createFilterBox("sort_by_leg", "Sort Legislators By:", c("Name", "Party Loyalty", "District"), selected = "Party Loyalty"),
         createFilterBox("sort_by_rc", "Sort Roll Calls By:", c("Bill Number", "Party Unity"), selected = "Party Unity")
     )
   })
   
   #filter junction table to restrict bills by category, if applicable
-  filtered_jct <- reactive({
-    req(input$bill_category)
-    jct_bill_categories %>% filter(bill_category == input$bill_category)
-  })
+  # filtered_jct <- reactive({
+  #   req(input$bill_category)
+  #   jct_bill_categories %>% filter(bill_category == input$bill_category)
+  # })
   
   data_filtered <- reactive({
     #data <- app01_vote_patterns %>% filter(true_pct!= 1 & true_pct != 0)
-    req(input$party, input$chamber, input$year, input$final, input$bill_category, input$sort_by_leg, input$sort_by_rc)  # Ensure inputs are available
+    req(input$party, input$chamber, input$year, input$final, 
+        # input$bill_category, 
+        input$sort_by_leg, input$sort_by_rc)  # Ensure inputs are available
     data <- app01_vote_patterns
     
     if (input$year != "All") {
@@ -182,9 +184,9 @@ observeEvent(input$navbar_page == "app1", {
       data <- data %>% dplyr::filter(chamber == input$chamber)
     }
     
-    if (input$bill_category != "All") {
-      data <- data %>% dplyr::filter(bill_id %in% filtered_jct()$bill_id)
-    }
+    # if (input$bill_category != "All") {
+    #   data <- data %>% dplyr::filter(bill_id %in% filtered_jct()$bill_id)
+    # }
     
     
     
@@ -327,9 +329,9 @@ observeEvent(input$navbar_page == "app1", {
             axis.text.y = element_text(size = 10),
             legend.position = "none",
             plot.title = element_blank(),
-            plot.subtitle = element_blank())
+            plot.subtitle = element_blank())+ aes(text = hover_text)
     
-    if (!input$isMobile) {
+    if (input$isMobile == "true") {
       p <- p + aes(text = hover_text)
     }
     
@@ -341,12 +343,9 @@ observeEvent(input$navbar_page == "app1", {
         margin = list(l = 200, t = 85, b = 150),
         plot_bgcolor = "rgba(255,255,255,0.85)",
         paper_bgcolor = "rgba(255,255,255,0.85)"
-      )
-    if (input$isMobile) {
-      plotly_output <- plotly_output %>%
-        layout(dragmode = FALSE) %>%
-        config(scrollZoom = FALSE)
-    }
+      ) %>% 
+        plotly::layout(dragmode = FALSE) %>%
+      plotly::config(scrollZoom = FALSE)
     return(plotly_output)
   })
 })   # END OBSERVER EVENT  
