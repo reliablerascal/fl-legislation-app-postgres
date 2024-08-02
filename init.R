@@ -1,3 +1,5 @@
+options(repos = c(CRAN = "https://cran.rstudio.com"))
+
 # init.R
 install_if_needed <- function(packages) {
   new_packages <- packages[!(packages %in% installed.packages()[,"Package"])]
@@ -35,7 +37,7 @@ cran_packages <- c(
   "shinythemes",
   "readr",
   "DT",
-  "shinyWidgets",
+  "shinyWidgets"
 )
 
 # Install CRAN packages if needed

@@ -1,11 +1,5 @@
 # server1_vote_patterns.R
 # version from 7/22/24 AM
-
-
-# redundant, but somehow necessary to reload some libraries?
-# library(shiny)
-# library(dplyr)
-# library(plotly)
 library(shinyjs)
 
 ########################################
@@ -43,21 +37,16 @@ observeEvent(input$navbar_page == "app1", {
   #                                      #
   ########################################   
   output$dynamicHeader <- renderUI({
-    # year <- input$year
-    # party_same <- if(input$party == "D") "Democrats" else if(input$party == "R") "Republicans" else "All Parties"
-    # party_oppo <- if(input$party == "D") "Republicans" else if(input$party == "R") "Democrats" else "All Parties"
-    #   
-    # is_mobile <- ifelse(is.null(input$is_mobile), FALSE, input$is_mobile)
-    # print(paste0('mobile detected?',is_mobile))
-    # is_mobile <- !is_mobile
-    # is_mobile_desc <- ifelse(is_mobile, '<em>Recommended viewing on desktop, not mobile.</em><br>','')
-    # 
     HTML(paste0(
-      '<div class="header-tab">(DEV) Voting Patterns in Florida State Legislature</div>',
+      '<div class="header-tab">Florida Legislature Voting Patterns</div>',
+      '<div class="subtitle">Navigate Your Lawmaker\'s Voting Record</div>',
       '<div align="left">',
-      'This tab displays each legislator\'s vote on each roll call for bills &amp; amendments where their party voted in favor but not unanimously. ',
-      'Bills may have multiple roll calls; hover over plot for more info about specific roll calls.<br>',
-      'The intended audience includes Florida journalists focused on politics, policy, and elections.<br>',
+      'Explore how Florida legislators vote, compare their choices to their district\'s political leanings, ',
+      'and see how closely they align with their party. This easy-to-use tool helps you understand ',
+      'your representative\'s voting patterns on key issues.',
+      'This tool visualizes how Florida legislators vote on bills and amendments. Each square represents a vote, color-coded to show alignment or divergence from party lines. ',
+      'Hover over any square for detailed information about the vote. ',
+      'Use the filters below to explore voting patterns by party, chamber, year, and more.',
       '</div>'
     ))
   })
@@ -76,15 +65,15 @@ observeEvent(input$navbar_page == "app1", {
       '<div class="legend-box">',
       '  <div class="legend-item">',
       '    <div class="legend-color" style="background-color: ', color_same, ';"></div>',
-      '    Legislator aligned&nbsp;&nbsp;<em>with</em>&nbsp;&nbsp;most ', party_same, '.',
+      '    Legislator voted&nbsp;&nbsp;<em>with</em>&nbsp;&nbsp;most ', party_same, '.',
       '  </div>',
       '  <div class="legend-item">',
       '    <div class="legend-color" style="background-color: ', color_oppo, ';"></div>',
-      '    Legislator aligned&nbsp;&nbsp;<em>against</em>&nbsp;&nbsp;most ', party_same, ' and&nbsp;&nbsp;<em>with</em>&nbsp;&nbsp;most ', party_oppo, '.',
+      '    Legislator voted&nbsp;&nbsp;<em>against</em>&nbsp;&nbsp;most ', party_same, ' and&nbsp;&nbsp;<em>with</em>&nbsp;&nbsp;most ', party_oppo, '.',
       '  </div>',
       '  <div class="legend-item">',
       '    <div class="legend-color" style="background-color: #6DA832;"></div>',
-      '    Legislator aligned&nbsp;&nbsp;<em>against</em>&nbsp;&nbsp;both parties in bipartisan decisions.',
+      '    Legislator voted&nbsp;&nbsp;<em>against</em>&nbsp;&nbsp;both parties in bipartisan decisions.',
       '  </div>',
       '  <div class="legend-item">',
       '    <div class="legend-color" style="background-color: #FFFFFF; border: 1px solid black;"></div>',
@@ -95,24 +84,6 @@ observeEvent(input$navbar_page == "app1", {
     ))
   })
   
-  output$staticMethodology1 <- renderUI({
-    HTML(paste0(
-      '<div class="header-section">Methodology</div>',
-      '<div class="methodology-notes">',
-      'Party loyalty for each legislator is calculated across all sessions in 2023 and 2024, as a weighted average of with party/against oppo (1) and against party/with oppo (0), excluding votes on bipartisan roll calls.<br>',
-      '<strong>Data source:</strong> <a href="https://legiscan.com/FL/datasets">LegiScan\'s Florida Legislative Datasets for all 2023 and 2024 Regular Session</a>.<br>',
-      'For details on wishlist items and work in progress, see <a href="https://docs.google.com/document/d/1OGiJH7B_0j3B38gEtgt_FDhkxzL84ZtGistdup2yYHI/edit" target="_blank"><strong>development notes</strong></a>.',
-      '</div>'
-    ))
-  })
-  
-  # output$dynamicRecordCount <- renderUI({
-  #   HTML(paste0(
-  #     '<p>Displaying <span class="stat-bold">', n_legislators(), "</span> ", 
-  #     'legislators across <span class="stat-bold">', n_roll_calls(), '</span> roll calls with at least one same party member dissenting from the party majority</p>'
-  #   ))
-  # })
-  
   # THIS SECTION WILL BREAK EVERYTHING BUT I NEED TO IMPLEMENT A VARIANT OF IT
   output$dynamicRecordCount <- renderUI({
     # print("rc test")
@@ -120,9 +91,9 @@ observeEvent(input$navbar_page == "app1", {
     party_same <- if(input$party == "D") "Democrat" else if(input$party == "R") "Republican" else "All Parties"
 
     HTML(paste0(
-      '<p>Displaying <span class="stat-bold">', n_legislators(), '</span> ', input$chamber, ' ', party_same, 's<br>',
-      'across the <span class="stat-bold">', n_roll_calls(), '</span> roll calls in ', input$year, ' with at least one dissenting ', input$chamber, ' ', party_same,'</p>'
+      '<p>Displaying <span class="stat-bold">', n_legislators(), '</span> ', input$chamber, ' ', party_same, 's across <span class="stat-bold">', n_roll_calls(), '</span> partisan roll<br>',' calls in ', input$year,       ' where at least one ', input$chamber, ' ', party_same, ' voted against their party majority.</p>'
     ))
+    
   })
   
   
@@ -203,8 +174,8 @@ observeEvent(input$navbar_page == "app1", {
   # PLOT              #
   #                   #
   #####################
-  #clarify with Andrew- do we want to highlight % of present for party, vs. % of total for bill?
   #format pop-ups for when user hovers over a heatmap square
+  
   createHoverText <- function(numbers, descriptions, urls, pcts, pct_d, pct_r, vote_texts, descs, title, date, names, width = 100) {
     wrapped_descriptions <- sapply(descriptions, function(desc) paste(strwrap(desc, width = width), collapse = "<br>"))
     paste0(
@@ -216,8 +187,7 @@ observeEvent(input$navbar_page == "app1", {
     )
   }
   
-  
-  
+
   output$heatmapPlot <- renderPlotly({
     #req(input$isMobile)
     filtered_data <- data_filtered()
@@ -259,7 +229,7 @@ observeEvent(input$navbar_page == "app1", {
     
     numBills <- n_roll_calls()
     baseWidth <- 500 # Minimum width
-    perBillWidth <- 10 # Height per bill
+    perBillWidth <- 10 # Width per bill
     totalWidth <- baseWidth + (numBills * perBillWidth) # Total dynamic width
     
     # sort legislators. "reorder" function is used to sort based on another variable
@@ -337,17 +307,29 @@ observeEvent(input$navbar_page == "app1", {
     
     plotly_output <- ggplotly(p, tooltip = "text", height = totalHeight, width = totalWidth) %>%
       layout(
-        autosize = TRUE,
+        #autosize = TRUE,
         xaxis = list(side = "top"),
         font = list(family = "Archivo"),
-        margin = list(l = 200, t = 85, b = 150),
+        margin = list(l = 25, t = 50, b = 25),
         plot_bgcolor = "rgba(255,255,255,0.85)",
-        paper_bgcolor = "rgba(255,255,255,0.85)"
-      ) %>% 
-        plotly::layout(dragmode = FALSE) %>%
-      plotly::config(scrollZoom = FALSE)
+        paper_bgcolor = "rgba(255,255,255,0.85)",
+        dragmode = FALSE) %>%
+      plotly::config(scrollZoom = FALSE, displayModeBar = FALSE)
     return(plotly_output)
+    
   })
+  
+  output$staticMethodology1 <- renderUI({
+    HTML(paste0(
+      '<div class="header-section">About This Tool</div>',
+      '<div class="methodology-notes">',
+      'Party loyalty scores are calculated using partisan votes across all sessions in 2023 and 2024. The votes include every committee vote, every amendment and every final roll call. The score ignores bipartisan votes. Scores range from 0 to 1, where 1 indicates a legislator always votes with the majority of their party and 0 indicates a legislator always votes against their own party.<br>',
+      '<strong>Data source:</strong> <a href="https://legiscan.com/FL/datasets">LegiScan\'s Florida Legislative Datasets for all 2023 and 2024 Regular Session</a>.<br>',
+      'For more information on our methodology and future improvements, see our <a href="https://docs.google.com/document/d/1OGiJH7B_0j3B38gEtgt_FDhkxzL84ZtGistdup2yYHI/edit" target="_blank"><strong>development notes</strong></a>.',
+      '</div>'
+    ))
+  })
+  
 })   # END OBSERVER EVENT  
 
   

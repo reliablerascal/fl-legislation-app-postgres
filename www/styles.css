@@ -14,6 +14,20 @@
   margin: 10px;
 }
 
+.subtitle {
+    font-size: 1.2em;
+    color: #4a4a4a;
+    font-weight: 500;
+    margin-bottom: 20px;
+    text-align: center;
+    font-family: 'Archivo', sans-serif;
+    line-height: 1.4;
+    padding: 0 10px;
+    max-width: 800px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
 .header-section {
   font-size: 1.17em;
   font-weight: bold;
@@ -546,7 +560,8 @@ div.demographicsPlot{
 }
 
 .legislative-voting .main-list > li {
-  margin-bottom: 10px;
+  padding:10px;
+  line-height:1.25;
 }
 
 .legislative-voting .main-list ul {
@@ -577,6 +592,9 @@ div.demographicsPlot{
   line-height: 1.4;
 }
 
+div#helper3_district_lean{
+  max-width:300px;
+}
 .population-voting h3, .district-demographics h3 {
   background-color: #f0f0f0;
   padding: 10px;

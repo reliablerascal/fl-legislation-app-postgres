@@ -20,12 +20,13 @@ observeEvent(input$navbarPage == "app3", {
     data_district <- qry_demo_district()
     
     HTML(paste0(
-      '<div class = "header-tab-small">Representation Alignment for </div>',
+      '<div class = "header-tab-small">Legislator Spotlight</div>',
       '<h2>', data_district$legislator_name, ' (', data_district$party, ')</h2>',
-      '<h3>', data_district$chamber, ' district ', data_district$district, '</h3>',
+      '<h3>', data_district$chamber, ' District ', data_district$district, '</h3>',
       '<div align="left">',
-      'This tab displays each legislator\'s partisan leanings compared to their district\'s voting record and demographics.',
-      'The intended audience includes prospective voters in <a href="https://ballotpedia.org/Florida_elections,_2024#Offices_on_the_ballot">Florida\'s primary election on August 20</a>.<br>'
+      'This tool compares each legislator\'s voting record with their district\'s political leanings. ',
+      'Use it to understand how well a legislator represents their constituents\' views and characteristics. The tool below allows you to look up every single vote every legislator has taken, from committee votes to bill amendments to final roll calls.',
+      '</div>'
     ))
   })
   
@@ -122,6 +123,8 @@ observeEvent(input$navbarPage == "app3", {
   output$helper3_party_loyalty <- renderUI({
     data_district <- qry_demo_district()
     same_party <- if (data_district$party == "R") "Republican" else "Democrat"
+    same_party_adj <- if (data_district$party == "R") "Republican" else "Democratic"
+    
     n_legislators_in_party <- if (same_party == "Republican") {
       count_legislators_in_party(app03_district_context, "R", input$chamber3)$n
     } else {
@@ -135,16 +138,16 @@ observeEvent(input$navbarPage == "app3", {
     
     HTML(paste0(
       '<div class="flex-item legislative-voting">',
-      '<h3 class="flex-header-section">LEGISLATIVE VOTING</h3>',
+      '<h3 class="flex-header-section">VOTING RECORD</h3>',
       '<h4 class="legislator-name">', data_district$legislator_name, '\'S VOTING RECORD:</h4>',
       '<ul class="main-list">',
-      '<li>Ranked #<span class="stat-bold">', rank_leg, '</span> most loyal out of <span class="stat-bold">', n_legislators_in_party, '</span> ', input$chamber3, ' ', same_party, 's</li>',
-      '<li>Party loyalty calculated from <span class="stat-bold">', data_district$leg_n_votes_denom_loyalty, '</span> key votes:',
+      '<li><div>Party Loyalty Ranking:</div> <div><span class="stat-bold">#', rank_leg, '</span> most loyal out of <span class="stat-bold">', n_legislators_in_party, '</span> ', input$chamber3, ' ', same_party, 's</div></li>',
+      '<li>Based on <span class="stat-bold">', data_district$leg_n_votes_denom_loyalty, '</span> key votes:',
       '<ul>',
-      '<li>Party-Line Votes: <span class="stat-bold">', data_district$leg_n_votes_party_line_partisan, '</span> ', 
-      '<span class="percentage">', percent(data_district$leg_n_votes_party_line_partisan/data_district$leg_n_votes_denom_loyalty, accuracy = 0.1), '</span></li>',
-      '<li>Cross-Party Votes: <span class="stat-bold">', data_district$leg_n_votes_cross_party, '</span> ',
-      '<span class="percentage">', percent(data_district$leg_n_votes_cross_party/data_district$leg_n_votes_denom_loyalty, accuracy = 0.1), '</span></li>',
+      '<li>Voted with the ',same_party_adj,' Party: <span class="stat-bold">', data_district$leg_n_votes_party_line_partisan, '</span> ', 
+      '(<span class="percentage">', percent(data_district$leg_n_votes_party_line_partisan/data_district$leg_n_votes_denom_loyalty, accuracy = 0.1), '</span>)</li>',
+      '<li>Voted against the ',same_party_adj,' Party: <span class="stat-bold">', data_district$leg_n_votes_cross_party, '</span> ',
+      '(<span class="percentage">', percent(data_district$leg_n_votes_cross_party/data_district$leg_n_votes_denom_loyalty, accuracy = 0.1), '</span>)</li>',
       '</ul></li>',
       '<li>Additional voting data (not in loyalty calculation):',
       '<ul>',
@@ -164,49 +167,35 @@ observeEvent(input$navbarPage == "app3", {
   # district lean             #
   #                           #
   #############################
-# output$helper3_district_lean <- renderUI({
-#   data_district <- qry_demo_district()
-#   
-#   same_party <- if (data_district$party == "R") {"Republican"} else if (data_district$party == "D") {"Democrat"}
-#   
-#   n_districts <- if (data_district$chamber == "House") {120} else if (data_district$chamber == "Senate") {40}
-#   
-#   rank_dist <- if (data_district$party == "R") {
-#     data_district$rank_partisan_dist_R
-#   } else if (data_district$party == "D") {
-#     data_district$rank_partisan_dist_D
-#   }
-# 
-#   
-#   HTML(paste0(
-#     '<div class="flex-item">',
-#     '<div class="flex-header-section">Population Voting</div>',
-#   
-#         'In comparison, this district is ranked<br>#<span class="stat-bold">', rank_dist, '</span> most ', same_party,
-#         '-leaning of <span class="stat-bold">', n_districts, '</span> ', data_district$chamber, ' districts:<br>',
-#         '<span class="stat-bold">', data_district$avg_party_lean, ' + ', data_district$avg_party_lean_points_abs, '</span><br>',
-#         '<span class="stat-bold">', percent(data_district$avg_pct_R), '</span> Republican<br>',
-#         '<span class="stat-bold">', percent(data_district$avg_pct_D), '</span> Democrat<br>',
-#     '</div>'
-#       ))
-#   })
   output$helper3_district_lean <- renderUI({
     data_district <- qry_demo_district()
-    same_party <- if (data_district$party == "R") "Republican" else "Democrat"
+    same_party <- if (data_district$party == "R") "Republican" else "Democratic"
     n_districts <- if (data_district$chamber == "House") 120 else 40
     rank_dist <- if (data_district$party == "R") data_district$rank_partisan_dist_R else data_district$rank_partisan_dist_D
+    
+    lean_description <- paste0(
+      data_district$avg_party_lean, '+', data_district$avg_party_lean_points_abs,
+      " means ", 
+      ifelse(data_district$avg_party_lean > 0, 
+             "Republicans", 
+             "Democrats"), 
+      " on average won recent statewide elections by ", 
+      data_district$avg_party_lean ,
+      " percentage points in this district."
+    )
     
     HTML(paste0(
       '<div class="flex-item population-voting">',
       '<h3 class="flex-header-section">POPULATION VOTING</h3>',
       '<ul class="main-list">',
-      '<li>This district is ranked #<span class="stat-bold">', rank_dist, '</span> most ', same_party,
+      '<li>District Partisanship: This district votes the #<span class="stat-bold">', rank_dist, '</span> most ', same_party,
       '-leaning of <span class="stat-bold">', n_districts, '</span> ', data_district$chamber, ' districts</li>',
-      '<li>Partisan lean: <span class="stat-bold">', data_district$avg_party_lean, ' + ', data_district$avg_party_lean_points_abs, '</span></li>',
-      '<li>Voting breakdown:',
+      '<li>Partisan lean: <span class="stat-bold">', data_district$avg_party_lean, '+', data_district$avg_party_lean_points_abs, '</span></li>',
+      '<li>', lean_description, '</li>',
+      '<li>Recent Election Results:',
       '<ul>',
-      '<li><span class="stat-bold">', percent(data_district$avg_pct_R), '</span> Republican</li>',
-      '<li><span class="stat-bold">', percent(data_district$avg_pct_D), '</span> Democrat</li>',
+      '<li>Republican:  <span class="stat-bold">', percent(data_district$avg_pct_R), '</span></li>',
+      '<li>Democratic:  <span class="stat-bold">', percent(data_district$avg_pct_D), '</span></li>',
       '</ul></li>',
       '</ul>',
       '</div>'
@@ -392,15 +381,22 @@ observeEvent(input$navbarPage == "app3", {
   output$staticMethodology3 <- renderUI({
     HTML(paste0(
       '<hr>',
-      '<div class="header-section">Methodology</div>',
+      '<div class="header-section"><h3>Methodology</h3></div>',
       '<div class="methodology-notes">',
-      '*Other votes include those marked absent or "no vote", voting with party when party is equally divided, and voting against party when oppo is equally divided.</span><br>',
-      'Legislator party loyalty is calculated across all legislative sessions in 2023 and 2024, as a weighted average of votes with party/against oppo (1) and against party/with oppo (0), excluding votes with both parties or against both parties.<br>',
-      'District electoral lean is calculated based on voting in the 2016 Presidential, 2018 Gubernatorial, and 2020 Presidential elections.<br>',
+      '<p>*Other votes include those marked absent or "no vote", voting with party when party is equally divided, and voting against party when oppo is equally divided.</p>',
+      '<p><strong>Legislator Party Loyalty:</strong> Calculated using all votes from 2023 and 2024 legislative sessions where parties disagreed.</p>',
+      '<p>Scores range from 0 to 1, where 1 indicates always voting with party majority and 0 indicates always voting against.</p>',
+      '<p><strong>District Partisan Lean:</strong> Based on a weighted average of recent election results:</p>',
+      '<ul>',
+      '<li>2022 Gubernatorial Election (30% weight)</li>',
+      '<li>2020 Presidential Election (50% weight)</li>',
+      '<li>2018 Gubernatorial Election (10% weight)</li>',
+      '<li>2016 Presidential Election (10% weight)</li>',
+      '</ul>',
       '<strong>Data sources:</strong>',
       '<ul>',
-      '<li>Legislator voting info from <a href="https://legiscan.com/FL/datasets">LegiScan\'s Florida Legislative Datasets for all 2023 and 2024 Regular Session</a>.<br>',
-      '<li>District demographics and election results curated by <a href="https://davesredistricting.org/maps#state::FL">Dave\'s Redistricting</a>.',
+      '<li>Legislator voting info from <a href="https://legiscan.com/FL/datasets">LegiScan\'s Florida Legislative Datasets for all 2023 and 2024 Regular Session</a>.</li>',
+      '<li>District demographics and election results curated by <a href="https://davesredistricting.org/maps#state::FL">Dave\'s Redistricting</a>.</li>',
       '</ul>',
       'For details on wishlist items and work in progress, see <a href="https://docs.google.com/document/d/1e3KDrnpXjKL4OJqFR49hqti77TntPRL7k4AkqSfsefU/edit" target="_blank"><strong>development notes</strong></a>.',
       '<br><br></div>'

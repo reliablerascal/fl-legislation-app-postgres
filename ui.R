@@ -61,12 +61,12 @@ app1_ui <- fluidPage(
   ),
   c_disconnect_message(), 
   uiOutput("dynamicHeader"), 
-  uiOutput("staticMethodology1"), 
   uiOutput("dynamicFilters"), 
   uiOutput("dynamicLegend"), 
   uiOutput("dynamicRecordCount"), 
   uiOutput("noDataMessage"), 
-  plotlyOutput("heatmapPlot") 
+  plotlyOutput("heatmapPlot",width = "100%", height = "auto"),
+  uiOutput("staticMethodology1")
 )
 
 
