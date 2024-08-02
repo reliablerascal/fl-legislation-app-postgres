@@ -11,8 +11,8 @@ library(jsonlite)
 config <- config::get()
 
 # Extract the API key
-api_key_geocodio <- config$api_key_geocodio
-api_key_plural <- config$api_key_plural
+api_key_geocodio <- config::get("api_key_geocodio")
+api_key_plural <- config::get("api_key_plural")
 
 
 ##############################
