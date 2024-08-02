@@ -6,7 +6,8 @@
 # app 3: district context              #
 #                                      #
 ########################################
-
+source("servers/voting_history_module.R")
+library(patchwork)
 # App-specific logic
 observeEvent(input$navbarPage == "app3", {
 
@@ -41,10 +42,21 @@ observeEvent(input$navbarPage == "app3", {
   }
   
   output$dynamicFilters3 <- renderUI({
+    sort_legislators_by_last_name <- function(legislators) {
+      # Extract last names assuming legislator_name is in "First Last" format
+      last_names <- sapply(strsplit(legislators, " "), function(x) x[length(x)])
+      sorted_indices <- order(last_names)
+      legislators[sorted_indices]
+    }
+    
     legislators <- unique(app03_district_context$legislator_name)
+    sorted_legislators <- sort_legislators_by_last_name(legislators)
+    sorted_data <- app03_district_context  %>%
+      arrange(match(legislator_name, sorted_legislators))
     
     div(class = "filter-row query-input",
-        radioButtons("filter_method", "Filter By:", choices = c("District", "Legislator Name"), selected = "District"),
+        radioButtons("filter_method", "Filter By:", choices = c("Legislator Name", "District"), selected = "Legislator Name"),
+                     #choices = c( "District","Legislator Name"), selected = "District"),
         conditionalPanel(
           condition = "input.filter_method == 'District'",
           createFilterBox("chamber3", "Select Chamber:", c("House", "Senate"), selected = "House"),
@@ -52,10 +64,11 @@ observeEvent(input$navbarPage == "app3", {
         ),
         conditionalPanel(
           condition = "input.filter_method == 'Legislator Name'",
-          selectInput("legislator3", "Select Legislator:", choices = legislators, selected = legislators[1])
+          selectInput("legislator3", "Select Legislator:", choices = sorted_legislators, selected = sorted_legislators[1])
         )
     )
   })
+  
   
   # Observe the chamber selection and update the district options accordingly
   observeEvent(input$chamber3, {
@@ -66,7 +79,17 @@ observeEvent(input$navbarPage == "app3", {
     }
   })
   
+  selected_legislator_chamber <- reactive({
+    req(input$filter_method == "Legislator Name")
+    data <- app03_district_context
+    leg_data <- data[data$legislator_name == input$legislator3, ]
+    return(leg_data$chamber)
+  })
   
+  observeEvent(input$legislator3, {
+    selected_legislator_chamber <- selected_legislator_chamber()
+    updateSelectInput(session, "chamber3", selected = selected_legislator_chamber)
+  })
   
   # Reactive subset of app03_district_context based on input$chamber3 and input$district3, or input$legislator3
   qry_demo_district <- reactive({
@@ -84,87 +107,111 @@ observeEvent(input$navbarPage == "app3", {
     return (data)
   })
   
+  count_legislators_in_party <- function(data, party, chamber) {
+    data %>%
+      filter(party == !!party, chamber == !!chamber) %>%
+      tally()
+  }
+  
   ########################################
   #                                      #  
   # comparative partisanship             #
   #                                      #
   ######################################## 
   
-  output$dynamicPartisanship <- renderUI({
+  output$helper3_party_loyalty <- renderUI({
     data_district <- qry_demo_district()
-    # data_district <- data_district$data
-    
-    n_districts <- if (data_district$chamber == "House") {
-      120
-    } else if (data_district$chamber == "Senate") {
-      40
-    }
-    
-    same_party <- if (data_district$party == "R") {
-      "Republican"
-    } else if (data_district$party == "D") {
-      "Democrat"
-    }
-    
-    count_legislators_in_party <- function(data, party, chamber) {
-      data %>%
-        filter(party == !!party, chamber == !!chamber) %>%
-        tally()
-    }
-    
+    same_party <- if (data_district$party == "R") "Republican" else "Democrat"
     n_legislators_in_party <- if (same_party == "Republican") {
       count_legislators_in_party(app03_district_context, "R", input$chamber3)$n
-    } else if (same_party == "Democrat") {
+    } else {
       count_legislators_in_party(app03_district_context, "D", input$chamber3)$n
     }
-    
-    rank_dist <- if (data_district$party == "R") {
-      data_district$rank_partisan_dist_R
-    } else if (data_district$party == "D") {
-      data_district$rank_partisan_dist_D
-    }
-    
     rank_leg <- if (data_district$party == "R") {
       data_district$rank_partisan_leg_R
     } else if (data_district$party == "D") {
       data_district$rank_partisan_leg_D
     }
     
-    tagList(
-      HTML(paste0(
-        '<table style="width:100%; border-collapse: collapse;">',
-        '<tr>',
-        '<th style="width:50%; text-align:left; border-right: 1px solid black; padding-right: 10px;"><span class="header-section">Legislative Voting</span></th>',
-        '<th style="width:50%; text-align:left; padding-left: 10px;"><span class="header-section">Population Voting</span></th>',
-        '</tr>',
-        '<tr>',
-        '<td style="vertical-align:top; width:50%; border-right: 1px solid black; padding-right: 10px;" align=left>',
-        '<span class="stat-bold">', data_district$legislator_name, '\'s</span> voting record is ranked #<span class="stat-bold">', rank_leg,
-        '</span> most ',same_party , '-leaning amongst <span class="stat-bold">', n_legislators_in_party, '</span> ', input$chamber3, ' legislators in the ', same_party, ' party.<br>',
-        '<br>Of their ', data_district$leg_n_votes_denom_loyalty, ' votes included in calculating party loyalty:<br>',
-        'Party Line Partisan: <span class="stat-bold">', data_district$leg_n_votes_party_line_partisan, ' (', percent(data_district$leg_n_votes_party_line_partisan/data_district$leg_n_votes_denom_loyalty,accuracy = 0.1), ')</span><br>',
-        'Cross Party Votes: <span class="stat-bold">', data_district$leg_n_votes_cross_party, ' (', percent(data_district$leg_n_votes_cross_party/data_district$leg_n_votes_denom_loyalty, accuracy = 0.1), ')</span><br>',
-        '<br>Not included in the loyalty calculation:<br>',
-        'Party Line Bipartisan: <span class="stat-bold">', data_district$leg_n_votes_party_line_bipartisan, '</span><br>',
-        'Independent (vs. both parties): <span class="stat-bold">', data_district$leg_n_votes_independent, '</span><br>',
-        'Absent or No Vote: <span class="stat-bold">', data_district$leg_n_votes_absent_nv, '</span><br>',
-        '*Other Votes: <span class="stat-bold">', data_district$leg_n_votes_other, '</span><br>',
-        '<a href = "', data_district$ballotpedia ,'" target="_blank">', data_district$legislator_name, ' on Ballotpedia</a>',
-        '</td>',
-        '<td style="vertical-align:top; width:50%; padding-left: 10px;"  align=left>',
-        'In comparison, this district is ranked #<span class="stat-bold">', rank_dist, '</span> most ', same_party,
-        '-leaning of <span class="stat-bold">', n_districts, '</span> ', data_district$chamber, ' districts:<br>',
-        '<span class="stat-bold">', data_district$avg_party_lean, ' + ', data_district$avg_party_lean_points_abs, '</span><br>',
-        '<span class="stat-bold">', percent(data_district$avg_pct_R), '</span> Republican<br>',
-        '<span class="stat-bold">', percent(data_district$avg_pct_D), '</span> Democrat<br>',
-        '</td>',
-        '</tr>',
-        '</table>',
-        '<hr>'
-      ))
-    )
+    HTML(paste0(
+      '<div class="flex-item legislative-voting">',
+      '<h3 class="flex-header-section">LEGISLATIVE VOTING</h3>',
+      '<h4 class="legislator-name">', data_district$legislator_name, '\'S VOTING RECORD:</h4>',
+      '<ul class="main-list">',
+      '<li>Ranked #<span class="stat-bold">', rank_leg, '</span> most loyal out of <span class="stat-bold">', n_legislators_in_party, '</span> ', input$chamber3, ' ', same_party, 's</li>',
+      '<li>Party loyalty calculated from <span class="stat-bold">', data_district$leg_n_votes_denom_loyalty, '</span> key votes:',
+      '<ul>',
+      '<li>Party-Line Votes: <span class="stat-bold">', data_district$leg_n_votes_party_line_partisan, '</span> ', 
+      '<span class="percentage">', percent(data_district$leg_n_votes_party_line_partisan/data_district$leg_n_votes_denom_loyalty, accuracy = 0.1), '</span></li>',
+      '<li>Cross-Party Votes: <span class="stat-bold">', data_district$leg_n_votes_cross_party, '</span> ',
+      '<span class="percentage">', percent(data_district$leg_n_votes_cross_party/data_district$leg_n_votes_denom_loyalty, accuracy = 0.1), '</span></li>',
+      '</ul></li>',
+      '<li>Additional voting data (not in loyalty calculation):',
+      '<ul>',
+      '<li>Bipartisan votes: <span class="stat-bold">', data_district$leg_n_votes_party_line_bipartisan, '</span></li>',
+      '<li>Votes against both parties: <span class="stat-bold">', data_district$leg_n_votes_independent, '</span></li>',
+      '<li>Absent or no votes: <span class="stat-bold">', data_district$leg_n_votes_absent_nv, '</span></li>',
+      '<li>Other votes: <span class="stat-bold">', data_district$leg_n_votes_other, '</span></li>',
+      '</ul></li>',
+      '<li><a href="', data_district$ballotpedia, '" target="_blank">View ', data_district$legislator_name, '\'s profile on Ballotpedia</a></li>',
+      '</ul>',
+      '</div>'
+    ))
   })
-  
+    
+  #############################
+  #                           #  
+  # district lean             #
+  #                           #
+  #############################
+# output$helper3_district_lean <- renderUI({
+#   data_district <- qry_demo_district()
+#   
+#   same_party <- if (data_district$party == "R") {"Republican"} else if (data_district$party == "D") {"Democrat"}
+#   
+#   n_districts <- if (data_district$chamber == "House") {120} else if (data_district$chamber == "Senate") {40}
+#   
+#   rank_dist <- if (data_district$party == "R") {
+#     data_district$rank_partisan_dist_R
+#   } else if (data_district$party == "D") {
+#     data_district$rank_partisan_dist_D
+#   }
+# 
+#   
+#   HTML(paste0(
+#     '<div class="flex-item">',
+#     '<div class="flex-header-section">Population Voting</div>',
+#   
+#         'In comparison, this district is ranked<br>#<span class="stat-bold">', rank_dist, '</span> most ', same_party,
+#         '-leaning of <span class="stat-bold">', n_districts, '</span> ', data_district$chamber, ' districts:<br>',
+#         '<span class="stat-bold">', data_district$avg_party_lean, ' + ', data_district$avg_party_lean_points_abs, '</span><br>',
+#         '<span class="stat-bold">', percent(data_district$avg_pct_R), '</span> Republican<br>',
+#         '<span class="stat-bold">', percent(data_district$avg_pct_D), '</span> Democrat<br>',
+#     '</div>'
+#       ))
+#   })
+  output$helper3_district_lean <- renderUI({
+    data_district <- qry_demo_district()
+    same_party <- if (data_district$party == "R") "Republican" else "Democrat"
+    n_districts <- if (data_district$chamber == "House") 120 else 40
+    rank_dist <- if (data_district$party == "R") data_district$rank_partisan_dist_R else data_district$rank_partisan_dist_D
+    
+    HTML(paste0(
+      '<div class="flex-item population-voting">',
+      '<h3 class="flex-header-section">POPULATION VOTING</h3>',
+      '<ul class="main-list">',
+      '<li>This district is ranked #<span class="stat-bold">', rank_dist, '</span> most ', same_party,
+      '-leaning of <span class="stat-bold">', n_districts, '</span> ', data_district$chamber, ' districts</li>',
+      '<li>Partisan lean: <span class="stat-bold">', data_district$avg_party_lean, ' + ', data_district$avg_party_lean_points_abs, '</span></li>',
+      '<li>Voting breakdown:',
+      '<ul>',
+      '<li><span class="stat-bold">', percent(data_district$avg_pct_R), '</span> Republican</li>',
+      '<li><span class="stat-bold">', percent(data_district$avg_pct_D), '</span> Democrat</li>',
+      '</ul></li>',
+      '</ul>',
+      '</div>'
+    ))
+  }) 
   
   ########################################
   #                                      #  
@@ -172,12 +219,23 @@ observeEvent(input$navbarPage == "app3", {
   #                                      #
   ########################################   
   
-  output$dynamicDemographics <- renderUI({
+  # output$helper3_demographics <- renderUI({
+  #   tagList(
+  #     HTML(paste0(
+  #       '<div class="flex-item"><div class = "flex-header-section">District Demographics</div>'
+  #     )),
+  #     tags$div(
+  #     plotOutput("demographicsPlot"),
+  #     style = "align-items:center;"),
+  #     HTML('</div>')
+  #   )
+  # })
+  output$helper3_demographics <- renderUI({
     tagList(
-      HTML(paste0(
-        '<div class = "header-section">District Demographics</div>'
-      )),
-      plotOutput("demographicsPlot")
+      div(class = "flex-item district-demographics",
+          h3(class = "flex-header-section", "DISTRICT DEMOGRAPHICS"),
+          plotOutput("demographicsPlot", height = "auto")
+      )
     )
   })
   
@@ -186,52 +244,119 @@ observeEvent(input$navbarPage == "app3", {
     demo_district <- qry_demo_district()
     demo_state <- app03_district_context_state
     
-    # need to have 5x2 for each of category, percent, and demographic
+    # Create a district name
+    district_name <- paste(demo_district$chamber, "District", demo_district$district)
+    
     data <- data.frame(
-      Category = factor(rep(c("District", "State"), 5), levels = c("State", "District")),  # Reverse factor levels
+      Category = factor(c(district_name, "Florida", district_name, "Florida", 
+                          district_name, "Florida", district_name, "Florida"),
+                        levels = c("Florida", district_name)),
       Percent = c(
         demo_district$pct_white, demo_state$pct_white,
         demo_district$pct_black, demo_state$pct_black,
         demo_district$pct_asian, demo_state$pct_asian,
-        demo_district$pct_hispanic, demo_state$pct_hispanic,
-        demo_district$pct_napi, demo_state$pct_napi
+        demo_district$pct_hispanic, demo_state$pct_hispanic
       ),
-      Demographic = rep(c("White", "Black", "Asian", "Hispanic", "Native American/Pacific Islander"), each = 2)
+      Demographic = rep(c("White", "Black", "Asian", "Hispanic"), each = 2)
     )
     
     create_plot <- function(demo) {
       ggplot(subset(data, Demographic == demo), aes(x = Category, y = Percent, fill = Category)) +
-        geom_bar(stat = "identity", position = "dodge", width=1) +
-        geom_text(aes(label = scales::percent(Percent,accuracy=0.1)), 
-                  position = position_dodge(width = 1), 
-                  vjust = 0.5,
-                  hjust = -0.1,
-                  size = 7) +
-        scale_fill_manual(values = c("District" = "#17becf", "State" = "#dfdfdf")) +
-        scale_y_continuous(labels = percent_format(),, limits = c(0, 1)) +
+        geom_bar(stat = "identity", position = "dodge", width = 0.7) +
+        geom_text(aes(label = scales::percent(Percent, accuracy = 0.1)), 
+                  position = position_dodge(width = 0), 
+                  hjust = -.1,
+                  size = 5,
+                  family = "Archivo") +
+        scale_fill_manual(values = c(setNames(c("#17becf", "#dfdfdf"), c(district_name, "Florida")))) +
+        scale_y_continuous(labels = scales::percent_format(), limits = c(0, max(data$Percent) * 1.175)) +
         labs(title = demo, x = "", y = "") +
-        theme_minimal() +
+        theme_minimal(base_size = 14,base_family = "Archivo") +
         theme(
           legend.position = "none",
           panel.grid.major = element_blank(),
           panel.grid.minor = element_blank(),
-          axis.text.x = element_blank(),
-          axis.ticks.x = element_blank(),
-          axis.text.y = element_text(size = 12, hjust = 1, margin = margin(r = -5))
+          axis.text.x = element_text(size = 14, angle = 0, hjust = 0.5),
+          plot.title = element_text(size = 16, face = "bold", hjust = 0.5,colour = "#064875"),
+          axis.text.y = element_text(size = 14),
+          plot.margin = margin(20, 10, 20, 10)
         ) +
         coord_flip()
     }
     
-    # Create plots for each demographic
-    plot_white <- create_plot("White")
-    plot_black <- create_plot("Black")
-    plot_asian <- create_plot("Asian")
-    plot_hispanic <- create_plot("Hispanic")
-    plot_napi <- create_plot("Native American/Pacific Islander")
-    
-    # Combine plots using patchwork
-    plot_white / plot_black/ plot_asian/ plot_hispanic/ plot_napi
+    plots <- lapply(c("White", "Black", "Asian", "Hispanic"), create_plot)
+    do.call(gridExtra::grid.arrange, c(plots, ncol = 1))
+  }, width = 400, height = 600)
+  
+  # output$demographicsPlot <- renderPlot({
+  #   req(qry_demo_district)
+  #   demo_district <- qry_demo_district()
+  #   demo_state <- app03_district_context_state
+  #   
+  #   # need to have 5x2 for each of category, percent, and demographic
+  #   data <- data.frame(
+  #     Category = factor(rep(c("District", "State"), 5), levels = c("State", "District")),  # Reverse factor levels
+  #     Percent = c(
+  #       demo_district$pct_white, demo_state$pct_white,
+  #       demo_district$pct_black, demo_state$pct_black,
+  #       demo_district$pct_asian, demo_state$pct_asian,
+  #       demo_district$pct_hispanic, demo_state$pct_hispanic,
+  #       demo_district$pct_napi, demo_state$pct_napi
+  #     ),
+  #     Demographic = rep(c("White", "Black", "Asian", "Hispanic", "Native American/Pacific Islander"), each = 2)
+  #   )
+  #   
+  #   create_plot <- function(demo) {
+  #     ggplot(subset(data, Demographic == demo), aes(x = Category, y = Percent, fill = Category)) +
+  #       geom_bar(stat = "identity", position = "dodge", width=.9) +
+  #       geom_text(aes(label = scales::percent(Percent,accuracy=0.1)), 
+  #                 position = position_dodge(width = .9), 
+  #                 vjust = 0.5,
+  #                 hjust = -0.15,
+  #                 size = 6) +
+  #       scale_fill_manual(values = c("District" = "#17becf", "State" = "#dfdfdf")) +
+  #       scale_y_continuous(labels = scales::percent_format(), limits = c(0, 1.05)) +
+  #       labs(title = demo, x = "", y = "") +
+  #       theme_minimal() +
+  #       theme(
+  #         legend.position = "none",
+  #         panel.grid.major = element_blank(),
+  #         panel.grid.minor = element_blank(),
+  #         axis.text.x = element_blank(),
+  #         axis.ticks.x = element_blank(),
+  #         plot.title=element_text(size=16),
+  #         axis.text.y = element_text(size = 15, hjust = 1, margin = margin(r = 0)),
+  #         plot.margin=margin(5,15,5,10)
+  #       ) +
+  #       coord_flip()
+  #   }
+  #   # Create plots for each demographic
+  #   plot_white <- create_plot("White")
+  #   plot_black <- create_plot("Black")
+  #   plot_asian <- create_plot("Asian")
+  #   plot_hispanic <- create_plot("Hispanic")
+  #   plot_napi <- create_plot("Native American/Pacific Islander")
+  #   
+  #   # Combine plots using patchwork
+  #   plot_white / plot_black / plot_asian / plot_hispanic / plot_napi
+  #   }, width = 400, height = "auto")
+  
+
+  ########################################
+  #                                      #  
+  # Combined output                      #
+  #                                      #
+  ######################################## 
+  output$dynamicContextComparison <- renderUI({
+    tagList(
+      HTML('<div class="flex-section">'),
+      uiOutput("helper3_party_loyalty"),
+      uiOutput("helper3_district_lean"),
+      uiOutput("helper3_demographics"),
+      HTML('</div>')
+    )
   })
+  
   
   ########################################
   #                                      #  
@@ -249,6 +374,15 @@ observeEvent(input$navbarPage == "app3", {
   #     '</div>'
   #   ))
   # })
+  
+  selected_legislator <- reactive({
+    data <- qry_demo_district()
+    print(paste("Selected legislator:", data$legislator_name))  # Debug print
+    data$legislator_name
+  })
+  
+  # Call the voting history module
+  votingHistoryServer("votingHistory", selected_legislator)
   
   ########################################
   #                                      #  

@@ -1,10 +1,8 @@
-# server4_partisanship_scatterplot.R
-
-
 observeEvent(input$navbar_page == "app4", {
+
   
   filtered_data <- reactive({
-    data <- app03_district_context
+    data <- app04_district_context
     if (input$chamber4 != "All") {
       data <- data %>% filter(chamber == input$chamber4)
     }
@@ -14,12 +12,19 @@ observeEvent(input$navbar_page == "app4", {
     data
   })
   
+  # Debugging: Print the filtered data
+  observe({
+    data <- filtered_data()
+
+  })
+  
   median_data <- reactive({
     data <- filtered_data()
-    median_lean <- median(data$avg_party_lean_points_R)
+    median_lean <- median(data$avg_party_lean_points_R, na.rm = TRUE)
     median_districts <- data %>%
       arrange(abs(avg_party_lean_points_R - median_lean)) %>%
       slice(1:2)
+    
     list(
       median_lean = median_lean,
       districts = median_districts
@@ -28,6 +33,7 @@ observeEvent(input$navbar_page == "app4", {
   
   output$scatterplot <- renderPlotly({
     data <- filtered_data()
+
     median_info <- median_data()
     
     p <- ggplot(data, aes(x = avg_party_lean_points_R, y = leg_party_loyalty, 
@@ -46,17 +52,19 @@ observeEvent(input$navbar_page == "app4", {
       theme_minimal() +
       theme(
         panel.background = element_rect(fill = "#f0f0f0", color = NA),
-        plot.background = element_rect(fill = "#f0f0f0", color = NA)
+        plot.background = element_rect(fill = "white", color = NA)
       ) +
       annotate("text", x = median_info$median_lean, y = 0.5, label = "Median", angle = 90, vjust = -0.5)
+
+    ggplotly(p, tooltip = "text") %>% layout(dragmode = FALSE) %>%
+      plotly::config(displayModeBar = FALSE)
     
-    ggplotly(p, tooltip = "text") %>%
-      layout(dragmode = FALSE) %>%
-      config(displayModeBar = FALSE)
+    
   })
   
   output$medianInfo <- renderUI({
     median_info <- median_data()
+
     districts <- median_info$districts
     
     HTML(paste0(
