@@ -1,0 +1,10 @@
+{
+  "name": "FL Leg Votes Dashboard",
+  "description": "Florida Legislature Voting Dashboard",
+  "keywords": ["r", "shiny"],
+  "buildpacks": [
+    {
+      "url": "https://github.com/virtualstaticvoid/heroku-buildpack-r.git#heroku-16"
+    }
+  ]
+}
