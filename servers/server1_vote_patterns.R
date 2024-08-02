@@ -318,9 +318,9 @@ observeEvent(input$navbar_page == "app1", {
             plot.title = element_blank(),
             plot.subtitle = element_blank())
     
-    if (!input$isMobile) {
+    # if (!input$isMobile) {
       p <- p + aes(text = hover_text)
-    }
+    # }
     
     plotly_output <- ggplotly(p, tooltip = "text", height = totalHeight, width = totalWidth) %>%
       layout(
@@ -331,11 +331,11 @@ observeEvent(input$navbar_page == "app1", {
         plot_bgcolor = "rgba(255,255,255,0.85)",
         paper_bgcolor = "rgba(255,255,255,0.85)"
       )
-    if (input$isMobile) {
-      plotly_output <- plotly_output %>%
-        layout(dragmode = FALSE) %>%
-        config(scrollZoom = FALSE)
-    }
+    # if (input$isMobile) {
+    #   plotly_output <- plotly_output %>%
+    #     layout(dragmode = FALSE) %>%
+    #     config(scrollZoom = FALSE)
+    # }
     return(plotly_output)
   })
 })   # END OBSERVER EVENT  
