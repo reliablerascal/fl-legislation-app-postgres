@@ -122,6 +122,7 @@ observeEvent(input$navbarPage == "app3", {
   output$helper3_party_loyalty <- renderUI({
     data_district <- qry_demo_district()
     same_party <- if (data_district$party == "R") "Republican" else "Democrat"
+
     n_legislators_in_party <- if (same_party == "Republican") {
       count_legislators_in_party(app03_district_context, "R", input$chamber3)$n
     } else {
@@ -212,6 +213,7 @@ observeEvent(input$navbarPage == "app3", {
       '</div>'
     ))
   }) 
+  
   
   ########################################
   #                                      #  
@@ -342,6 +344,22 @@ observeEvent(input$navbarPage == "app3", {
   #   }, width = 400, height = "auto")
   
 
+  ########################################
+  #                                      #  
+  # Combined output                      #
+  #                                      #
+  ######################################## 
+  output$dynamicContextComparison <- renderUI({
+    tagList(
+      HTML('<div class="flex-section">'),
+      uiOutput("helper3_party_loyalty"),
+      uiOutput("helper3_district_lean"),
+      uiOutput("helper3_demographics"),
+      HTML('</div>')
+    )
+  })
+  
+  
   ########################################
   #                                      #  
   # Combined output                      #

@@ -3,6 +3,7 @@
 .Rhistory
 .RProj.user/
 archive/
+config.yml
 data/
 data.RData
 legislator_dashboard.Rproj

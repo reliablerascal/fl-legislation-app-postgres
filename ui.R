@@ -73,7 +73,6 @@ app1_ui <- fluidPage(
   plotlyOutput("heatmapPlot") 
 )
 
-
 ###########################
 #                         #  
 # app 3 district context  #
@@ -177,7 +176,6 @@ app5_ui <- fluidPage(
   )
 )
 
-
 #####################
 #                   #  
 # navbar page       #
@@ -245,8 +243,6 @@ ui <- fluidPage(
   # navigation bar    #
   #                   #
   #####################
-
-
 div(class="navbar2",
     tabsetPanel(
       tabPanel("Voting Patterns", value = "app1", app1_ui),
