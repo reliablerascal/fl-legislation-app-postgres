@@ -1,8 +1,0 @@
-# to test locally
-# copy this file as config.yml
-# and replace with your own API keys
-
-default:
-  api_key_geocodio: "cc8ab166abb13b1c64b66b118a4c2664c684c61"
-
-  api_key_plural: "e542d53a-85bf-4e5b-b712-be26d4c63930"
