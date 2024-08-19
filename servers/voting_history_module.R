@@ -8,14 +8,16 @@ library(shinyjs)
 votingHistoryUI <- function(id) {
   ns <- NS(id)
   tagList(
-    div(class = "header-section", "Voting History"),
+    div(class = "header-section", "Detailed Voting History"),
     div(class="flex-section",
         checkboxGroupInput(ns("voteType"), "Vote Type:",
                            choices = c("Independent", "Maverick", "Normal"),
                            selected = c("Independent", "Maverick", "Normal")),
         textInput(ns("searchText"), "Search Bills:", ""),
-        actionButton(ns("btn_year_2023"), "2023"),
-        actionButton(ns("btn_year_2024"), "2024"),
+        actionButton(ns("btn_year_2023"), "2023", class = "btn-filter"),
+        actionButton(ns("btn_year_2024"), "2024", class = "btn-filter"),
+        
+        
         selectInput(ns("items_per_page"), "Items per page:",
                     choices = c(10, 25, 50, 100),
                     selected = 25)),
@@ -83,9 +85,9 @@ votingHistoryServer <- function(id, selected_legislator) {
     vote_counts <- reactive({
       data <- filtered_voting_data()
       list(
-        Independent = sum(data$vote_with_neither == 1, na.rm = TRUE),
-        Maverick = sum(data$maverick_votes == 1, na.rm = TRUE),
-        Normal = sum(data$maverick_votes == 0 & data$vote_with_neither == 0, na.rm = TRUE)
+        'Voted Against Both Parties' = sum(data$vote_with_neither == 1, na.rm = TRUE),
+        'Voted With Opposing Party' = sum(data$maverick_votes == 1, na.rm = TRUE),
+        'Voted With Own Party' = sum(data$maverick_votes == 0 & data$vote_with_neither == 0, na.rm = TRUE)
       )
     })
     
