@@ -1,3 +1,5 @@
+options(repos = c(CRAN = "https://cran.rstudio.com"))
+
 # init.R
 install_if_needed <- function(packages) {
   new_packages <- packages[!(packages %in% installed.packages()[,"Package"])]
@@ -36,6 +38,7 @@ cran_packages <- c(
   "readr",
   "DT",
   "shinyWidgets",
+  "gridExtra"
 )
 
 # Install CRAN packages if needed
@@ -54,10 +57,3 @@ if (!requireNamespace("dwnominate", quietly = TRUE)) remotes::install_github('wm
 
 # Set conflicts preference to prioritize all dplyr functions
 conflicted::conflict_prefer_all("dplyr", quiet=TRUE)
-
-# to install an individual package:
-# install.packages("dplyr")
-
-#packages for scraping IDs of Florida reps
-# install.packages("rvest")
-# install.packages("httr")

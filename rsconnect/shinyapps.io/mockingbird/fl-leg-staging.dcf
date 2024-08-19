@@ -1,10 +1,10 @@
-name: fl-leg-app-postgres
+name: fl-leg-staging
 title:
 username: mockingbird
 account: mockingbird
 server: shinyapps.io
 hostUrl: https://api.shinyapps.io/v1
-appId: 12275450
-bundleId: 8908079
-url: https://mockingbird.shinyapps.io/fl-leg-app-postgres/
+appId: 12387172
+bundleId: 8939145
+url: https://mockingbird.shinyapps.io/fl-leg-staging/
 version: 1
