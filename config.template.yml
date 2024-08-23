@@ -1,6 +1,8 @@
 
 
 default:
-  api_key_geocodio: "188e686ed6da7e667766e66632e77ae6ddd6a7d"
+  api_key_geocodio: <your geocodio api key here>
 
-  api_key_plural: "24254982-f7fe-4c0c-8a75-1003a57a046f"
+  api_key_plural: <your plural api key here>
+
+  postgres_pwd: <your postgres pwd here>
