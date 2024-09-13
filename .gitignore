@@ -12,3 +12,4 @@ test.html
 .Rproj.user
 deploy.R
 mobile/
+rsconnect/
