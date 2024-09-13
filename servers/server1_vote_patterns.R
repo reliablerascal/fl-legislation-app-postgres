@@ -37,6 +37,7 @@ observeEvent(input$navbar_page == "app1", {
   #                                      #
   ########################################   
   output$dynamicHeader <- renderUI({
+
     HTML(paste0(
       '<div class="header-tab">Florida Legislature Voting Patterns</div>',
       '<div class="subtitle">Navigate Your Lawmaker\'s Voting Record</div>',
@@ -84,7 +85,17 @@ observeEvent(input$navbar_page == "app1", {
     ))
   })
   
-  # THIS SECTION WILL BREAK EVERYTHING BUT I NEED TO IMPLEMENT A VARIANT OF IT
+  # output$staticMethodology1 <- renderUI({
+  #   HTML(paste0(
+  #     '<div class="header-section">Methodology</div>',
+  #     '<div class="methodology-notes">',
+  #     'Party loyalty for each legislator is calculated across all sessions in 2023 and 2024, as a weighted average of with party/against oppo (1) and against party/with oppo (0), excluding votes on bipartisan roll calls.<br>',
+  #     '<strong>Data source:</strong> <a href="https://legiscan.com/FL/datasets">LegiScan\'s Florida Legislative Datasets for all 2023 and 2024 Regular Session</a>.<br>',
+  #     'For details on wishlist items and work in progress, see <a href="https://docs.google.com/document/d/1OGiJH7B_0j3B38gEtgt_FDhkxzL84ZtGistdup2yYHI/edit" target="_blank"><strong>development notes</strong></a>.',
+  #     '</div>'
+  #   ))
+  # })
+  
   output$dynamicRecordCount <- renderUI({
     # print("rc test")
     req(input$year, input$chamber, input$party)
@@ -114,8 +125,7 @@ observeEvent(input$navbar_page == "app1", {
         createFilterBox("chamber", "Select Chamber:", c("House", "Senate")),
         createFilterBox("year", "Select Session Year:", c(2023, 2024, "All"), selected = 2024),
         createFilterBox("final", "Final (Third Reading) Vote?", c("Y", "N", "All"), selected = "Y"),
-        #createFilterBox("bill_category", "Bill Category (demo)", c("education", "All"), selected = "All"),
-        createFilterBox("sort_by_leg", "Sort Legislators By:", c("Name", "Party Loyalty", "District"), selected = "Party Loyalty"),
+        createFilterBox("sort_by_leg", "Sort Legislators By:", c("Name", "Party Loyalty", "District #", "Electorate Lean"), selected = "Party Loyalty"),
         createFilterBox("sort_by_rc", "Sort Roll Calls By:", c("Bill Number", "Party Unity"), selected = "Party Unity")
     )
   })
@@ -239,8 +249,13 @@ observeEvent(input$navbar_page == "app1", {
       data$legislator_name <- factor(data$legislator_name, levels = unique(data$legislator_name))  # Set factor levels
     } else if (input$sort_by_leg == "Party Loyalty") {
       data$legislator_name <- reorder(data$legislator_name, -data$rank_partisan_leg)
-    } else if (input$sort_by_leg == "District") {
+    } else if (input$sort_by_leg == "District #") {
       data$legislator_name <- reorder(data$legislator_name, -data$district_number)
+    } else if (input$sort_by_leg == "Electorate Lean") {
+      if (input$party == "R") {
+        data$legislator_name <- reorder(data$legislator_name, -data$rank_partisan_dist_R)
+      } else
+      {data$legislator_name <- reorder(data$legislator_name, -data$rank_partisan_dist_D)}
     }
     
     # sort roll calls
@@ -302,8 +317,9 @@ observeEvent(input$navbar_page == "app1", {
             plot.subtitle = element_blank())+ aes(text = hover_text)
     
     if (input$isMobile == "true") {
+    # if (!input$isMobile) {
       p <- p + aes(text = hover_text)
-    }
+     }
     
     plotly_output <- ggplotly(p, tooltip = "text", height = totalHeight, width = totalWidth) %>%
       layout(
@@ -315,6 +331,12 @@ observeEvent(input$navbar_page == "app1", {
         paper_bgcolor = "rgba(255,255,255,0.85)",
         dragmode = FALSE) %>%
       plotly::config(scrollZoom = FALSE, displayModeBar = FALSE)
+    # if (input$isMobile) {
+    #   plotly_output <- plotly_output %>%
+    #     layout(dragmode = FALSE) %>%
+    #     config(scrollZoom = FALSE)
+    # }
+
     return(plotly_output)
     
   })

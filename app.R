@@ -58,6 +58,9 @@ library(shinydisconnect) #customize Shiny app disconnect message
 #all_data <- readRDS("data/all_data.rds")#
 library(httr)
 url <- "https://s3.amazonaws.com/data.jaxtrib.org/dev/all_data.rds"
+
+#all_data <- readRDS("C:/Users/Andrew/Documents/fl-legislation-etl-/data-app/all_data.RDS")
+
 temp_file <- tempfile(fileext = ".rds")
 GET(url, write_disk(temp_file, overwrite = TRUE))
 all_data <- readRDS(temp_file)

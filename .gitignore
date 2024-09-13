@@ -3,9 +3,12 @@
 .Rhistory
 .RProj.user/
 archive/
+config.yml
 data/
 data.RData
 legislator_dashboard.Rproj
 servers/archive
 test.html
 .Rproj.user
+deploy.R
+mobile/

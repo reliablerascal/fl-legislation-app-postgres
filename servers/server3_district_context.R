@@ -124,7 +124,6 @@ observeEvent(input$navbarPage == "app3", {
     data_district <- qry_demo_district()
     same_party <- if (data_district$party == "R") "Republican" else "Democrat"
     same_party_adj <- if (data_district$party == "R") "Republican" else "Democratic"
-    
     n_legislators_in_party <- if (same_party == "Republican") {
       count_legislators_in_party(app03_district_context, "R", input$chamber3)$n
     } else {
@@ -201,6 +200,7 @@ observeEvent(input$navbarPage == "app3", {
       '</div>'
     ))
   }) 
+  
   
   ########################################
   #                                      #  
