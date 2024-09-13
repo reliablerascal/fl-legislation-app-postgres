@@ -37,7 +37,8 @@ cran_packages <- c(
   "shinythemes",
   "readr",
   "DT",
-  "shinyWidgets"
+  "shinyWidgets",
+  "gridExtra"
 )
 
 # Install CRAN packages if needed
@@ -56,10 +57,3 @@ if (!requireNamespace("dwnominate", quietly = TRUE)) remotes::install_github('wm
 
 # Set conflicts preference to prioritize all dplyr functions
 conflicted::conflict_prefer_all("dplyr", quiet=TRUE)
-
-# to install an individual package:
-# install.packages("dplyr")
-
-#packages for scraping IDs of Florida reps
-# install.packages("rvest")
-# install.packages("httr")

@@ -1,0 +1,8 @@
+
+
+default:
+  api_key_geocodio: <your geocodio api key here>
+
+  api_key_plural: <your plural api key here>
+
+  postgres_pwd: <your postgres pwd here>

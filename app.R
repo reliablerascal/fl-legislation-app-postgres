@@ -42,8 +42,6 @@ library(shinydisconnect) #customize Shiny app disconnect message
 #                       #
 ######################### 
 
-
-
 ### read all_data
 #########################
 #                       #  
@@ -66,8 +64,6 @@ GET(url, write_disk(temp_file, overwrite = TRUE))
 all_data <- readRDS(temp_file)
 unlink(temp_file)
 ######################### 
-#test #
-
 
 ### set up dataframes ####
 app01_vote_patterns <- all_data$app01_vote_patterns

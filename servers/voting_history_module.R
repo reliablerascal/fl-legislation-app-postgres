@@ -14,10 +14,8 @@ votingHistoryUI <- function(id) {
                            choices = c("Independent", "Maverick", "Normal"),
                            selected = c("Independent", "Maverick", "Normal")),
         textInput(ns("searchText"), "Search Bills:", ""),
-        actionButton(ns("btn_year_2023"), "2023"#, class = "btn-filter"
-                     ),
-        actionButton(ns("btn_year_2024"), "2024"#, class = "btn-filter"
-                     ),
+        actionButton(ns("btn_year_2023"), "2023", class = "btn-filter"),
+        actionButton(ns("btn_year_2024"), "2024", class = "btn-filter"),
         
         
         selectInput(ns("items_per_page"), "Items per page:",
