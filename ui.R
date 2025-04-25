@@ -13,6 +13,7 @@ library(shinyjs)
 library(DT)
 library(plotly)
 library(shinyWidgets)
+library(bslib)
 library(shiny)
 library(shinydisconnect) # not sure why this is needed here AND in app.R, but it prevents Error in c_disconnect_message() : could not find function "c_disconnect_message"
 
@@ -29,13 +30,13 @@ c_disconnect_message <- function() {
   disconnectMessage(
     text = "Your session has been disconnected due to inactivity. Please refresh the page.",
     refresh = "Refresh",
-    background = "#ffcccc",
-    colour = "#ff0000",
-    size = 24,
-    overlayColour = "#ffffff",
-    overlayOpacity = 0.75,
-    top = "center",
-    refreshColour = "#0000ff"
+    background = "#fbfdfb",  # Off-white background for approachability
+    colour = "#064875",       # Dark blue text color for clarity and emphasis
+    size = 24,                # Text size remains 24 for readability
+    overlayColour = "#00204D", # Alt-dark blue for the overlay
+    overlayOpacity = 0.75,    # 75% opacity for subtle overlay effect
+    top = "center",           # Centered message
+    refreshColour = "#f99a10" # Orange color for refresh button to grab attention
   )
 }
 
@@ -46,8 +47,44 @@ c_disconnect_message <- function() {
 #####################
 # Define the UI for App 1 ####
 
-app1_ui <- fluidPage( 
+`app1_ui` <- fluidPage( 
   tags$head( 
+    tags$style(HTML("
+      .swipe-right {
+        display: none;
+        font-size: 1.2rem;
+        color: #888;
+        position: fixed;
+        bottom: 10%;
+        left: 50%;
+        transform: translateX(-50%);
+        background-color: rgba(255, 255, 255, 0.9);
+        padding: 8px 15px;
+        border-radius: 8px;
+        z-index: 1000;
+        text-align: center;
+      }
+      @media (max-width: 768px) {
+        .swipe-right {
+          display: block;
+        }
+      }
+    ")),
+    tags$script(HTML("
+    document.addEventListener('DOMContentLoaded', function() {
+      var swipeRight = document.querySelector('.swipe-right');
+      var plotlyDiv = document.querySelector('.plotly');
+      
+      // Hide the message when the user scrolls
+      plotlyDiv.addEventListener('scroll', function() {
+        swipeRight.style.display = 'none';
+        clearTimeout(plotlyDiv.stickyTimeout);
+        plotlyDiv.stickyTimeout = setTimeout(function() {
+          swipeRight.style.display = 'block';
+        }, 1000);
+      });
+    });
+  ")),
     #tags$link(rel = "stylesheet", type = "text/css", href = "styles.css"), 
     tags$link(rel = "stylesheet", type = "text/css", href = "https://data.jaxtrib.org/dev/styles.css"),
     
@@ -66,6 +103,7 @@ app1_ui <- fluidPage(
   uiOutput("dynamicRecordCount"), 
   uiOutput("noDataMessage"), 
   plotlyOutput("heatmapPlot",width = "100%", height = "auto"),
+
   uiOutput("staticMethodology1")
 )
 
@@ -87,9 +125,9 @@ app3_ui <- fluidPage(
   # #uiOutput("dynamicLegProfile"),
   # votingHistoryUI("votingHistory"),
   # uiOutput("staticMethodology3")
-  fluidRow(column(12, uiOutput("dynamicHeader3"))),
-  fluidRow(column(12, uiOutput("dynamicFilters3"))),
-  fluidRow(column(12, uiOutput("dynamicContextComparison"))),
+  column(12, uiOutput("dynamicHeader3")),
+  column(12, uiOutput("dynamicFilters3")),
+  column(12, uiOutput("dynamicContextComparison")),
   votingHistoryUI("votingHistory"),
   fluidRow(column(12, uiOutput("staticMethodology3")))
 )
@@ -143,35 +181,6 @@ app4_ui <-
 
 
 
-app5_ui <- fluidPage(
-  
-  #tags$head(tags$link(rel = "stylesheet", type = "text/css", href = "https://mockingbird.shinyapps.io/fl-leg-app-postgres/styles.css")),
-  tags$head(tags$link(rel = "stylesheet", type = "text/css", href = "https://data.jaxtrib.org/dev/styles.css")),
-  
-  
-  c_disconnect_message(),
-  
-  titlePanel("Find Your Elected Representatives"),
-  
-  sidebarLayout(
-    
-    sidebarPanel(
-      
-      textInput("address", "Your address (include city and state):", ""),
-      
-      actionButton("submit", "Find Representatives")
-      
-    ),
-    
-    mainPanel(
-      
-      tableOutput("representatives")
-      
-    )
-    
-  )
-)
-
 #####################
 #                   #  
 # navbar page       #
@@ -181,11 +190,13 @@ app5_ui <- fluidPage(
 # Combine the UIs into a navbarPage ####
 ui <- fluidPage(
   useShinyjs(),
-  theme = shinytheme("flatly"),
+  theme = bs_theme(version = 4, bootswatch = "flatly"),
+  
+  #theme = shinytheme("flatly"),
   tags$head(
     tags$meta(charset = "utf-8"),
     tags$meta(name = "viewport", content = "width=device-width, initial-scale=1"),
-    tags$title("Florida Legislature Dashboard • The Tributary"),
+    tags$title("Florida Legislative Compass: How Lawmakers Vote • The Tributary"),
     tags$link(rel = "icon", href = "https://jaxtrib.org/wp-content/uploads/2021/06/cropped-favicon-32x32.png", sizes = "32x32"),
     tags$link(rel = "icon", href = "https://i2.wp.com/jaxtrib.org/wp-content/uploads/2021/06/cropped-favicon.png?fit=192%2C192&ssl=1", sizes = "192x192"),
     tags$meta(name = "robots", content = "index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1"),
@@ -193,7 +204,7 @@ ui <- fluidPage(
     tags$meta(name = "description", content = "Explore the interactive dashboard for insights into the Florida Legislature's voting patterns, presented by The Tributary."),
     tags$meta(property = "og:locale", content = "en_US"),
     tags$meta(property = "og:type", content = "website"),
-    tags$meta(property = "og:title", content = "Florida Legislature Voting Dashboard • The Tributary"),
+    tags$meta(property = "og:title", content = "Florida Legislative Compass: How Lawmakers Vote • The Tributary"),
     tags$meta(property = "og:description", content = "Explore the interactive dashboard for insights into the Florida Legislature's voting patterns, presented by The Tributary."),
     tags$meta(property = "og:url", content = "https://data.jaxtrib.org/legislator_dashboard"),
     tags$meta(property = "og:site_name", content = "The Tributary"),
@@ -205,7 +216,7 @@ ui <- fluidPage(
     tags$link(rel = "icon", href = "https://jaxtrib.org/wp-content/uploads/2021/06/cropped-favicon-32x32.png", sizes = "32x32"),
     tags$link(rel = "icon", href = "https://i2.wp.com/jaxtrib.org/wp-content/uploads/2021/06/cropped-favicon.png?fit=192%2C192&ssl=1", sizes = "192x192"),
     # Twitter meta tags
-    tags$meta(name = "twitter:title", content = "Florida Legislature Voting Dashboard • The Tributary"),
+    tags$meta(name = "twitter:title", content = "Florida Legislative Compass: How Lawmakers Vote • The Tributary"),
     tags$meta(name = "twitter:description", content = "Explore the interactive dashboard for insights into the Florida Legislature's voting patterns, presented by The Tributary."),
     tags$meta(name = "twitter:image", content = "https://data.tributary.org/legislature_dashboard.png"),
     tags$meta(name = "twitter:creator", content = "@APantazi"),
@@ -227,6 +238,13 @@ ui <- fluidPage(
     #tags$link(rel = "stylesheet", type = "text/css", href = "styles.css")
     tags$link(rel = "stylesheet", type = "text/css", href = "https://data.jaxtrib.org/dev/styles.css")
   ),
+    tags$script(src = "https://cdn.jsdelivr.net/npm/mobile-detect@1.4.5/mobile-detect.min.js"),
+    tags$script(HTML("
+    $(document).on('shiny:connected', function(event) {
+      var md = new MobileDetect(window.navigator.userAgent);
+      Shiny.setInputValue('isMobile', !!md.mobile());
+    });
+  ")),
   # Banner #####
   div(class = "banner",
       tags$a(href = "https://jaxtrib.org/", 
@@ -242,9 +260,7 @@ ui <- fluidPage(
 div(class="navbar2",
     tabsetPanel(
       tabPanel("Voting Patterns", value = "app1", app1_ui),
-      #tabPanel("Legislator Activity", value = "app2", app2_ui),
-      tabPanel("District Context", value = "app3", app3_ui),
-      tabPanel("Legislator Lookup", value = "app5", app5_ui),
+      tabPanel("Legislator Lookup", value = "app3", app3_ui),
       tabPanel("Partisanship Scatterplot", value = "app4",app4_ui),
       id = "navbar_page",
       selected = "app1"

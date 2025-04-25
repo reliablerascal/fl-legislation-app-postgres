@@ -11,7 +11,7 @@
 # The App               #
 #                       #
 ######################### 
-#source("init.R", local = TRUE) # install packages if needed
+source("init.R", local = TRUE) # install packages if needed
 
 library(shiny)
 
@@ -57,14 +57,22 @@ library(shinydisconnect) #customize Shiny app disconnect message
 ###  Read from AWS    ###
 #all_data <- readRDS("data/all_data.rds")#
 library(httr)
-url <- "https://s3.amazonaws.com/data.jaxtrib.org/dev/all_data.rds"
+#url <- "https://s3.amazonaws.com/data.jaxtrib.org/dev/all_data.rds"
 
 #all_data <- readRDS("C:/Users/Andrew/Documents/fl-legislation-etl-/data-app/all_data.RDS")
 
+url <- "https://raw.githubusercontent.com/apantazi/shinydata/main/data/all_data.rds"
+
+# Download to a temporary file
 temp_file <- tempfile(fileext = ".rds")
 GET(url, write_disk(temp_file, overwrite = TRUE))
+
+# Load the data
 all_data <- readRDS(temp_file)
+
+# Clean up
 unlink(temp_file)
+
 ######################### 
 #test #
 
@@ -75,14 +83,13 @@ app02_leg_activity <- all_data$app02_leg_activity
 jct_bill_categories <- all_data$jct_bill_categories
 app03_district_context <- all_data$app03_district_context
 app03_district_context_state <- all_data$app03_district_context_state
-app04_district_context <- all_data$app04_district_context
-source("servers/voting_history_module.R", local = TRUE)
-
+app04_district_context <- all_data$app03_district_context
 ########################
 #                      #  
 # User Interface       #
 #                      #
 ########################
+source("servers/voting_history_module.R", local = TRUE)
 source("ui.R", TRUE)
 
 ########################
@@ -97,20 +104,8 @@ source("ui.R", TRUE)
 #local = TRUE ensures each sourced file has access to input/output/session
 server <- function(input, output, session) {
   source("servers/server1_vote_patterns.R", local = TRUE)
-  #source("servers/server2_leg_activity.R", local = TRUE) #we've moved it inside of server3
   source("servers/server3_district_context.R", local = TRUE)
   source("servers/server4_partisanship_scatterplot.R", local = TRUE)
-  source("servers/server5_legislator_lookup.R", local = TRUE)
-  #print(paste("Number of rows in app02_leg_activity:", nrow(app02_leg_activity)))  # Debug print
-  #print(head(app02_leg_activity))  # Debug print
-  output$debug_output <- renderPrint({
-    print("Columns in app02_leg_activity:")
-    print(names(app02_leg_activity))
-    print("Summary of vote_with_neither:")
-    print(summary(app02_leg_activity$vote_with_neither))
-    print("Summary of maverick_votes:")
-    print(summary(app02_leg_activity$maverick_votes))
-  })
 }
 
 ########################

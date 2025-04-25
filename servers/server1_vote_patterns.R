@@ -10,6 +10,14 @@ library(shinyjs)
 
 # App-specific logic
 observeEvent(input$navbar_page == "app1", {
+  is_mobile <- reactive({
+    if (is.null(input$isMobile)) FALSE else input$isMobile == "true"
+  })
+  observe({
+    print(input$isMobile)
+    print(is_mobile())
+  })
+  
   
   n_legislators <- reactive({
     data <- data_filtered()
@@ -39,8 +47,8 @@ observeEvent(input$navbar_page == "app1", {
   output$dynamicHeader <- renderUI({
 
     HTML(paste0(
-      '<div class="header-tab">Florida Legislature Voting Patterns</div>',
-      '<div class="subtitle">Navigate Your Lawmaker\'s Voting Record</div>',
+      '<div class="header-tab">Florida Legislative Compass: How Lawmakers Vote</div>',
+      '<div class="subtitle">Navigate Lawmakers\' Voting Records</div>',
       '<div align="left">',
       'Explore how Florida legislators vote, compare their choices to their district\'s political leanings, ',
       'and see how closely they align with their party. This easy-to-use tool helps you understand ',
@@ -66,15 +74,15 @@ observeEvent(input$navbar_page == "app1", {
       '<div class="legend-box">',
       '  <div class="legend-item">',
       '    <div class="legend-color" style="background-color: ', color_same, ';"></div>',
-      '    Legislator voted&nbsp;&nbsp;<em>with</em>&nbsp;&nbsp;most ', party_same, '.',
+      '    Voted <em>in line with</em> most ', party_same, '.',
       '  </div>',
       '  <div class="legend-item">',
       '    <div class="legend-color" style="background-color: ', color_oppo, ';"></div>',
-      '    Legislator voted&nbsp;&nbsp;<em>against</em>&nbsp;&nbsp;most ', party_same, ' and&nbsp;&nbsp;<em>with</em>&nbsp;&nbsp;most ', party_oppo, '.',
+      '    Voted <em>against</em> the majority of ', party_same, ' and <em>with</em> the majority of ', party_oppo, '.',
       '  </div>',
       '  <div class="legend-item">',
       '    <div class="legend-color" style="background-color: #6DA832;"></div>',
-      '    Legislator voted&nbsp;&nbsp;<em>against</em>&nbsp;&nbsp;both parties in bipartisan decisions.',
+      '    Voted <em>against</em> both parties\' majorities in bipartisan decisions.',
       '  </div>',
       '  <div class="legend-item">',
       '    <div class="legend-color" style="background-color: #FFFFFF; border: 1px solid black;"></div>',
@@ -96,17 +104,26 @@ observeEvent(input$navbar_page == "app1", {
   #   ))
   # })
   
+  # output$dynamicRecordCount <- renderUI({
+  #   req(input$year, input$chamber, input$party)
+  #   party_same <- if(input$party == "D") "Democrat" else if(input$party == "R") "Republican" else "All Parties"
+  # 
+  #   HTML(paste0(
+  #     '<p>Displaying <span class="stat-bold">', n_legislators(), '</span> ', input$chamber, ' ', party_same, 's across <span class="stat-bold">', n_roll_calls(), '</span> partisan roll<br>',' calls in ', input$year,       ' where at least one ', input$chamber, ' ', party_same, ' voted against their party majority.</p>'
+  #   ))
+  #   
+  # })
   output$dynamicRecordCount <- renderUI({
-    # print("rc test")
     req(input$year, input$chamber, input$party)
     party_same <- if(input$party == "D") "Democrat" else if(input$party == "R") "Republican" else "All Parties"
-
-    HTML(paste0(
-      '<p>Displaying <span class="stat-bold">', n_legislators(), '</span> ', input$chamber, ' ', party_same, 's across <span class="stat-bold">', n_roll_calls(), '</span> partisan roll<br>',' calls in ', input$year,       ' where at least one ', input$chamber, ' ', party_same, ' voted against their party majority.</p>'
-    ))
     
+    div(
+      class = "record-count",
+      HTML(paste0(
+        'Displaying <span class="stat-bold">', n_legislators(), '</span> ', input$chamber, ' ', party_same, 's across <span class="stat-bold">', n_roll_calls(), '</span> partisan roll calls in ', input$year, ' where at least one ', input$chamber, ' ', party_same, ' voted against their party majority.'
+      ))
+    )
   })
-  
   
   ##############################
   #                            #  
@@ -120,11 +137,17 @@ observeEvent(input$navbar_page == "app1", {
   }
   
   output$dynamicFilters <- renderUI({
+    req(app01_vote_patterns) # Make sure the data is loaded before proceeding
+    available_years <- unique(app01_vote_patterns$session_year)
+    available_years <- sort(as.numeric(available_years[!is.na(as.numeric(available_years))]), decreasing = TRUE) # Sort descending
+    year_choices <- c("All", available_years)
+    default_year <- "All"
+    
     div(class = "filter-row query-input",
         createFilterBox("party", "Select Party:", c("D", "R")),
         createFilterBox("chamber", "Select Chamber:", c("House", "Senate")),
-        createFilterBox("year", "Select Session Year:", c(2023, 2024, "All"), selected = 2024),
-        createFilterBox("final", "Final (Third Reading) Vote?", c("Y", "N", "All"), selected = "Y"),
+        createFilterBox("year", "Select Session Year:", choices = year_choices, selected = default_year),
+        createFilterBox("final", "Final (Third Reading) Vote?", c("Y", "N", "All"), selected = "All"),
         createFilterBox("sort_by_leg", "Sort Legislators By:", c("Name", "Party Loyalty", "District #", "Electorate Lean"), selected = "Party Loyalty"),
         createFilterBox("sort_by_rc", "Sort Roll Calls By:", c("Bill Number", "Party Unity"), selected = "Party Unity")
     )
@@ -199,7 +222,6 @@ observeEvent(input$navbar_page == "app1", {
   
 
   output$heatmapPlot <- renderPlotly({
-    #req(input$isMobile)
     filtered_data <- data_filtered()
     # Determine colors based on party
     
@@ -211,7 +233,6 @@ observeEvent(input$navbar_page == "app1", {
     if (nrow(data) == 0) return(NULL)
     
     #create hover text
-    #RR not sure why these are all plural? maybe b/c earlier version wasn't deduplicated
     data$hover_text <- mapply(
       createHoverText,
       numbers = data$bill_number,
@@ -263,8 +284,17 @@ observeEvent(input$navbar_page == "app1", {
     if (input$sort_by_rc == "Bill Number") {
       data <- data[order(data$bill_number), ]
     } else if (input$sort_by_rc == "Party Unity") {
+      if (input$party == "D"){
+        data <- data[order(data$rc_unity_D,decreasing=TRUE),]
+      }
+      else if (input$party== "R"){
+        data <- data[order(data$rc_unity_R,decreasing=TRUE),]
+      }
+      else {
       data <- data[order(data$rc_mean_partisanship, decreasing=TRUE), ]
+      }
     }
+      
     data$roll_call_id <- factor(data$roll_call_id, levels = unique(data$roll_call_id))
     
     # data$bill_number <- as.character(data$bill_number)
@@ -291,17 +321,11 @@ observeEvent(input$navbar_page == "app1", {
     color_against_both <- "#6DA832"
     color_na <- "#FFFFFF"
     
-    #gradient-based plot is a hack, but it works quite well. scale_fill_manual takes *much* longer to render. 
-    #scale_fill_manual(values = fill_colors, na.value = color_na) +
-    #fill_colors <- c("0" = color_with_party, "1" = color_against_party, "99" = color_against_both, "999" = color_na)
-    #x_labels_tooltips <- setNames(paste('Bill:', labels$bill_number), labels$roll_call_id)
-    
-    
-    # print("input$isMobile")
-    # print(input$isMobile)
-    # is_mobile <- ifelse(is.null(input$isMobile), FALSE, input$isMobile)
-    
-    p <- ggplot(data, aes(y = legislator_name, x = roll_call_id, fill = partisan_vote_plot)) +
+ 
+
+      
+    if (input$isMobile==FALSE) {
+      p <- ggplot(data, aes(y = legislator_name, x = roll_call_id, fill = partisan_vote_plot)) +
       geom_tile(color = "white", linewidth = 0.5) +
       scale_fill_gradient2(low = color_with_party, mid = color_against_party, high = color_against_both, midpoint = 1) +
       theme_minimal() +
@@ -314,16 +338,32 @@ observeEvent(input$navbar_page == "app1", {
             axis.text.y = element_text(size = 10),
             legend.position = "none",
             plot.title = element_blank(),
-            plot.subtitle = element_blank())+ aes(text = hover_text)
+            plot.subtitle = element_blank()) + aes(text = hover_text)
+    }
     
-    if (input$isMobile == "true") {
-    # if (!input$isMobile) {
-      p <- p + aes(text = hover_text)
-     }
+    if (input$isMobile==TRUE) {
+      p <- ggplot(data, aes(y = legislator_name, x = roll_call_id, fill = partisan_vote_plot)) +
+        geom_tile(color = "white", linewidth = 0.2, height = 0.8, width = 0.8) +  # Smaller tiles
+        scale_fill_gradient2(low = color_with_party, mid = color_against_party, high = color_against_both, midpoint = 1) +
+        theme_minimal() +
+        scale_y_discrete(labels = y_labels_with_links) + 
+        scale_x_discrete(labels = x_labels_with_links, position = "top") +
+        theme(
+          axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1, size = 6),  # Smaller x-axis labels
+          axis.text.y = element_text(size = 8),  # Smaller y-axis labels
+          axis.ticks.y = element_blank(),
+          axis.title.y = element_blank(),
+          axis.title.x = element_blank(),
+          plot.title = element_blank(),
+          legend.position = "none",
+          plot.subtitle = element_blank(),
+          plot.margin = margin(5, 5, 5, 5)  # Smaller margins for more plot space
+        )
+    }
+    
     
     plotly_output <- ggplotly(p, tooltip = "text", height = totalHeight, width = totalWidth) %>%
       layout(
-        #autosize = TRUE,
         xaxis = list(side = "top"),
         font = list(family = "Archivo"),
         margin = list(l = 25, t = 50, b = 25),
@@ -331,17 +371,17 @@ observeEvent(input$navbar_page == "app1", {
         paper_bgcolor = "rgba(255,255,255,0.85)",
         dragmode = FALSE) %>%
       plotly::config(scrollZoom = FALSE, displayModeBar = FALSE)
-    # if (input$isMobile) {
-    #   plotly_output <- plotly_output %>%
-    #     layout(dragmode = FALSE) %>%
-    #     config(scrollZoom = FALSE)
-    # }
+    
+    
 
     return(plotly_output)
     
   })
   
-  output$staticMethodology1 <- renderUI({
+  renderUI({HTML(div(class = "swipe-right", "Scroll right for more votes and down for more legislators"),
+  )})
+
+    output$staticMethodology1 <- renderUI({
     HTML(paste0(
       '<div class="header-section">About This Tool</div>',
       '<div class="methodology-notes">',

@@ -8,9 +8,41 @@
 ########################################
 source("servers/voting_history_module.R")
 library(patchwork)
-# App-specific logic
-observeEvent(input$navbarPage == "app3", {
+library(bslib)
+library(shinyBS)
 
+# App-specific logic
+observeEvent(input$navbar_page == "app3", {
+  req(app02_leg_activity) # Ensure data is loaded
+  methodology_years_numeric <- reactive({
+    years <- unique(app02_leg_activity$session_year)
+    years <- years[!is.na(years)]
+    years <- suppressWarnings(as.numeric(years))
+    sort(unique(years)) # Sort ascending for min/max
+  })
+  
+  # Create the dynamic year string for display
+  methodology_year_string <- reactive({
+    years <- methodology_years_numeric()
+    req(length(years) > 0) # Ensure we have years
+    
+    if (length(years) == 1) {
+      as.character(years) # Single year
+    } else if (length(years) == 2) {
+      paste(years[1], "and", years[2]) # Two years
+    } else {
+      # Check if years are sequential for range format
+      if (all(diff(years) == 1)) {
+        paste0(min(years), "-", max(years)) # Contiguous range (e.g., 2023-2025)
+      } else {
+        # Non-contiguous years (e.g., "2023, 2024, and 2026") - more complex formatting needed if required
+        # For now, let's just show min-max as a fallback
+        paste0(min(years), "-", max(years))
+        # Or alternatively, list them:
+        # paste(paste(head(years, -1), collapse=", "), "and", tail(years, 1))
+      }
+    }
+  })
   ########################################
   #                                      #  
   # Header- methodology and legend       #
@@ -22,7 +54,7 @@ observeEvent(input$navbarPage == "app3", {
     HTML(paste0(
       '<div class = "header-tab-small">Legislator Spotlight</div>',
       '<h2>', data_district$legislator_name, ' (', data_district$party, ')</h2>',
-      '<h3>', data_district$chamber, ' District ', data_district$district, '</h3>',
+      '<h3>', data_district$chamber, ' District ', data_district$district_number, '</h3>',
       '<div align="left">',
       'This tool compares each legislator\'s voting record with their district\'s political leanings. ',
       'Use it to understand how well a legislator represents their constituents\' views and characteristics. The tool below allows you to look up every single vote every legislator has taken, from committee votes to bill amendments to final roll calls.',
@@ -122,6 +154,7 @@ observeEvent(input$navbarPage == "app3", {
   
   output$helper3_party_loyalty <- renderUI({
     data_district <- qry_demo_district()
+    
     same_party <- if (data_district$party == "R") "Republican" else "Democrat"
     same_party_adj <- if (data_district$party == "R") "Republican" else "Democratic"
     n_legislators_in_party <- if (same_party == "Republican") {
@@ -168,38 +201,61 @@ observeEvent(input$navbarPage == "app3", {
   #############################
   output$helper3_district_lean <- renderUI({
     data_district <- qry_demo_district()
-    same_party <- if (data_district$party == "R") "Republican" else "Democratic"
-    n_districts <- if (data_district$chamber == "House") 120 else 40
-    rank_dist <- if (data_district$party == "R") data_district$rank_partisan_dist_R else data_district$rank_partisan_dist_D
+    # Ensure data is valid and has at least one row
+    req(nrow(data_district) > 0,
+        !is.na(data_district$avg_party_lean),
+        !is.na(data_district$avg_party_lean_points_abs),
+        !is.na(data_district$avg_pct_R),
+        !is.na(data_district$avg_pct_D))
     
+    # Determine district lean party and associated values
+    district_lean_party_abbr <- data_district$avg_party_lean # "R" or "D"
+    district_lean_party_name <- ifelse(district_lean_party_abbr == "R", "Republican", "Democratic")
+    district_rank_col <- ifelse(district_lean_party_abbr == "R", data_district$rank_partisan_dist_R, data_district$rank_partisan_dist_D)
+    district_rank_formatted <- ifelse(is.na(district_rank_col), "?", as.integer(district_rank_col))
+    
+    # Construct lean display string (e.g., "R+15.5")
+    lean_value_abs_formatted <- format(round(data_district$avg_party_lean_points_abs, 1), nsmall = 1)
+    lean_display_string <- paste0(district_lean_party_abbr, "+", lean_value_abs_formatted)
+    
+    # Determine winning party for description
+    winning_party_name_desc <- ifelse(district_lean_party_abbr == "R", "Republicans", "Democrats")
+    
+    # Construct simplified and corrected description sentence
     lean_description <- paste0(
-      data_district$avg_party_lean, '+', data_district$avg_party_lean_points_abs,
-      " means ", 
-      ifelse(data_district$avg_party_lean > 0, 
-             "Republicans", 
-             "Democrats"), 
-      " on average won recent statewide elections by ", 
-      data_district$avg_party_lean ,
+      "This means ", winning_party_name_desc,
+      " on average won recent statewide elections by ",
+      lean_value_abs_formatted, # Use formatted absolute value
       " percentage points in this district."
     )
+    
+    # Chamber info
+    n_districts <- if (data_district$chamber == "House") 120 else 40
+    
+    # Format percentages
+    avg_pct_R_formatted <- scales::percent(data_district$avg_pct_R, accuracy = 0.1)
+    avg_pct_D_formatted <- scales::percent(data_district$avg_pct_D, accuracy = 0.1)
     
     HTML(paste0(
       '<div class="flex-item population-voting">',
       '<h3 class="flex-header-section">POPULATION VOTING</h3>',
       '<ul class="main-list">',
-      '<li>District Partisanship: This district votes the #<span class="stat-bold">', rank_dist, '</span> most ', same_party,
+      # Use district's lean party and rank
+      '<li>District Partisanship: This district votes the #<span class="stat-bold">', district_rank_formatted, '</span> most ', district_lean_party_name, # Use district lean party
       '-leaning of <span class="stat-bold">', n_districts, '</span> ', data_district$chamber, ' districts</li>',
-      '<li>Partisan lean: <span class="stat-bold">', data_district$avg_party_lean, '+', data_district$avg_party_lean_points_abs, '</span></li>',
+      # Use constructed display string
+      '<li>Partisan lean: <span class="stat-bold">', lean_display_string, '</span></li>',
+      # Use corrected description
       '<li>', lean_description, '</li>',
       '<li>Recent Election Results:',
       '<ul>',
-      '<li>Republican:  <span class="stat-bold">', percent(data_district$avg_pct_R), '</span></li>',
-      '<li>Democratic:  <span class="stat-bold">', percent(data_district$avg_pct_D), '</span></li>',
+      '<li>Republican:  <span class="stat-bold">', avg_pct_R_formatted, '</span></li>',
+      '<li>Democratic:  <span class="stat-bold">', avg_pct_D_formatted, '</span></li>',
       '</ul></li>',
       '</ul>',
       '</div>'
     ))
-  }) 
+  })
   
   
   ########################################
@@ -234,7 +290,7 @@ observeEvent(input$navbarPage == "app3", {
     demo_state <- app03_district_context_state
     
     # Create a district name
-    district_name <- paste(demo_district$chamber, "District", demo_district$district)
+    district_name <- paste(demo_district$chamber, "District", demo_district$district_number)
     
     data <- data.frame(
       Category = factor(c(district_name, "Florida", district_name, "Florida", 
@@ -257,25 +313,31 @@ observeEvent(input$navbarPage == "app3", {
                   hjust = -.1,
                   size = 5,
                   family = "Archivo") +
-        scale_fill_manual(values = c(setNames(c("#17becf", "#dfdfdf"), c(district_name, "Florida")))) +
-        scale_y_continuous(labels = scales::percent_format(), limits = c(0, max(data$Percent) * 1.175)) +
+        scale_fill_manual(values = c(setNames(c("#098677", "#cccccc"), c(district_name, "Florida")))) +
+        scale_y_continuous(labels = scales::percent_format(), limits = c(0, 1.05)) +
         labs(title = demo, x = "", y = "") +
         theme_minimal(base_size = 14,base_family = "Archivo") +
         theme(
           legend.position = "none",
           panel.grid.major = element_blank(),
           panel.grid.minor = element_blank(),
-          axis.text.x = element_text(size = 14, angle = 0, hjust = 0.5),
+          axis.text.x =element_blank(),
+          axis.ticks.x = element_blank(),
           plot.title = element_text(size = 16, face = "bold", hjust = 0.5,colour = "#064875"),
           axis.text.y = element_text(size = 14),
-          plot.margin = margin(20, 10, 20, 10)
+          plot.margin = margin(20, 30, 20, 10),
+          
+        panel.background = element_rect(fill = "#f9f9f9", colour = NA),
+
+        plot.background = element_rect(fill = "#ffffff", colour = NA)
         ) +
         coord_flip()
     }
     
     plots <- lapply(c("White", "Black", "Asian", "Hispanic"), create_plot)
     do.call(gridExtra::grid.arrange, c(plots, ncol = 1))
-  }, width = 400, height = 600)
+  }, 
+  width = 400, height = 600)
   
   # output$demographicsPlot <- renderPlot({
   #   req(qry_demo_district)
@@ -345,7 +407,8 @@ observeEvent(input$navbarPage == "app3", {
       HTML('</div>')
     )
   })
-  
+
+
   
   ########################################
   #                                      #  
@@ -379,12 +442,15 @@ observeEvent(input$navbarPage == "app3", {
   #                                      #
   ########################################   
   output$staticMethodology3 <- renderUI({
+    year_text <- methodology_year_string()
+    
     HTML(paste0(
       '<hr>',
       '<div class="header-section"><h3>Methodology</h3></div>',
       '<div class="methodology-notes">',
       '<p>*Other votes include those marked absent or "no vote", voting with party when party is equally divided, and voting against party when oppo is equally divided.</p>',
-      '<p><strong>Legislator Party Loyalty:</strong> Calculated using all votes from 2023 and 2024 legislative sessions where parties disagreed.</p>',
+      # Use dynamic year_text
+      '<p><strong>Legislator Party Loyalty:</strong> Calculated using all votes from ', year_text, ' legislative sessions where parties disagreed.</p>',
       '<p>Scores range from 0 to 1, where 1 indicates always voting with party majority and 0 indicates always voting against.</p>',
       '<p><strong>District Partisan Lean:</strong> Based on a weighted average of recent election results:</p>',
       '<ul>',
@@ -395,11 +461,11 @@ observeEvent(input$navbarPage == "app3", {
       '</ul>',
       '<strong>Data sources:</strong>',
       '<ul>',
-      '<li>Legislator voting info from <a href="https://legiscan.com/FL/datasets">LegiScan\'s Florida Legislative Datasets for all 2023 and 2024 Regular Session</a>.</li>',
+      # Use dynamic year_text again
+      '<li>Legislator voting info from <a href="https://legiscan.com/FL/datasets">LegiScan\'s Florida Legislative Datasets for ', year_text, ' Regular Session</a>.</li>',
       '<li>District demographics and election results curated by <a href="https://davesredistricting.org/maps#state::FL">Dave\'s Redistricting</a>.</li>',
       '</ul>',
-      'For details on wishlist items and work in progress, see <a href="https://docs.google.com/document/d/1e3KDrnpXjKL4OJqFR49hqti77TntPRL7k4AkqSfsefU/edit" target="_blank"><strong>development notes</strong></a>.',
-      '<br><br></div>'
+      '<br></div>'
     ))
   })
   

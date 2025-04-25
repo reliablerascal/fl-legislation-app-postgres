@@ -1,6 +1,25 @@
 /* styles.css */
 
 /* added for use with 3-column district context table */
+@media (max-width: 768px) {
+  .btn, .form-control {
+    font-size: 16px;
+    padding: 10px;
+  }
+  select.form-control {
+    height: 40px;
+  }
+}
+
+@media (max-width: 768px) {
+  body {
+    font-size: 14px;
+  }
+  h1 { font-size: 24px; }
+  h2 { font-size: 20px; }
+  h3 { font-size: 18px; }
+}
+
 .flex-section {
   display: flex;
   justify-content: space-evenly;
@@ -481,6 +500,13 @@ a:focus {
   font-weight: bold;
   color: #064875;
   font-size: 1.1em;
+}
+
+.record-count {
+  max-width: 600px;
+  margin: 0 auto;
+  text-align: left;
+  word-wrap: break-word;
 }
 
 .methodology-notes {
