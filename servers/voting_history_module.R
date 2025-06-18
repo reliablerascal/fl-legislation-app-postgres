@@ -1,5 +1,5 @@
 # voting_history_module.R
-
+library(data.table)
 library(shiny)
 library(dplyr)
 library(lubridate)
@@ -15,7 +15,6 @@ votingHistoryUI <- function(id) {
         #actionButton(ns("btn_year_2023"), "2023"),
         #actionButton(ns("btn_year_2024"), "2024"),
         uiOutput(ns("yearButtonsUI")),
-        
         selectInput(ns("items_per_page"), "Items per page:",
                     choices = c(10, 25, 50, 100),
                     selected = 25)),
@@ -112,7 +111,7 @@ votingHistoryServer <- function(id, selected_legislator) {
     filtered_voting_data <- reactive({
       req(selected_legislator())
       
-      data <- app02_leg_activity %>%
+      data <- as.data.table(app02_leg_activity) %>%
         filter(legislator_name == selected_legislator())
       
       if (length(values$selectedYears) > 0) {
@@ -121,11 +120,9 @@ votingHistoryServer <- function(id, selected_legislator) {
       
       if (!is.null(input$searchText) && input$searchText != "") {
         search_pattern <- tolower(input$searchText)
-        data <- data %>%
-          filter(
-            grepl(search_pattern, tolower(bill_title), fixed = TRUE) |
-              grepl(search_pattern, tolower(bill_desc), fixed = TRUE)
-          )
+        # data.table syntax for fast search
+        data <- data[tolower(bill_title) %like% search_pattern |
+                       tolower(bill_desc) %like% search_pattern]
       }
       
       if (length(values$selectedVoteTypes) > 0) {
@@ -143,7 +140,7 @@ votingHistoryServer <- function(id, selected_legislator) {
     
     vote_counts <- reactive({
       req(selected_legislator())
-      data <- app02_leg_activity %>%
+      data <- as.data.table(app02_leg_activity) %>%
         filter(legislator_name == selected_legislator())
       list(
         'Voted Against Both Parties' = sum(data$vote_with_neither == 1, na.rm = TRUE),

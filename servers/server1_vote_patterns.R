@@ -11,7 +11,7 @@ library(shinyjs)
 # App-specific logic
 observeEvent(input$navbar_page == "app1", {
   is_mobile <- reactive({
-    if (is.null(input$isMobile)) FALSE else input$isMobile == "true"
+    isTRUE(input$isMobile)
   })
   observe({
     print(input$isMobile)
@@ -149,6 +149,7 @@ observeEvent(input$navbar_page == "app1", {
         createFilterBox("year", "Select Session Year:", choices = year_choices, selected = default_year),
         createFilterBox("final", "Final (Third Reading) Vote?", c("Y", "N", "All"), selected = "All"),
         createFilterBox("sort_by_leg", "Sort Legislators By:", c("Name", "Party Loyalty", "District #", "Electorate Lean"), selected = "Party Loyalty"),
+        #createFilterBox("bill_category", "Bill Category (demo)", c("education", "All"), selected = "All"),
         createFilterBox("sort_by_rc", "Sort Roll Calls By:", c("Bill Number", "Party Unity"), selected = "Party Unity")
     )
   })
@@ -270,13 +271,8 @@ observeEvent(input$navbar_page == "app1", {
       data$legislator_name <- factor(data$legislator_name, levels = unique(data$legislator_name))  # Set factor levels
     } else if (input$sort_by_leg == "Party Loyalty") {
       data$legislator_name <- reorder(data$legislator_name, -data$rank_partisan_leg)
-    } else if (input$sort_by_leg == "District #") {
+    } else if (input$sort_by_leg == "District") {
       data$legislator_name <- reorder(data$legislator_name, -data$district_number)
-    } else if (input$sort_by_leg == "Electorate Lean") {
-      if (input$party == "R") {
-        data$legislator_name <- reorder(data$legislator_name, -data$rank_partisan_dist_R)
-      } else
-      {data$legislator_name <- reorder(data$legislator_name, -data$rank_partisan_dist_D)}
     }
     
     # sort roll calls
@@ -324,8 +320,8 @@ observeEvent(input$navbar_page == "app1", {
  
 
       
-    if (input$isMobile==FALSE) {
-      p <- ggplot(data, aes(y = legislator_name, x = roll_call_id, fill = partisan_vote_plot)) +
+    if (!is_mobile()) {
+      p <- ggplot(data, aes(y = legislator_name, x = roll_call_id, fill = partisan_vote_plot, text = hover_text)) +
       geom_tile(color = "white", linewidth = 0.5) +
       scale_fill_gradient2(low = color_with_party, mid = color_against_party, high = color_against_both, midpoint = 1) +
       theme_minimal() +
@@ -341,8 +337,8 @@ observeEvent(input$navbar_page == "app1", {
             plot.subtitle = element_blank()) + aes(text = hover_text)
     }
     
-    if (input$isMobile==TRUE) {
-      p <- ggplot(data, aes(y = legislator_name, x = roll_call_id, fill = partisan_vote_plot)) +
+    else  {
+      p <- ggplot(data, aes(y = legislator_name, x = roll_call_id, fill = partisan_vote_plot, text = hover_text)) +
         geom_tile(color = "white", linewidth = 0.2, height = 0.8, width = 0.8) +  # Smaller tiles
         scale_fill_gradient2(low = color_with_party, mid = color_against_party, high = color_against_both, midpoint = 1) +
         theme_minimal() +
@@ -361,7 +357,7 @@ observeEvent(input$navbar_page == "app1", {
         )
     }
     
-    
+
     plotly_output <- ggplotly(p, tooltip = "text", height = totalHeight, width = totalWidth) %>%
       layout(
         xaxis = list(side = "top"),
@@ -371,12 +367,10 @@ observeEvent(input$navbar_page == "app1", {
         paper_bgcolor = "rgba(255,255,255,0.85)",
         dragmode = FALSE) %>%
       plotly::config(scrollZoom = FALSE, displayModeBar = FALSE)
-    
-    
 
     return(plotly_output)
     
-  })
+  }) %>% bindCache(input$party, input$chamber, input$year, input$final)
   
   renderUI({HTML(div(class = "swipe-right", "Scroll right for more votes and down for more legislators"),
   )})

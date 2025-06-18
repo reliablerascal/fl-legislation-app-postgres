@@ -149,13 +149,31 @@ button.btn-filter.active-filter {
 
 /* Banner styling */
 .banner {
+  width: 100%;
   background-color: #064875;
-  padding-top: 10px;
-  padding-bottom: 0;
+  padding: 16px 0 10px 0;
+/*  padding-top: 10px; 
+  padding-bottom: 0;*/
   text-align: center;
   margin-bottom: 0;
+  box-shadow: 0 4px 16px rgba(6, 72, 117, 0.05);
 }
-
+.banner svg {
+  max-width: 440px;      /* Looks good on desktop, adjust as needed */
+  width: 92vw;           /* Responsive for mobile/tablet */
+  height: auto;
+  display: inline-block;
+  vertical-align: middle;
+  margin: 0 auto;
+  padding: 0;
+  /* If you want extra separation: margin-top: 8px; */
+}
+@media (max-width: 600px) {
+  .banner svg {
+    max-width: 99vw;
+    width: 99vw;
+  }
+}
 /* Navbar styling */
 .navbar2 {
   margin-top: 0;

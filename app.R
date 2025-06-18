@@ -18,6 +18,7 @@ library(shiny)
 
 library(dplyr)
 conflicted::conflict_prefer_all("dplyr", quiet=TRUE)
+library(data.table)
 library(plotly)
 conflicted::conflicts_prefer(plotly::layout,.quiet = TRUE)
 library(ggplot2)
@@ -42,13 +43,11 @@ library(shinydisconnect) #customize Shiny app disconnect message
 #                       #
 ######################### 
 
-
-
 ### read all_data
 #########################
 #                       #  
 ###  Read locally     ###
-#all_data <- readRDS("data/all_data.rds")#
+all_data <- readRDS("data/all_data.rds")#
 ######################### 
 
 
@@ -74,16 +73,14 @@ all_data <- readRDS(temp_file)
 unlink(temp_file)
 
 ######################### 
-#test #
-
 
 ### set up dataframes ####
-app01_vote_patterns <- all_data$app01_vote_patterns
-app02_leg_activity <- all_data$app02_leg_activity
-jct_bill_categories <- all_data$jct_bill_categories
-app03_district_context <- all_data$app03_district_context
-app03_district_context_state <- all_data$app03_district_context_state
-app04_district_context <- all_data$app03_district_context
+app01_vote_patterns <- as.data.table(all_data$app01_vote_patterns)
+app02_leg_activity <- as.data.table(all_data$app02_leg_activity)
+jct_bill_categories <- as.data.table(all_data$jct_bill_categories)
+app03_district_context <- as.data.table(all_data$app03_district_context)
+app03_district_context_state <- as.data.table(all_data$app03_district_context_state)
+app04_district_context <- as.data.table(all_data$app03_district_context)
 ########################
 #                      #  
 # User Interface       #

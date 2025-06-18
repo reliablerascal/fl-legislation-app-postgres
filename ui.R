@@ -85,8 +85,8 @@ c_disconnect_message <- function() {
       });
     });
   ")),
-    #tags$link(rel = "stylesheet", type = "text/css", href = "styles.css"), 
-    tags$link(rel = "stylesheet", type = "text/css", href = "https://data.jaxtrib.org/dev/styles.css"),
+    #tags$link(rel = "stylesheet", type = "text/css", href = "www/styles.css"), 
+    tags$link(rel = "stylesheet", type = "text/css", href = "https://legislative-compass.s3.us-east-2.amazonaws.com/styles.css"),
     
     tags$script(src = "https://cdn.jsdelivr.net/npm/mobile-detect@1.4.5/mobile-detect.min.js"), # Include MobileDetect.js 
     tags$script(HTML("
@@ -114,8 +114,8 @@ c_disconnect_message <- function() {
 ###########################
 
 app3_ui <- fluidPage(
-  #tags$head(tags$link(rel = "stylesheet", type = "text/css", href = "https://mockingbird.shinyapps.io/fl-leg-app-postgres/styles.css")),
-  tags$head(tags$link(rel = "stylesheet", type = "text/css", href = "https://data.jaxtrib.org/dev/styles.css")),
+  #tags$head(tags$link(rel = "stylesheet", type = "text/css", href = "www/styles.css")),
+  tags$head(tags$link(rel = "stylesheet", type = "text/css", href = "https://legislative-compass.s3.us-east-2.amazonaws.com/styles.css")),
   c_disconnect_message(),
   # uiOutput("app3UI"),
   # uiOutput("dynamicHeader3"),
@@ -235,8 +235,8 @@ ui <- fluidPage(
     tags$meta(property = "article:published_time", content = "2024-02-22T03:02:59+00:00"),
     tags$meta(property = "article:modified_time", content = "2024-02-22T03:02:59+00:00"),
     tags$link(href = "https://fonts.googleapis.com/css2?family=Archivo:ital,wght@0,500;0,600;1,500;1,600&display=swap", rel = "stylesheet"),
-    #tags$link(rel = "stylesheet", type = "text/css", href = "styles.css")
-    tags$link(rel = "stylesheet", type = "text/css", href = "https://data.jaxtrib.org/dev/styles.css")
+    #tags$link(rel = "stylesheet", type = "text/css", href = "www/styles.css")
+    tags$link(rel = "stylesheet", type = "text/css", href = "https://legislative-compass.s3.us-east-2.amazonaws.com/styles.css")
   ),
     tags$script(src = "https://cdn.jsdelivr.net/npm/mobile-detect@1.4.5/mobile-detect.min.js"),
     tags$script(HTML("
@@ -248,7 +248,21 @@ ui <- fluidPage(
   # Banner #####
   div(class = "banner",
       tags$a(href = "https://jaxtrib.org/", 
-             tags$img(src = "https://jaxtrib.org/wp-content/uploads/2021/09/TRB_TributaryLogo_NoTagline_White.png", class = "logo-img", alt = "The Tributary")
+             HTML('        <svg width="650" height="180" viewBox="0 0 650 180" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <text x="20" y="70" font-family="Archivo Black, Archivo, Arial Black, Arial, sans-serif" font-size="60" font-weight="bold" fill="white" letter-spacing="2">LEGISLATIVE</text>
+          <text x="20" y="140" font-family="Archivo Black, Archivo, Arial Black, Arial, sans-serif" font-size="60" font-weight="bold" fill="white" letter-spacing="2">COMPASS</text>
+          <g transform="translate(530,90)">
+            <polygon points="0,-62 12,-32 0,-18 -12,-32" fill="#E74C3C"/>
+            <polygon points="0,62 12,32 0,18 -12,32" fill="white"/>
+            <polygon points="62,0 32,12 18,0 32,-12" fill="#5DADE2"/>
+            <polygon points="-62,0 -32,12 -18,0 -32,-12" fill="white"/>
+            <polygon points="44,-44 28,-16 0,-18 16,-28" fill="white"/>
+            <polygon points="44,44 28,16 0,18 16,28" fill="white"/>
+            <polygon points="-44,44 -16,28 0,18 -28,16" fill="#5DADE2"/>
+            <polygon points="-44,-44 -16,-28 0,-18 -28,-16" fill="white"/>
+            <circle cx="0" cy="0" r="10" fill="#1A2D49"/>
+          </g>
+        </svg>')
       )
   ),
   
