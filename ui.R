@@ -4,7 +4,7 @@
 # Specifies user input controls (e.g., text inputs, sliders, drop-downs).
 # Sets up placeholders for outputs (e.g., tables, plots, text).
 #
-# 6/13/24 RR
+# 5/20/25 RR
 # separated this section into its own script, but kept Andrew's code intact
 # none of this is dependent on data
 
@@ -15,7 +15,7 @@ library(plotly)
 library(shinyWidgets)
 library(bslib)
 library(shiny)
-library(shinydisconnect) # not sure why this is needed here AND in app.R, but it prevents Error in c_disconnect_message() : could not find function "c_disconnect_message"
+library(shinydisconnect)
 
 verbatimTextOutput("debug_output")
 
@@ -39,6 +39,20 @@ c_disconnect_message <- function() {
     refreshColour = "#f99a10" # Orange color for refresh button to grab attention
   )
 }
+#####################
+#                   #  
+# about tab    #
+#                   #
+##################### 
+aboutTabUI <- function(id) {
+  ns <- NS(id)
+  tagList(
+    # You can style this as needed
+    div(class = "about-section",
+        uiOutput(ns("aboutText"))
+    )
+  )
+}
 
 #####################
 #                   #  
@@ -47,7 +61,7 @@ c_disconnect_message <- function() {
 #####################
 # Define the UI for App 1 ####
 
-`app1_ui` <- fluidPage( 
+`app1_ui` <- tagList( 
   tags$head( 
     tags$style(HTML("
       .swipe-right {
@@ -86,7 +100,6 @@ c_disconnect_message <- function() {
     });
   ")),
     #tags$link(rel = "stylesheet", type = "text/css", href = "www/styles.css"), 
-    tags$link(rel = "stylesheet", type = "text/css", href = "https://legislative-compass.s3.us-east-2.amazonaws.com/styles.css"),
     
     tags$script(src = "https://cdn.jsdelivr.net/npm/mobile-detect@1.4.5/mobile-detect.min.js"), # Include MobileDetect.js 
     tags$script(HTML("
@@ -96,14 +109,13 @@ c_disconnect_message <- function() {
       });
     "))
   ),
-  c_disconnect_message(), 
   uiOutput("dynamicHeader"), 
   uiOutput("dynamicFilters"), 
   uiOutput("dynamicLegend"), 
   uiOutput("dynamicRecordCount"), 
   uiOutput("noDataMessage"), 
   plotlyOutput("heatmapPlot",width = "100%", height = "auto"),
-
+  
   uiOutput("staticMethodology1")
 )
 
@@ -113,29 +125,22 @@ c_disconnect_message <- function() {
 #                         #
 ###########################
 
-app3_ui <- fluidPage(
-  #tags$head(tags$link(rel = "stylesheet", type = "text/css", href = "www/styles.css")),
-  tags$head(tags$link(rel = "stylesheet", type = "text/css", href = "https://legislative-compass.s3.us-east-2.amazonaws.com/styles.css")),
-  c_disconnect_message(),
-  # uiOutput("app3UI"),
-  # uiOutput("dynamicHeader3"),
-  # uiOutput("dynamicFilters3"),
-  # uiOutput("dynamicPartisanship"),
-  # uiOutput("dynamicDemographics"),
-  # #uiOutput("dynamicLegProfile"),
-  # votingHistoryUI("votingHistory"),
-  # uiOutput("staticMethodology3")
+app3_ui <- tagList(
+  tags$head(
+    tags$script(HTML(
+      "
+    $(document).on('hidden.bs.modal', function () {
+      $('body').css('overflow', 'auto');
+    });
+    "
+    ))
+  ),
   column(12, uiOutput("dynamicHeader3")),
   column(12, uiOutput("dynamicFilters3")),
   column(12, uiOutput("dynamicContextComparison")),
   votingHistoryUI("votingHistory"),
   fluidRow(column(12, uiOutput("staticMethodology3")))
 )
-
-
-
-
-
 
 ###########################
 
@@ -147,7 +152,7 @@ app3_ui <- fluidPage(
 
 ###########################
 app4_ui <- 
-  fluidPage(
+  tagList(
     div(class = "header-tab", "Legislator vs District Partisanship"),
     sidebarLayout(
       sidebarPanel(
@@ -169,18 +174,6 @@ app4_ui <-
   )
 
 
-###########################
-
-#                         #  
-
-# app 5 legislator lookup #
-
-#                         #
-
-###########################
-
-
-
 #####################
 #                   #  
 # navbar page       #
@@ -190,56 +183,41 @@ app4_ui <-
 # Combine the UIs into a navbarPage ####
 ui <- fluidPage(
   useShinyjs(),
-  theme = bs_theme(version = 4, bootswatch = "flatly"),
+  theme = bs_theme(version = 5, bootswatch = "flatly"),
+  c_disconnect_message(),
+  
   
   #theme = shinytheme("flatly"),
   tags$head(
     tags$meta(charset = "utf-8"),
     tags$meta(name = "viewport", content = "width=device-width, initial-scale=1"),
-    tags$title("Florida Legislative Compass: How Lawmakers Vote • The Tributary"),
-    tags$link(rel = "icon", href = "https://jaxtrib.org/wp-content/uploads/2021/06/cropped-favicon-32x32.png", sizes = "32x32"),
-    tags$link(rel = "icon", href = "https://i2.wp.com/jaxtrib.org/wp-content/uploads/2021/06/cropped-favicon.png?fit=192%2C192&ssl=1", sizes = "192x192"),
+    tags$title("Florida Legislative Compass: How Lawmakers Vote"),
+    tags$link(rel = "icon", type = "image/png", href = "https://legislative-compass.s3.us-east-2.amazonaws.com/favicon.png"),
+    tags$link(rel = "shortcut icon", href = "https://legislative-compass.s3.us-east-2.amazonaws.com/favicon.ico"),
     tags$meta(name = "robots", content = "index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1"),
-    tags$meta(name = "google-site-verification", content = "c-p4lmvJsiiQlKV2swCEQsMzWP3CX46GCRBL7WXjVxk"),
-    tags$meta(name = "description", content = "Explore the interactive dashboard for insights into the Florida Legislature's voting patterns, presented by The Tributary."),
+    tags$meta(name = "description", content = "Explore the interactive dashboard for insights into the Florida Legislature's voting patterns."),
     tags$meta(property = "og:locale", content = "en_US"),
     tags$meta(property = "og:type", content = "website"),
-    tags$meta(property = "og:title", content = "Florida Legislative Compass: How Lawmakers Vote • The Tributary"),
-    tags$meta(property = "og:description", content = "Explore the interactive dashboard for insights into the Florida Legislature's voting patterns, presented by The Tributary."),
-    tags$meta(property = "og:url", content = "https://data.jaxtrib.org/legislator_dashboard"),
-    tags$meta(property = "og:site_name", content = "The Tributary"),
-    tags$meta(property = "article:publisher", content = "https://data.tributary.org/legislature_dashboard.png"),
+    tags$meta(property = "og:title", content = "Florida Legislative Compass: How Lawmakers Vote"),
+    tags$meta(property = "og:description", content = "Explore the interactive dashboard for insights into the Florida Legislature's voting patterns."),
+    tags$meta(property = "og:url", content = "https://apantazi.shinyapps.io/FLLegislativeCompass/"),
+    tags$meta(property = "og:site_name", content = "Legislative Compass"),
     tags$meta(property = "og:image:type", content = "image/png"),
     tags$meta(name = "twitter:card", content = "summary_large_image"),
-    tags$meta(charset = "utf-8"),
-    tags$title("Interactive Dashboard • The Tributary"),
-    tags$link(rel = "icon", href = "https://jaxtrib.org/wp-content/uploads/2021/06/cropped-favicon-32x32.png", sizes = "32x32"),
-    tags$link(rel = "icon", href = "https://i2.wp.com/jaxtrib.org/wp-content/uploads/2021/06/cropped-favicon.png?fit=192%2C192&ssl=1", sizes = "192x192"),
-    # Twitter meta tags
-    tags$meta(name = "twitter:title", content = "Florida Legislative Compass: How Lawmakers Vote • The Tributary"),
-    tags$meta(name = "twitter:description", content = "Explore the interactive dashboard for insights into the Florida Legislature's voting patterns, presented by The Tributary."),
-    tags$meta(name = "twitter:image", content = "https://data.tributary.org/legislature_dashboard.png"),
-    tags$meta(name = "twitter:creator", content = "@APantazi"),
-    tags$meta(name = "twitter:site", content = "@TheJaxTrib"),
-    tags$meta(name = "twitter:label1", content = "Written by"),
-    tags$meta(name = "twitter:data1", content = "Andrew Pantazi"),
-    # Facebook meta tag
-    tags$meta(property = "fb:pages", content = "399115500554052"),
-    # Additional meta tags
+    tags$meta(property = "og:image", content = "https://legislative-compass.s3.us-east-2.amazonaws.com/az-preview.png"),
+    tags$meta(name = "twitter:image", content = "https://legislative-compass.s3.us-east-2.amazonaws.com/az-preview.png"),
     tags$meta(name = "theme-color", content = "#fff"),
     tags$meta(name = "apple-mobile-web-app-capable", content = "yes"),
     tags$meta(name = "mobile-web-app-capable", content = "yes"),
     tags$meta(name = "apple-touch-fullscreen", content = "YES"),
-    tags$meta(name = "apple-mobile-web-app-title", content = "The Tributary"),
-    tags$meta(name = "application-name", content = "The Tributary"),
     tags$meta(property = "article:published_time", content = "2024-02-22T03:02:59+00:00"),
     tags$meta(property = "article:modified_time", content = "2024-02-22T03:02:59+00:00"),
     tags$link(href = "https://fonts.googleapis.com/css2?family=Archivo:ital,wght@0,500;0,600;1,500;1,600&display=swap", rel = "stylesheet"),
     #tags$link(rel = "stylesheet", type = "text/css", href = "www/styles.css")
     tags$link(rel = "stylesheet", type = "text/css", href = "https://legislative-compass.s3.us-east-2.amazonaws.com/styles.css")
   ),
-    tags$script(src = "https://cdn.jsdelivr.net/npm/mobile-detect@1.4.5/mobile-detect.min.js"),
-    tags$script(HTML("
+  tags$script(src = "https://cdn.jsdelivr.net/npm/mobile-detect@1.4.5/mobile-detect.min.js"),
+  tags$script(HTML("
     $(document).on('shiny:connected', function(event) {
       var md = new MobileDetect(window.navigator.userAgent);
       Shiny.setInputValue('isMobile', !!md.mobile());
@@ -247,8 +225,7 @@ ui <- fluidPage(
   ")),
   # Banner #####
   div(class = "banner",
-      tags$a(href = "https://jaxtrib.org/", 
-             HTML('        <svg width="650" height="180" viewBox="0 0 650 180" fill="none" xmlns="http://www.w3.org/2000/svg">
+      HTML('        <svg width="650" height="180" viewBox="0 0 650 180" fill="none" xmlns="http://www.w3.org/2000/svg">
           <text x="20" y="70" font-family="Archivo Black, Archivo, Arial Black, Arial, sans-serif" font-size="60" font-weight="bold" fill="white" letter-spacing="2">LEGISLATIVE</text>
           <text x="20" y="140" font-family="Archivo Black, Archivo, Arial Black, Arial, sans-serif" font-size="60" font-weight="bold" fill="white" letter-spacing="2">COMPASS</text>
           <g transform="translate(530,90)">
@@ -263,21 +240,25 @@ ui <- fluidPage(
             <circle cx="0" cy="0" r="10" fill="#1A2D49"/>
           </g>
         </svg>')
-      )
   ),
+  
+  
+  
   
   #####################
   #                   #  
   # navigation bar    #
   #                   #
   #####################
-div(class="navbar2",
-    tabsetPanel(
-      tabPanel("Voting Patterns", value = "app1", app1_ui),
-      tabPanel("Legislator Lookup", value = "app3", app3_ui),
-      tabPanel("Partisanship Scatterplot", value = "app4",app4_ui),
-      id = "navbar_page",
-      selected = "app1"
-    )
-)
+  div(class="navbar2",
+      tabsetPanel(
+        tabPanel("About", value = "about", aboutTabUI("about")),
+        
+        tabPanel("Voting Patterns", value = "app1", app1_ui),
+        tabPanel("Legislator Lookup", value = "app3", app3_ui),
+        tabPanel("Partisanship Scatterplot", value = "app4",app4_ui),
+        id = "navbar_page",
+        selected = "app1"
+      )
+  )
 )

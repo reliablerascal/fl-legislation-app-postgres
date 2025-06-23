@@ -1,10 +1,4 @@
 # voting_history_module.R
-library(data.table)
-library(shiny)
-library(dplyr)
-library(lubridate)
-library(shinyjs)
-
 votingHistoryUI <- function(id) {
   ns <- NS(id)
   tagList(
@@ -14,7 +8,8 @@ votingHistoryUI <- function(id) {
         textInput(ns("searchText"), "Search Bills:", ""),
         #actionButton(ns("btn_year_2023"), "2023"),
         #actionButton(ns("btn_year_2024"), "2024"),
-        uiOutput(ns("yearButtonsUI")),
+        div(class="year-button-container",  # <-- WRAP HERE!
+            uiOutput(ns("yearButtonsUI"))),
         selectInput(ns("items_per_page"), "Items per page:",
                     choices = c(10, 25, 50, 100),
                     selected = 25)),
@@ -25,7 +20,10 @@ votingHistoryUI <- function(id) {
     
   )
 }
+
 votingHistoryServer <- function(id, selected_legislator) {
+  last_legislator <- reactiveVal(NULL)
+  
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
     req(app02_leg_activity)
@@ -41,7 +39,8 @@ votingHistoryServer <- function(id, selected_legislator) {
     values <- reactiveValues(
       selectedYears = numeric(0),
       yearActive = list(),
-      selectedVoteTypes = c('Voted Against Both Parties', 'Voted With Opposing Party', 'Voted With Own Party')
+      selectedVoteTypes = c('Voted Against Both Parties', 'Voted With Opposing Party', 'Voted With Own Party'),
+      popupObservers = list()
     )
     
     observeEvent(available_years(), {
@@ -108,6 +107,11 @@ votingHistoryServer <- function(id, selected_legislator) {
       values$selectedVoteTypes <- input$voteType
     })
     
+    # Reset filter if legislator changes
+    observeEvent(selected_legislator(), {
+      last_legislator(selected_legislator())
+    }, ignoreInit = TRUE)
+    
     filtered_voting_data <- reactive({
       req(selected_legislator())
       
@@ -134,6 +138,7 @@ votingHistoryServer <- function(id, selected_legislator) {
                  maverick_votes == 0 & vote_with_neither == 0 & vote_with_same == 1)
           )
       }
+      
       
       data
     })
@@ -215,16 +220,62 @@ votingHistoryServer <- function(id, selected_legislator) {
     })
     
     observe({
-      lapply(seq_len(nrow(paginated_data())), function(i) {
-        bill_data <- paginated_data()[i, ]
+      lapply(isolate(values$popupObservers), function(obs) {
+        if (!is.null(obs)) obs$destroy()
+      })
+      isolate(values$popupObservers <- list())
+      
+      data <- paginated_data()
+      lapply(seq_len(nrow(data)), function(i) {
+        bill_data <- data[i, ]
         bill_id <- gsub("[^A-Za-z0-9]", "", bill_data$bill_number)
         button_id <- sprintf('vote-details-link-%s', bill_id)
         
-        observeEvent(input[[button_id]], {
+        obs <- observeEvent(input[[button_id]], {
+          rc_id <- bill_data$roll_call_id
+          rc_votes <- app02_leg_activity[app02_leg_activity$roll_call_id == rc_id, ]
+          
+          # Democratic breakdown
+          D_present <- sum(rc_votes$party == "D")
+          D_yea <- sum(rc_votes$party == "D" & rc_votes$vote_text == "Yea")
+          D_nay <- sum(rc_votes$party == "D" & rc_votes$vote_text == "Nay")
+          D_yea_pct <- if (D_present > 0) round(100 * D_yea / D_present, 0) else NA
+          D_nay_pct <- if (D_present > 0) round(100 * D_nay / D_present, 0) else NA
+          
+          # Republican breakdown
+          R_present <- sum(rc_votes$party == "R")
+          R_yea <- sum(rc_votes$party == "R" & rc_votes$vote_text == "Yea")
+          R_nay <- sum(rc_votes$party == "R" & rc_votes$vote_text == "Nay")
+          R_yea_pct <- if (R_present > 0) round(100 * R_yea / R_present, 0) else NA
+          R_nay_pct <- if (R_present > 0) round(100 * R_nay / R_present, 0) else NA
+          
           showModal(modalDialog(
             title = paste("Vote Details for Bill", bill_data$bill_number),
             p(bill_data$roll_call_desc, " - ", strong(format(as.Date(bill_data$roll_call_date), "%b %d, %Y"))),
-            p(paste0(round(bill_data$pct_of_total * 100, 2), "% of legislators voted Yea.")),
+            p(paste0(round(bill_data$pct_of_total * 100, 1), "% of legislators voted Yea.")),
+            # --- Party Breakdown Table ---
+            HTML(sprintf(
+              "<b>Party Breakdown:</b>
+   <table class='vote-table' style='margin-bottom:12px;'>
+     <tr>
+       <th style='text-align:left;'></th>
+       <th>Yea</th>
+       <th>Nay</th>
+     </tr>
+     <tr>
+       <td style='text-align:left;'><span style='color:#4575b4;'>Democrats</span></td>
+       <td>%d / %d (%.1f%%)</td>
+       <td>%d / %d (%.1f%%)</td>
+     </tr>
+     <tr>
+       <td style='text-align:left;'><span style='color:#d73027;'>Republicans</span></td>
+       <td>%d / %d (%.1f%%)</td>
+       <td>%d / %d (%.1f%%)</td>
+     </tr>
+   </table>",
+              D_yea, D_present, D_yea_pct, D_nay, D_present, D_nay_pct,
+              R_yea, R_present, R_yea_pct, R_nay, R_present, R_nay_pct
+            )),
             p(HTML(paste0(
               ifelse(bill_data$vote_with_neither == 1,
                      "This legislator voted <b><i>against</i></b> the majorities of both parties.",
@@ -241,7 +292,9 @@ votingHistoryServer <- function(id, selected_legislator) {
             easyClose = TRUE,
             footer = modalButton("Close")
           ))
-        })
+        }, ignoreInit = TRUE)
+        
+        isolate(values$popupObservers[[button_id]] <- obs)
       })
     })
     
