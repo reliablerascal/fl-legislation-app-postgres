@@ -10,3 +10,6 @@ legislator_dashboard.Rproj
 servers/archive
 test.html
 .Rproj.user
+deploy.R
+mobile/
+rsconnect/

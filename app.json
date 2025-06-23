@@ -1,6 +1,6 @@
 {
-  "name": "FL Leg Votes Dashboard",
-  "description": "Florida Legislature Voting Dashboard",
+  "name": "Florida Legislative Compass: How Lawmakers Vote",
+  "description": "Florida Legislative Compass: How Lawmakers Vote",
   "keywords": ["r", "shiny"],
   "buildpacks": [
     {

@@ -2,7 +2,7 @@ observeEvent(input$navbar_page == "app4", {
 
   
   filtered_data <- reactive({
-    data <- app04_district_context
+    data <- app03_district_context
     if (input$chamber4 != "All") {
       data <- data %>% filter(chamber == input$chamber4)
     }
@@ -85,8 +85,7 @@ observeEvent(input$navbar_page == "app4", {
       <p><strong>Bills Analyzed:</strong> This analysis includes only bills where a majority of Democrats and a majority of Republicans voted differently, highlighting partisan disagreements.</p>
       <p><strong>District Partisan Lean:</strong> Calculated from the weighted average of the following election results:</p>
       <ul>
-        <li>2016 Presidential Election (10% weight)</li>
-        <li>2018 Gubernatorial Election (10% weight)</li>
+        <li>2018 Gubernatorial Election (20% weight)</li>
         <li>2020 Presidential Election (50% weight)</li>
         <li>2022 Gubernatorial Election (30% weight)</li>
       </ul>
